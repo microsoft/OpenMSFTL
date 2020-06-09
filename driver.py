@@ -4,7 +4,7 @@ import argparse
 
 def _parse_args():
     parser = argparse.ArgumentParser(description='driver.py')
-    parser.add_argument('--d', type=str, default='mnist',
+    parser.add_argument('--d', type=str, default='cifar10',
                         help='Pass data-set')
     parser.add_argument('--spl', type=float, default=0.1,
                         help='Provide train test split | fraction of data used for training')
@@ -36,4 +36,3 @@ if __name__ == '__main__':
     train_loader = data_reader.train_loader
     val_loader = data_reader.val_loader
     test_loader = data_reader.test_loader
-

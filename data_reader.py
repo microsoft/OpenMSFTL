@@ -2,11 +2,12 @@ import torchvision.datasets as datasets
 from torch.utils.data.sampler import SubsetRandomSampler
 from torchvision import transforms
 from torch.utils.data import DataLoader
-from typing import Optional
 import torch
 import os
 curr_dir = os.path.dirname(__file__)
 root = os.path.join(curr_dir, './data/')
+
+torch.random.manual_seed(1)
 
 
 class DataReader:

@@ -1,10 +1,15 @@
 from data_reader import DataReader
 import argparse
 
+"""
+This is an example file depicting the use of different modules of the project.
+This will be updated very frequently.
+"""
+
 
 def _parse_args():
     parser = argparse.ArgumentParser(description='driver.py')
-    parser.add_argument('--d', type=str, default='cifar10',
+    parser.add_argument('--d', type=str, default='mnist',
                         help='Pass data-set')
     parser.add_argument('--spl', type=float, default=0.1,
                         help='Provide train test split | fraction of data used for training')

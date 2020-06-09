@@ -35,13 +35,13 @@ class DataReader:
         self.split = split
 
         if data_set == 'mnist':
-            self.train_loader, self.test_loader = self._get_mnist()
+            self.train_loader, self.val_loader, self.test_loader = self._get_mnist()
         elif data_set == 'cifar10':
-            self.train_loader, self.test_loader = self._get_cifar10()
+            self.train_loader, self.val_loader, self.test_loader = self._get_cifar10()
         else:
             raise NotImplementedError
 
-    def _get_mnist(self) -> [DataLoader, DataLoader, Optional[DataLoader]]:
+    def _get_mnist(self) -> [DataLoader, DataLoader, DataLoader]:
         trans = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
         self.no_of_labels = 10
         mnist_train = datasets.MNIST(root=root, download=self.download, train=True, transform=trans)
@@ -51,12 +51,13 @@ class DataReader:
         if self.dev_flag:
             train_loader, dev_loader = self.split_torch_data(data_set=mnist_train, split=self.split,
                                                              batch_size=self.batch_size)
-            return train_loader, test_loader, dev_loader
+        else:
+            train_loader, dev_loader = self.split_torch_data(data_set=mnist_train, split=0,
+                                                             batch_size=self.batch_size)
 
-        train_loader = DataLoader(mnist_train, batch_size=self.batch_size, shuffle=True)
-        return train_loader, test_loader
+        return train_loader, dev_loader, test_loader
 
-    def _get_cifar10(self) -> [DataLoader, DataLoader, Optional[DataLoader]]:
+    def _get_cifar10(self) -> [DataLoader, DataLoader, DataLoader]:
         trans = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.4914, 0.4822, 0.4465),
                                                                                 (0.2023, 0.1994, 0.2010))])
         self.no_of_labels = 10
@@ -67,10 +68,10 @@ class DataReader:
         if self.dev_flag:
             train_loader, dev_loader = self.split_torch_data(data_set=cifar_train, split=self.split,
                                                              batch_size=self.batch_size)
-            return train_loader, test_loader, dev_loader
-
-        train_loader = DataLoader(cifar_train, batch_size=self.batch_size, shuffle=True)
-        return train_loader, test_loader
+        else:
+            train_loader, dev_loader = self.split_torch_data(data_set=cifar_train, split=0,
+                                                             batch_size=self.batch_size)
+        return train_loader, dev_loader, test_loader
 
     @staticmethod
     def split_torch_data(data_set, split: float, batch_size: int) -> [DataLoader, DataLoader]:

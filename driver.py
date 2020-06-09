@@ -34,4 +34,6 @@ if __name__ == '__main__':
                              split=split)
 
     train_loader = data_reader.train_loader
+    val_loader = data_reader.val_loader
     test_loader = data_reader.test_loader
+

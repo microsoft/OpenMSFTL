@@ -1,6 +1,7 @@
 from ftl.data_reader import DataReader
 from ftl.client import Client, distribute_data
 import argparse
+import math
 
 """
 This is an example file depicting the use of different modules of the project.
@@ -54,12 +55,15 @@ if __name__ == '__main__':
     # ------------------------------------------------- #
     #      Initialize Network , Server and Clients      #
     # ------------------------------------------------- #
+    print(' Setting Up the FTL Network ')
     num_client_nodes = args.num_clients
     clients = [Client(client_id=client_id) for client_id in range(num_client_nodes)]
 
     # ------------------------------------------------- #
     #          Distribute data among clients            #
     # ------------------------------------------------- #
-    data_partition_ix = distribute_data(clients=clients, num_samples=data_reader.num_train)
-    print(' Setting Up the FTL Network ')
+    data_partition_ix = distribute_data(data_loader=train_loader,
+                                        clients=clients,
+                                        num_batches=math.ceil(data_reader.num_train//data_reader.batch_size))
+
 

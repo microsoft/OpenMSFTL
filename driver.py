@@ -62,3 +62,4 @@ if __name__ == '__main__':
     # ------------------------------------------------- #
     data_partition_ix = distribute_data(clients=clients, num_samples=data_reader.num_train)
     print(' Setting Up the FTL Network ')
+

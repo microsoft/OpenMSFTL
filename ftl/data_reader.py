@@ -15,7 +15,6 @@ class DataReader:
                  data_set: str,
                  batch_size: int = 32,
                  download: bool = True,
-                 dev_set: bool = True,
                  split: float = 0.1):
         """
         For More Info:
@@ -31,17 +30,19 @@ class DataReader:
         :param data_set:   pass data set name. One from the above list of supported Data sets.
         :param batch_size: Choose Batch Size , default is 32
         :param download:   Whether to download the data. Default True
-        :param dev_set:    Many data sets don't have dev set. If this flag is True,
-                           return part of train set as dev
         :param split:      Choose what fraction of Train should be treated as dev, Only if dev_set flag is True
                            Default is 0.1
         """
         self.data_set = data_set
         self.download = download
-        self.no_of_labels = None
         self.batch_size = batch_size
-        self.dev_flag = dev_set
         self.split = split
+
+        # Data Set Properties to be populated
+        self.num_train = 0
+        self.num_dev = 0
+        self.num_test = 0
+        self.no_of_labels = 0
 
         if data_set == 'mnist':
             self.train_loader, self.val_loader, self.test_loader = self._get_mnist()
@@ -61,12 +62,11 @@ class DataReader:
         mnist_test = datasets.MNIST(root=root, download=self.download, train=False, transform=trans)
         test_loader = DataLoader(mnist_test)
 
-        if self.dev_flag:
-            train_loader, dev_loader = self.split_torch_data(data_set=mnist_train, split=self.split,
-                                                             batch_size=self.batch_size)
-        else:
-            train_loader, dev_loader = self.split_torch_data(data_set=mnist_train, split=0,
-                                                             batch_size=self.batch_size)
+        self.num_dev = int(self.split * mnist_train.data.shape[0])
+        self.num_train = mnist_train.data.shape[0] - self.num_dev
+        self.num_test = mnist_test.data.shape[0]
+
+        train_loader, dev_loader = self._split_torch_data(data_set=mnist_train, batch_size=self.batch_size)
 
         return train_loader, dev_loader, test_loader
 
@@ -82,31 +82,25 @@ class DataReader:
         cifar_test = datasets.CIFAR10(root=root, download=self.download, train=False, transform=trans)
         test_loader = DataLoader(cifar_test)
 
-        if self.dev_flag:
-            train_loader, dev_loader = self.split_torch_data(data_set=cifar_train, split=self.split,
-                                                             batch_size=self.batch_size)
-        else:
-            train_loader, dev_loader = self.split_torch_data(data_set=cifar_train, split=0,
-                                                             batch_size=self.batch_size)
+        self.num_dev = int(self.split * cifar_train.data.shape[0])
+        self.num_train = cifar_train.data.shape[0] - self.num_dev
+        self.num_test = cifar_test.data.shape[0]
+
+        train_loader, dev_loader = self._split_torch_data(data_set=cifar_train, batch_size=self.batch_size)
+
         return train_loader, dev_loader, test_loader
 
-    @staticmethod
-    def split_torch_data(data_set, split: float, batch_size: int) -> [DataLoader, DataLoader]:
+    def _split_torch_data(self, data_set, batch_size: int) -> [DataLoader, DataLoader]:
         """
         This is a util function to split a given torch data set into two based on the supplied
         split fraction. Useful for Train: Validation split
 
         :param data_set: provide the Torch data set you need to split
-        :param split: specify what fraction of data should be validation
         :param batch_size: specify batch size for iterator
         :return: Returns two DataLoader object, Training, Validation
         """
-        # Get Number of samples in train and validation bucket based on split
-        no_of_dev = int(split * data_set.data.shape[0])
-        no_of_train = data_set.data.shape[0] - no_of_dev
-
         # split the data set randomly into train and dev buckets and get indices
-        train_set, val_set = torch.utils.data.random_split(data_set, [no_of_train, no_of_dev])
+        train_set, val_set = torch.utils.data.random_split(data_set, [self.num_train, self.num_dev])
         train_ix = train_set.indices
         val_ix = val_set.indices
 

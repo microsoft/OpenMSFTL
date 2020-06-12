@@ -11,17 +11,15 @@ class Client:
 
 def distribute_data(clients: List[Client], num_samples: int):
     num_clients = len(clients)
-    data_partition_ix = []
+    data_partition_ix = {}
     num_samples_per_machine = num_samples // num_clients
     all_indexes = np.arange(num_samples)
 
-    for machine in range(0, num_clients - 1):
-        data_partition_ix += [
-            all_indexes[num_samples_per_machine * machine: num_samples_per_machine * (machine + 1)]]
+    for ix in range(0, num_clients - 1):
+        data_partition_ix[clients[ix].client_id] = \
+            [all_indexes[num_samples_per_machine * ix: num_samples_per_machine * (ix + 1)]]
 
-    # put the rest in the last machine
-    data_partition_ix += [all_indexes[num_samples_per_machine * (num_clients - 1):]]
-    print("All but last machine has {} data points".format(num_samples_per_machine))
-    print("length of last machine indices:", len(data_partition_ix[-1]))
+    # put the rest in the last client
+    data_partition_ix[clients[-1].client_id] = [all_indexes[num_samples_per_machine * (num_clients - 1):]]
 
-    return data_partition_ix, num_samples_per_machine
+    return data_partition_ix

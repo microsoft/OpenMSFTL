@@ -7,15 +7,14 @@ import os
 curr_dir = os.path.dirname(__file__)
 root = os.path.join(curr_dir, './data/')
 
-torch.random.manual_seed(1)
-
 
 class DataReader:
     def __init__(self,
                  data_set: str,
                  batch_size: int = 32,
                  download: bool = True,
-                 split: float = 0.1):
+                 split: float = 0.1,
+                 random_seed: int = 1):
         """
         For More Info:
         This is the universal DataLoader Class. This can support all data
@@ -33,6 +32,7 @@ class DataReader:
         :param split:      Choose what fraction of Train should be treated as dev, Only if dev_set flag is True
                            Default is 0.1
         """
+        torch.random.manual_seed(random_seed)
         self.data_set = data_set
         self.download = download
         self.batch_size = batch_size

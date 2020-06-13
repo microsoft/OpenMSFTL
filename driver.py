@@ -1,5 +1,5 @@
 from ftl.data_reader import DataReader
-from ftl.nodes import Client
+from ftl.nodes import Client, Server
 import argparse
 import math
 
@@ -13,11 +13,11 @@ def _parse_args():
     parser = argparse.ArgumentParser(description='driver.py')
 
     # Data IO Related Params
-    parser.add_argument('--ds', type=str, default='mnist',
+    parser.add_argument('--data_set', type=str, default='mnist',
                         help='Pass data-set')
-    parser.add_argument('--spl', type=float, default=0.1,
+    parser.add_argument('--dev_split', type=float, default=0.1,
                         help='Provide train test split | fraction of data used for training')
-    parser.add_argument('--bs', type=int, default=32,
+    parser.add_argument('--batch_size', type=int, default=32,
                         help='Training mini Batch Size')
 
     # Network Params
@@ -35,25 +35,22 @@ if __name__ == '__main__':
     # ------------------------------------------------- #
     #      Initialize Network , Server and Clients      #
     # ------------------------------------------------- #
-    print(' Setting Up the FTL Network ')
+    print(' Setting Up the FTL Network and distributing data ')
     num_client_nodes = args.num_clients
     clients = [Client(client_id=client_id) for client_id in range(num_client_nodes)]
+    server = Server()
 
     # ------------------------------------------------- #
-    #   Get Data : Train Data Loader, Test Data Loader  #
+    #      Get Data and Distribute among clients        #
     # ------------------------------------------------- #
-    print("--- Hang Tight !! Fetching Data --- ")
-    data_set = args.ds
-    batch_size = args.bs
-    split = args.spl
-
+    data_set = args.data_set
+    batch_size = args.batch_size
+    split = args.dev_split
     data_reader = DataReader(batch_size=batch_size,
                              data_set=data_set,
                              clients=clients,
                              download=True,
                              split=split)
 
-    train_loader = data_reader.train_loader
-    val_loader = data_reader.val_loader
-    test_loader = data_reader.test_loader
-
+    server.val_loader = data_reader.val_loader
+    server.test_loader = data_reader.test_loader

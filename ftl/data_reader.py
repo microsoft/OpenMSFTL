@@ -91,11 +91,13 @@ class DataReader:
         self.no_of_labels = 10
         cifar_train = datasets.CIFAR10(root=root, download=self.download, train=True, transform=trans)
         cifar_test = datasets.CIFAR10(root=root, download=self.download, train=False, transform=trans)
-        self.test_loader = DataLoader(cifar_test, batch_size=self.batch_size)
+        self.test_loader = DataLoader(cifar_test, batch_size=self.batch_size)  # We don't need to partition this
 
         self.num_dev = int(self.split * cifar_train.data.shape[0])
         self.num_train = cifar_train.data.shape[0] - self.num_dev
         self.num_test = cifar_test.data.shape[0]
+
+        self._distribute_data(data_set=cifar_train)
 
     def _distribute_data(self, data_set):
         """
@@ -124,6 +126,10 @@ class DataReader:
             local_indices = self.data_distribution_map[client.client_id]
             x_local = x_train[local_indices, :, :]
             y_local = y_train[local_indices]
+
+            x_local = torch.from_numpy(x_local)
+            y_local = torch.from_numpy(y_local)
+
             client.local_train_data = DataLoader(TensorDataset(x_local, y_local), batch_size=self.batch_size)
 
     def _get_data_partition_indices(self) -> Dict[Client, List[int]]:

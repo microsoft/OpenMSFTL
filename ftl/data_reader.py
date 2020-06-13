@@ -79,7 +79,7 @@ class DataReader:
         self.num_train = mnist_train.data.shape[0] - self.num_dev
         self.num_test = mnist_test.data.shape[0]
 
-        self._distribute_data(data_set=mnist_train, batch_size=self.batch_size)
+        self._distribute_data(data_set=mnist_train)
 
     def _get_cifar10(self) -> [DataLoader, DataLoader, DataLoader]:
         """
@@ -91,7 +91,7 @@ class DataReader:
         self.no_of_labels = 10
         cifar_train = datasets.CIFAR10(root=root, download=self.download, train=True, transform=trans)
         cifar_test = datasets.CIFAR10(root=root, download=self.download, train=False, transform=trans)
-        test_loader = DataLoader(cifar_test, batch_size=self.batch_size)
+        self.test_loader = DataLoader(cifar_test, batch_size=self.batch_size)
 
         self.num_dev = int(self.split * cifar_train.data.shape[0])
         self.num_train = cifar_train.data.shape[0] - self.num_dev
@@ -106,7 +106,6 @@ class DataReader:
         :param batch_size: specify batch size for iterator
         :return: Returns two DataLoader object, Training, Validation
         """
-
         x = data_set.train_data.numpy()
         y = data_set.train_labels.numpy()
 
@@ -121,18 +120,26 @@ class DataReader:
         # Now lets distribute the training data among clients
         self.data_distribution_map = self._get_data_partition_indices()  # populates the ix map
 
+        for client in self.clients:
+            local_indices = self.data_distribution_map[client.client_id]
+            x_local = x_train[local_indices, :, :]
+            y_local = y_train[local_indices]
+            client.local_data = DataLoader(TensorDataset(x_local, y_local), batch_size=self.batch_size)
+
     def _get_data_partition_indices(self) -> Dict[Client, List[int]]:
         num_clients = len(self.clients)
         num_samples_per_machine = self.num_train // num_clients
 
         # Create a map of client -> ix of data assigned to that client
         client_data_map = {}
-        all_indexes = list(np.arange(self.num_train))
-        for ix, client in enumerate(self.clients):
-            client_data_map[client] = all_indexes[num_samples_per_machine * ix: num_samples_per_machine * (ix + 1)]
+        all_indexes = np.arange(self.num_train)
 
-        # append the rest in the last client
-        client_data_map[self.clients[-1]].append(all_indexes[num_samples_per_machine * (num_clients - 1):])
+        for machine_ix in range(0, num_clients - 1):
+            client_data_map[self.clients[machine_ix].client_id] = \
+                all_indexes[num_samples_per_machine * machine_ix: num_samples_per_machine * (machine_ix + 1)]
+
+        # put the rest in the last machine
+        client_data_map[self.clients[-1].client_id] = all_indexes[num_samples_per_machine * (num_clients - 1):]
 
         return client_data_map
 

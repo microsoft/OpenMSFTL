@@ -1,7 +1,6 @@
 from ftl.data_reader import DataReader
 from ftl.nodes import Client, Server
 import argparse
-import math
 
 """
 This is an example file depicting the use of different modules of the project.

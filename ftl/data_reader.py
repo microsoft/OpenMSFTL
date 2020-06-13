@@ -108,8 +108,13 @@ class DataReader:
         :param batch_size: specify batch size for iterator
         :return: Returns two DataLoader object, Training, Validation
         """
-        x = data_set.train_data.numpy()
-        y = data_set.train_labels.numpy()
+        x = data_set.data
+        y = data_set.targets
+
+        if not isinstance(x, np.ndarray):
+            x = x.numpy()
+        if not isinstance(y, np.ndarray):
+            y = np.array(y)
 
         x_train = x[0: self.num_train, :, :]
         y_train = y[0:self.num_train]

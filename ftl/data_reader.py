@@ -2,7 +2,7 @@ import torchvision.datasets as datasets
 from torchvision import transforms
 from torch.utils.data import DataLoader, TensorDataset
 from typing import List, Dict
-from ftl.client import Client
+from ftl.nodes import Client
 import torch
 import os
 import numpy as np
@@ -124,7 +124,7 @@ class DataReader:
             local_indices = self.data_distribution_map[client.client_id]
             x_local = x_train[local_indices, :, :]
             y_local = y_train[local_indices]
-            client.local_data = DataLoader(TensorDataset(x_local, y_local), batch_size=self.batch_size)
+            client.local_train_data = DataLoader(TensorDataset(x_local, y_local), batch_size=self.batch_size)
 
     def _get_data_partition_indices(self) -> Dict[Client, List[int]]:
         num_clients = len(self.clients)

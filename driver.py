@@ -1,5 +1,5 @@
 from ftl.data_reader import DataReader
-from ftl.client import Client
+from ftl.nodes import Client
 import argparse
 import math
 

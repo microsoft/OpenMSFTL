@@ -43,6 +43,7 @@ class DataReader:
         self.batch_size = batch_size
         self.split = split
 
+        self.data_partition_ix = {}  # keep track of data distribution among clients
         # Data Set Properties to be populated
         self.num_train = 0
         self.num_dev = 0
@@ -94,7 +95,7 @@ class DataReader:
         self.num_train = cifar_train.data.shape[0] - self.num_dev
         self.num_test = cifar_test.data.shape[0]
 
-        self._split_torch_data(data_set=cifar_train, batch_size=self.batch_size)
+        # self._split_torch_data(data_set=cifar_train, batch_size=self.batch_size)
 
 
     def _split_torch_data(self, data_set, batch_size: int):
@@ -120,17 +121,17 @@ class DataReader:
 
         # Now lets distribute the training data among clients
 
-    def _get_batch_partition_indices(self, clients: List[Client], num_batches: int):
+    def _get_data_partition_indices(self, clients: List[Client], num_batches: int):
         num_clients = len(clients)
-        data_partition_ix = {}
+
         num_samples_per_machine = num_batches // num_clients
         all_indexes = list(np.arange(num_batches))
 
         for ix, client in enumerate(clients):
-            data_partition_ix[client] = \
+            self.data_partition_ix[client] = \
                 all_indexes[num_samples_per_machine * ix: num_samples_per_machine * (ix + 1)]
 
         # append the rest in the last client
-        data_partition_ix[clients[-1]].append(all_indexes[num_samples_per_machine * (num_clients - 1):])
+        self.data_partition_ix[clients[-1]].append(all_indexes[num_samples_per_machine * (num_clients - 1):])
 
-        return data_partition_ix
+        return self.data_partition_ix

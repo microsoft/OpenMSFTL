@@ -1,5 +1,5 @@
 from ftl.data_reader import DataReader
-from ftl.client import Client, distribute_data
+from ftl.client import Client
 import argparse
 import math
 
@@ -29,11 +29,15 @@ def _parse_args():
 
 
 if __name__ == '__main__':
-    # ------------------------------------------------- #
-    #                 Get Arguments                     #
-    # ------------------------------------------------- #
     args = _parse_args()
     print(args)
+
+    # ------------------------------------------------- #
+    #      Initialize Network , Server and Clients      #
+    # ------------------------------------------------- #
+    print(' Setting Up the FTL Network ')
+    num_client_nodes = args.num_clients
+    clients = [Client(client_id=client_id) for client_id in range(num_client_nodes)]
 
     # ------------------------------------------------- #
     #   Get Data : Train Data Loader, Test Data Loader  #
@@ -45,25 +49,11 @@ if __name__ == '__main__':
 
     data_reader = DataReader(batch_size=batch_size,
                              data_set=data_set,
+                             clients=clients,
                              download=True,
                              split=split)
 
     train_loader = data_reader.train_loader
     val_loader = data_reader.val_loader
     test_loader = data_reader.test_loader
-
-    # ------------------------------------------------- #
-    #      Initialize Network , Server and Clients      #
-    # ------------------------------------------------- #
-    print(' Setting Up the FTL Network ')
-    num_client_nodes = args.num_clients
-    clients = [Client(client_id=client_id) for client_id in range(num_client_nodes)]
-
-    # ------------------------------------------------- #
-    #          Distribute data among clients            #
-    # ------------------------------------------------- #
-    data_partition_ix = distribute_data(data_loader=train_loader,
-                                        clients=clients,
-                                        num_batches=math.ceil(data_reader.num_train//data_reader.batch_size))
-
 

@@ -1,9 +1,13 @@
 import torchvision.datasets as datasets
 from torch.utils.data.sampler import SubsetRandomSampler
 from torchvision import transforms
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, TensorDataset
+from typing import List
+from ftl.client import Client
 import torch
 import os
+import numpy as np
+
 curr_dir = os.path.dirname(__file__)
 root = os.path.join(curr_dir, './data/')
 
@@ -11,6 +15,7 @@ root = os.path.join(curr_dir, './data/')
 class DataReader:
     def __init__(self,
                  data_set: str,
+                 clients: List[Client],
                  batch_size: int = 32,
                  download: bool = True,
                  split: float = 0.1,
@@ -44,14 +49,18 @@ class DataReader:
         self.num_test = 0
         self.no_of_labels = 0
 
+        self.train_loader = None
+        self.val_loader = None
+        self.test_loader = None
+
         if data_set == 'mnist':
-            self.train_loader, self.val_loader, self.test_loader = self._get_mnist()
+            self._get_mnist()
         elif data_set == 'cifar10':
-            self.train_loader, self.val_loader, self.test_loader = self._get_cifar10()
+            self._get_cifar10()
         else:
             raise NotImplementedError
 
-    def _get_mnist(self) -> [DataLoader, DataLoader, DataLoader]:
+    def _get_mnist(self):
         """
         Wrapper to Download (if flag = True) and pre-process MNIST data set
         :returns Train, Validation and Test DataLoaders
@@ -60,15 +69,14 @@ class DataReader:
         self.no_of_labels = 10
         mnist_train = datasets.MNIST(root=root, download=self.download, train=True, transform=trans)
         mnist_test = datasets.MNIST(root=root, download=self.download, train=False, transform=trans)
-        test_loader = DataLoader(mnist_test)
+        self.test_loader = DataLoader(mnist_test)  # We don't need to partition this
 
+        # compute number of data points
         self.num_dev = int(self.split * mnist_train.data.shape[0])
         self.num_train = mnist_train.data.shape[0] - self.num_dev
         self.num_test = mnist_test.data.shape[0]
 
-        train_loader, dev_loader = self._split_torch_data(data_set=mnist_train, batch_size=self.batch_size)
-
-        return train_loader, dev_loader, test_loader
+        self._split_torch_data(data_set=mnist_train, batch_size=self.batch_size)
 
     def _get_cifar10(self) -> [DataLoader, DataLoader, DataLoader]:
         """
@@ -86,28 +94,43 @@ class DataReader:
         self.num_train = cifar_train.data.shape[0] - self.num_dev
         self.num_test = cifar_test.data.shape[0]
 
-        train_loader, dev_loader = self._split_torch_data(data_set=cifar_train, batch_size=self.batch_size)
+        self._split_torch_data(data_set=cifar_train, batch_size=self.batch_size)
 
-        return train_loader, dev_loader, test_loader
 
-    def _split_torch_data(self, data_set, batch_size: int) -> [DataLoader, DataLoader]:
+    def _split_torch_data(self, data_set, batch_size: int):
         """
-        This is a util function to split a given torch data set into two based on the supplied
-        split fraction. Useful for Train: Validation split
+        This is a util function to split a given torch data set into two
+        based on the supplied split fraction. Useful for Train: Validation split
 
         :param data_set: provide the Torch data set you need to split
         :param batch_size: specify batch size for iterator
         :return: Returns two DataLoader object, Training, Validation
         """
-        # split the data set randomly into train and dev buckets and get indices
-        train_set, val_set = torch.utils.data.random_split(data_set, [self.num_train, self.num_dev])
-        train_ix = train_set.indices
-        val_ix = val_set.indices
 
-        train_sampler = SubsetRandomSampler(train_ix)
-        val_sampler = SubsetRandomSampler(val_ix)
+        x = data_set.train_data.numpy()
+        y = data_set.train_labels.numpy()
 
-        train_loader = DataLoader(dataset=data_set, sampler=train_sampler, batch_size=batch_size)
-        val_loader = DataLoader(dataset=data_set, sampler=val_sampler, batch_size=batch_size)
+        x_train = x[0: self.num_train, :, :]
+        y_train = y[0:self.num_train]
 
-        return train_loader, val_loader
+        # Validation data goes into Aggregator only so need not distribute
+        x_val = torch.from_numpy(x[self.num_train:, :, :])
+        y_val = torch.from_numpy(y[self.num_train:])
+        self.val_loader = DataLoader(TensorDataset(x_val, y_val))
+
+        # Now lets distribute the training data among clients
+
+    def _get_batch_partition_indices(self, clients: List[Client], num_batches: int):
+        num_clients = len(clients)
+        data_partition_ix = {}
+        num_samples_per_machine = num_batches // num_clients
+        all_indexes = list(np.arange(num_batches))
+
+        for ix, client in enumerate(clients):
+            data_partition_ix[client] = \
+                all_indexes[num_samples_per_machine * ix: num_samples_per_machine * (ix + 1)]
+
+        # append the rest in the last client
+        data_partition_ix[clients[-1]].append(all_indexes[num_samples_per_machine * (num_clients - 1):])
+
+        return data_partition_ix

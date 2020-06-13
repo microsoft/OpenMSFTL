@@ -1,8 +1,7 @@
 import torchvision.datasets as datasets
-from torch.utils.data.sampler import SubsetRandomSampler
 from torchvision import transforms
 from torch.utils.data import DataLoader, TensorDataset
-from typing import List
+from typing import List, Dict
 from ftl.client import Client
 import torch
 import os
@@ -43,7 +42,10 @@ class DataReader:
         self.batch_size = batch_size
         self.split = split
 
-        self.data_partition_ix = {}  # keep track of data distribution among clients
+        # keep track of data distribution among clients
+        self.clients = clients
+        self.data_distribution_map = {}
+
         # Data Set Properties to be populated
         self.num_train = 0
         self.num_dev = 0
@@ -70,14 +72,14 @@ class DataReader:
         self.no_of_labels = 10
         mnist_train = datasets.MNIST(root=root, download=self.download, train=True, transform=trans)
         mnist_test = datasets.MNIST(root=root, download=self.download, train=False, transform=trans)
-        self.test_loader = DataLoader(mnist_test)  # We don't need to partition this
+        self.test_loader = DataLoader(mnist_test, batch_size=self.batch_size)  # We don't need to partition this
 
         # compute number of data points
         self.num_dev = int(self.split * mnist_train.data.shape[0])
         self.num_train = mnist_train.data.shape[0] - self.num_dev
         self.num_test = mnist_test.data.shape[0]
 
-        self._split_torch_data(data_set=mnist_train, batch_size=self.batch_size)
+        self._distribute_data(data_set=mnist_train, batch_size=self.batch_size)
 
     def _get_cifar10(self) -> [DataLoader, DataLoader, DataLoader]:
         """
@@ -89,16 +91,13 @@ class DataReader:
         self.no_of_labels = 10
         cifar_train = datasets.CIFAR10(root=root, download=self.download, train=True, transform=trans)
         cifar_test = datasets.CIFAR10(root=root, download=self.download, train=False, transform=trans)
-        test_loader = DataLoader(cifar_test)
+        test_loader = DataLoader(cifar_test, batch_size=self.batch_size)
 
         self.num_dev = int(self.split * cifar_train.data.shape[0])
         self.num_train = cifar_train.data.shape[0] - self.num_dev
         self.num_test = cifar_test.data.shape[0]
 
-        # self._split_torch_data(data_set=cifar_train, batch_size=self.batch_size)
-
-
-    def _split_torch_data(self, data_set, batch_size: int):
+    def _distribute_data(self, data_set):
         """
         This is a util function to split a given torch data set into two
         based on the supplied split fraction. Useful for Train: Validation split
@@ -117,21 +116,23 @@ class DataReader:
         # Validation data goes into Aggregator only so need not distribute
         x_val = torch.from_numpy(x[self.num_train:, :, :])
         y_val = torch.from_numpy(y[self.num_train:])
-        self.val_loader = DataLoader(TensorDataset(x_val, y_val))
+        self.val_loader = DataLoader(TensorDataset(x_val, y_val), batch_size=self.batch_size)
 
         # Now lets distribute the training data among clients
+        self.data_distribution_map = self._get_data_partition_indices()  # populates the ix map
 
-    def _get_data_partition_indices(self, clients: List[Client], num_batches: int):
-        num_clients = len(clients)
+    def _get_data_partition_indices(self) -> Dict[Client, List[int]]:
+        num_clients = len(self.clients)
+        num_samples_per_machine = self.num_train // num_clients
 
-        num_samples_per_machine = num_batches // num_clients
-        all_indexes = list(np.arange(num_batches))
-
-        for ix, client in enumerate(clients):
-            self.data_partition_ix[client] = \
-                all_indexes[num_samples_per_machine * ix: num_samples_per_machine * (ix + 1)]
+        # Create a map of client -> ix of data assigned to that client
+        client_data_map = {}
+        all_indexes = list(np.arange(self.num_train))
+        for ix, client in enumerate(self.clients):
+            client_data_map[client] = all_indexes[num_samples_per_machine * ix: num_samples_per_machine * (ix + 1)]
 
         # append the rest in the last client
-        self.data_partition_ix[clients[-1]].append(all_indexes[num_samples_per_machine * (num_clients - 1):])
+        client_data_map[self.clients[-1]].append(all_indexes[num_samples_per_machine * (num_clients - 1):])
 
-        return self.data_partition_ix
+        return client_data_map
+

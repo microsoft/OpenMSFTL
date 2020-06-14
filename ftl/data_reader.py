@@ -81,7 +81,7 @@ class DataReader:
 
         self._distribute_data(data_set=mnist_train)
 
-    def _get_cifar10(self) -> [DataLoader, DataLoader, DataLoader]:
+    def _get_cifar10(self):
         """
         Wrapper to Download (if flag = True) and pre-process CIFAR10 data set
         :returns Train, Validation and Test DataLoaders

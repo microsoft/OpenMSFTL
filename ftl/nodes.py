@@ -3,9 +3,11 @@ class Client:
         self.client_id = client_id
         self.local_train_data = None
         self.adversary_mode = adv_noise
-        self.local_model = None
+        self.local_model_t = None
+        self.local_model_prev = None
 
     def _update_local_model(self, model):
+        self.local_model_prev = self.local_model
         self.local_model = model
 
 

@@ -1,5 +1,6 @@
 from ftl.data_reader import DataReader
 from ftl.nodes import Client, Server
+from tensorboardX import SummaryWriter
 import argparse
 
 """
@@ -23,6 +24,20 @@ def _parse_args():
     # Network Params
     parser.add_argument('--num_clients', type=int, default=9)
     parser.add_argument('--client_bs', type=int, default=4)
+
+    # Training Params
+    parser.add_argument('--m', type=str, default='mlp',
+                        help='specify the network architecture you want to use')
+    parser.add_argument('--opt', type=bool, default='SGD',
+                        help='Pass the Optimizer you want to use')
+    parser.add_argument('--lr0', type=float, default=0.01,
+                        help='Pass the initial LR you want to use')
+    parser.add_argument('--lrs', type=str, default='step',
+                        help='Pass the LR Scheduler you want to use')
+    parser.add_argument('--num_global_epoch', type=int, default=20,
+                        help='Number of Global Epochs')
+    parser.add_argument('--num_local_epoch', type=int, default=20,
+                        help='Number of Local Epochs')
 
     args = parser.parse_args()
     return args

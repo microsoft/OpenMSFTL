@@ -1,5 +1,6 @@
 from ftl.data_reader import DataReader
 from ftl.nodes import Client, Server
+from ftl.models import get_model
 from tensorboardX import SummaryWriter
 import argparse
 
@@ -69,3 +70,10 @@ if __name__ == '__main__':
 
     server.val_loader = data_reader.val_loader
     server.test_loader = data_reader.test_loader
+
+# ------------------------------------------------- #
+#             Training Models                       #
+# ------------------------------------------------- #
+    model_arch = args.m
+    no_of_labels = data_reader.no_of_labels
+    model = get_model(model_arch=model_arch)

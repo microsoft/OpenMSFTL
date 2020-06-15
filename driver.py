@@ -15,7 +15,8 @@ def _parse_args():
     parser.add_argument('--data_set', type=str, default='mnist',
                         help='Pass data-set')
     parser.add_argument('--dev_split', type=float, default=0.1,
-                        help='Provide train test split | fraction of data used for training')
+                        help='Provide train test split | '
+                             'fraction of data used for training')
     parser.add_argument('--batch_size', type=int, default=32,
                         help='Training mini Batch Size')
 

@@ -1,15 +1,18 @@
 from torch import nn
 
 
-def get_model(model_arch, dim_in, dim_out, dim_hidden=64):
-    if model_arch == 'mlp':
-        return MLP(dim_in=dim_in, dim_hidden=dim_hidden, dim_out=dim_out)
+def get_model(args, dim_out: int):
+    if args.m == 'mlp':
+        model = MLP(dim_in=args.dim_in, dim_out=dim_out)
+        print('Training Model: ')
+        print(model)
+        return model
     else:
         raise NotImplementedError
 
 
 class MLP(nn.Module):
-    def __init__(self, dim_in, dim_hidden, dim_out):
+    def __init__(self, dim_in, dim_out, dim_hidden=64):
         super(MLP, self).__init__()
         self.layer_input = nn.Linear(dim_in, dim_hidden)
         self.relu = nn.ReLU()

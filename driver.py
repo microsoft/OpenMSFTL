@@ -26,9 +26,14 @@ def _parse_args():
     parser.add_argument('--num_clients', type=int, default=9)
     parser.add_argument('--client_bs', type=int, default=4)
 
-    # Training Params
+    # Model Params
     parser.add_argument('--m', type=str, default='mlp',
                         help='specify the network architecture you want to use')
+    parser.add_argument('--dim_in', type=int, default=28*28,
+                        help='in dim needed only for mlp')
+    parser.add_argument('--num_channels', type=int, default=1,
+                        help='num of image channels')
+    # Opt Params
     parser.add_argument('--opt', type=bool, default='SGD',
                         help='Pass the Optimizer you want to use')
     parser.add_argument('--lr0', type=float, default=0.01,
@@ -74,6 +79,10 @@ if __name__ == '__main__':
 # ------------------------------------------------- #
 #             Training Models                       #
 # ------------------------------------------------- #
-    model_arch = args.m
-    no_of_labels = data_reader.no_of_labels
-    model = get_model(model_arch=model_arch)
+    server.global_model = get_model(args=args, dim_out=data_reader.no_of_labels)
+
+    lr0 = args.lr0
+    optim = args.opt
+    lr_scheduling = args.lrs
+
+

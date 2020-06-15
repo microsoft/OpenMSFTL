@@ -16,4 +16,5 @@ class Server:
         self.val_loader = None
         self.test_loader = None
         self.aggregation = None
+        self.global_model = None
 

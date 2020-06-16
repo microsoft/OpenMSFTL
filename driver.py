@@ -37,7 +37,7 @@ def _parse_args():
     parser.add_argument('--num_channels', type=int, default=1,
                         help='num of image channels')
     # Opt Params
-    parser.add_argument('--opt', type=bool, default='SGD',
+    parser.add_argument('--opt', type=str, default='SGD',
                         help='Pass the Optimizer you want to use')
     parser.add_argument('--lr0', type=float, default=0.01,
                         help='Pass the initial LR you want to use')
@@ -97,6 +97,7 @@ if __name__ == '__main__':
             client.trainer.train(data=client.local_train_data,
                                  model=client.local_model,
                                  optimizer=opt)
+
 
 
 

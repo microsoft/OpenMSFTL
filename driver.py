@@ -5,7 +5,7 @@ from ftl.optimization import Optimization
 from ftl.trainer import Trainer
 from tensorboardX import SummaryWriter
 import argparse
-import copy
+
 
 """
 This is an example file depicting the use of different modules of the project.
@@ -39,7 +39,7 @@ def _parse_args():
     # Opt Params
     parser.add_argument('--opt', type=str, default='SGD',
                         help='Pass the Optimizer you want to use')
-    parser.add_argument('--lr0', type=float, default=0.01,
+    parser.add_argument('--lr0', type=float, default=0.001,
                         help='Pass the initial LR you want to use')
     parser.add_argument('--lrs', type=str, default='step',
                         help='Pass the LR Scheduler you want to use')
@@ -86,13 +86,12 @@ if __name__ == '__main__':
     server.global_model = get_model(args=args, dim_out=data_reader.no_of_labels)
 
     for epoch in range(1, args.num_global_epoch + 1):
-        # Now loop over each client and update the model
+        # Now loop over each client and update the local models
         print(' ----------------------- ')
         print('         epoch {}        '. format(epoch))
         print(' ----------------------- ')
         for client in clients:
-            # client.local_model_prev = copy.deepcopy(client.local_model)
-            client.local_model = copy.deepcopy(server.global_model)
+            client.update_local_model(model=server.global_model)
             opt = Optimization(model=client.local_model,
                                opt_alg=args.opt,
                                lr0=args.lr0).get_optimizer()
@@ -100,7 +99,11 @@ if __name__ == '__main__':
             client.trainer.train(data=client.local_train_data,
                                  model=client.local_model,
                                  optimizer=opt)
-            print('Client : {} loss at epoch {} = {}'.format(client.client_id, epoch, client.trainer.epoch_losses[-1]))
+            print('Client : {} loss = {}'.format(client.client_id, client.trainer.epoch_losses[-1]))
+
+        # Now aggregate the local models and update the global models
+        # so, during next epoch client local models will be updated with this aggregated model
+        server.fed_average(clients=clients)
 
 
 

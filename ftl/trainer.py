@@ -25,7 +25,8 @@ class Trainer:
             epoch_loss += loss.item()
         self.epoch_losses.append(epoch_loss/(batch_idx+1))
 
-    def test(self, test_loader, model):
+    @staticmethod
+    def infer(test_loader, model):
         model.eval()
         test_loss = 0
         correct = 0

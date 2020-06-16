@@ -97,6 +97,7 @@ if __name__ == '__main__':
             client.trainer.train(data=client.local_train_data,
                                  model=client.local_model,
                                  optimizer=opt)
+            print('Client : {} loss at epoch {} = {}'.format(client.client_id, epoch, client.trainer.epoch_losses[-1]))
 
 
 

@@ -12,7 +12,8 @@ class Trainer:
         model = model.to(device)
         model.train()
         epoch_loss = 0
-        for batch_idx, (x, y) in enumerate(tqdm.tqdm(data)):
+        # for batch_idx, (x, y) in enumerate(tqdm.tqdm(data)):
+        for batch_idx, (x, y) in enumerate(data):
             x, y = x.float(), y
             x, y = x.to(device), y.to(device)
             optimizer.zero_grad()

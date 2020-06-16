@@ -87,6 +87,9 @@ if __name__ == '__main__':
 
     for epoch in range(1, args.num_global_epoch + 1):
         # Now loop over each client and update the model
+        print(' ----------------------- ')
+        print('         epoch {}        '. format(epoch))
+        print(' ----------------------- ')
         for client in clients:
             # client.local_model_prev = copy.deepcopy(client.local_model)
             client.local_model = copy.deepcopy(server.global_model)

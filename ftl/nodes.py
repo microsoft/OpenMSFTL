@@ -2,6 +2,7 @@ import copy
 import torch
 from typing import List
 
+
 class Client:
     def __init__(self, client_id, trainer=None, adv_noise=None):
         self.client_id = client_id

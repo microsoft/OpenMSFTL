@@ -2,38 +2,37 @@ import torch.optim as optim
 
 
 class Optimization:
-    def __init__(self, model,
+    def __init__(self,
+                 model,
                  opt_alg: str,
                  lr0: float,
-                 lr_schedule: str = 'step',
+                 lrs: str = 'step',
                  reg: float = 0,
                  nesterov: bool = True,
                  momentum: float = 0.9,
                  dampening: float = 0):
+        self.opt_alg = opt_alg
+        self.lr0 = lr0
+        self.lrs = lrs
+        self.params = model.parameters()
+        self.reg = reg
+        self.momentum = momentum
+        self.nesterov = nesterov
+        self.damp = dampening
 
-        self.lr_schedule = lr_schedule
-        self.optimizer = self.get_optimizer(opt_alg=opt_alg,
-                                            lr0=lr0,
-                                            params=model.parameters(),
-                                            reg=reg,
-                                            nesterov=nesterov,
-                                            momentum=momentum,
-                                            dampening=dampening)
-        self.scheduler = self.get_scheduler()
-
-    def get_optimizer(self, params, lr0, opt_alg, reg, nesterov, momentum, dampening):
-        if opt_alg == 'SGD':
-            return optim.SGD(params=params,
-                             lr=lr0,
-                             momentum=momentum,
-                             weight_decay=reg,
-                             nesterov=nesterov,
-                             dampening=dampening)
+    def get_optimizer(self):
+        if self.opt_alg == 'SGD':
+            return optim.SGD(params=self.params,
+                             lr=self.lr0,
+                             momentum=self.momentum,
+                             weight_decay=self.reg,
+                             nesterov=self.nesterov,
+                             dampening=self.damp)
         else:
             raise NotImplementedError
 
-    def get_scheduler(self):
-        if self.lr_schedule == 'step':
-            return optim.lr_scheduler.StepLR(optimizer=self.optimizer, step_size=1, gamma=0.9)
+    def _get_scheduler(self):
+        if self.lrs == 'step':
+            return optim.lr_scheduler.StepLR(optimizer=self.opt, step_size=1, gamma=0.9)
         else:
             return None

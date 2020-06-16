@@ -85,14 +85,15 @@ if __name__ == '__main__':
     # Set up model architecture
     server.global_model = get_model(args=args, dim_out=data_reader.no_of_labels)
 
-    for epoch in range(1, args.num_global_epochs+1):
+    for epoch in range(1, args.num_global_epoch + 1):
         # Now loop over each client and update the model
         for client in clients:
             # client.local_model_prev = copy.deepcopy(client.local_model)
             client.local_model = copy.deepcopy(server.global_model)
             opt = Optimization(model=client.local_model,
                                opt_alg=args.opt,
-                               lr0=args.lr0)
+                               lr0=args.lr0).get_optimizer()
+
             client.trainer.train(data=client.local_train_data,
                                  model=client.local_model,
                                  optimizer=opt)

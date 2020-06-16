@@ -7,6 +7,7 @@ def get_model(args, dim_out: int):
         print('Training Model: ')
         print(model)
         return model
+
     else:
         raise NotImplementedError
 

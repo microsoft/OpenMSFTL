@@ -1,8 +1,11 @@
 from ftl.data_reader import DataReader
 from ftl.nodes import Client, Server
 from ftl.models import get_model
+from ftl.optimization import Optimization
+from ftl.trainer import Trainer
 from tensorboardX import SummaryWriter
 import argparse
+import copy
 
 """
 This is an example file depicting the use of different modules of the project.
@@ -58,7 +61,7 @@ if __name__ == '__main__':
     # ------------------------------------------------- #
     print(' Setting Up the FTL Network and distributing data ')
     num_client_nodes = args.num_clients
-    clients = [Client(client_id=client_id) for client_id in range(num_client_nodes)]
+    clients = [Client(client_id=client_id, trainer=Trainer()) for client_id in range(num_client_nodes)]
     server = Server()
 
     # ------------------------------------------------- #
@@ -76,13 +79,29 @@ if __name__ == '__main__':
     server.val_loader = data_reader.val_loader
     server.test_loader = data_reader.test_loader
 
-# ------------------------------------------------- #
-#             Training Models                       #
-# ------------------------------------------------- #
+    # ------------------------------------------------- #
+    #             Training Models                       #
+    # ------------------------------------------------- #
+    # Set up model architecture
     server.global_model = get_model(args=args, dim_out=data_reader.no_of_labels)
 
-    lr0 = args.lr0
-    optim = args.opt
-    lr_scheduling = args.lrs
+    for epoch in range(1, args.num_global_epochs+1):
+        # Now loop over each client and update the model
+        for client in clients:
+            # client.local_model_prev = copy.deepcopy(client.local_model)
+            client.local_model = copy.deepcopy(server.global_model)
+            opt = Optimization(model=client.local_model,
+                               opt_alg=args.opt,
+                               lr0=args.lr0)
+            client.trainer.train(data=client.local_train_data,
+                                 model=client.local_model,
+                                 optimizer=opt)
+
+
+
+
+
+
+
 
 

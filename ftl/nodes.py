@@ -1,8 +1,9 @@
 class Client:
-    def __init__(self, client_id, adv_noise=None):
+    def __init__(self, client_id, trainer=None, adv_noise=None):
         self.client_id = client_id
-        self.local_train_data = None
+        self.trainer = trainer
         self.adversary_mode = adv_noise
+        self.local_train_data = None
         self.local_model_t = None
         self.local_model_prev = None
 

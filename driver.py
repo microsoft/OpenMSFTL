@@ -89,7 +89,6 @@ if __name__ == '__main__':
         # Now loop over each client and update the model
         for client in clients:
             # client.local_model_prev = copy.deepcopy(client.local_model)
-
             client.local_model = copy.deepcopy(server.global_model)
             opt = Optimization(model=client.local_model,
                                opt_alg=args.opt,

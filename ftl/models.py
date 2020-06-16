@@ -22,7 +22,7 @@ class MLP(nn.Module):
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
-        x = x.view(-1, x.shape[1]*x.shape[-2]*x.shape[-1])
+        x = x.reshape(x.shape[0], x.shape[1] * x.shape[2])
         x = self.layer_input(x)
         x = self.dropout(x)
         x = self.relu(x)

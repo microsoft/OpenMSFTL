@@ -8,7 +8,7 @@ class Trainer:
         self.iteration_losses = []
         self.epoch_losses = []
 
-    def train(self, data, model, optimizer, flatten: bool = False):
+    def train(self, data, model, optimizer):
         model = model.to(device)
         model.train()
         epoch_loss = 0

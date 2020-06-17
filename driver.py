@@ -3,7 +3,6 @@ from ftl.nodes import Client, Server
 from ftl.models import get_model
 from ftl.optimization import Optimization
 from ftl.trainer import Trainer, infer
-from tensorboardX import SummaryWriter
 import argparse
 
 

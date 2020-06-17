@@ -2,7 +2,7 @@ from ftl.data_reader import DataReader
 from ftl.nodes import Client, Server
 from ftl.models import get_model
 from ftl.optimization import Optimization
-from ftl.trainer import Trainer
+from ftl.trainer import Trainer, infer
 from tensorboardX import SummaryWriter
 import argparse
 
@@ -104,6 +104,8 @@ if __name__ == '__main__':
         # Now aggregate the local models and update the global models
         # so, during next epoch client local models will be updated with this aggregated model
         server.fed_average(clients=clients)
+        acc, _ = infer(test_loader=server.val_loader, model=server.global_model)
+        print(" Validation Accuracy = {}".format(acc))
 
 
 

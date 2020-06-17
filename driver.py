@@ -27,7 +27,6 @@ def _parse_args():
 
     # Network Params
     parser.add_argument('--num_clients', type=int, default=9)
-    parser.add_argument('--client_bs', type=int, default=4)
 
     # Model Params
     parser.add_argument('--m', type=str, default='mlp',
@@ -43,7 +42,7 @@ def _parse_args():
                         help='Pass the initial LR you want to use')
     parser.add_argument('--lrs', type=str, default='step',
                         help='Pass the LR Scheduler you want to use')
-    parser.add_argument('--num_global_epoch', type=int, default=20,
+    parser.add_argument('--num_global_epoch', type=int, default=30,
                         help='Number of Global Epochs')
     parser.add_argument('--num_local_epoch', type=int, default=20,
                         help='Number of Local Epochs')
@@ -105,7 +104,8 @@ if __name__ == '__main__':
         # so, during next epoch client local models will be updated with this aggregated model
         server.fed_average(clients=clients)
         acc, _ = infer(test_loader=server.val_loader, model=server.global_model)
-        print(" Validation Accuracy = {}".format(acc))
+        print("Validation Accuracy = {}".format(acc))
+
 
 
 

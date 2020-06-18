@@ -3,6 +3,8 @@ from ftl.nodes import Client, Server
 from ftl.models import get_model
 from ftl.optimization import Optimization
 from ftl.trainer import Trainer, infer
+
+import matplotlib.pyplot as plt
 import argparse
 
 
@@ -41,6 +43,10 @@ def _parse_args():
                         help='Pass the initial LR you want to use')
     parser.add_argument('--lrs', type=str, default='step',
                         help='Pass the LR Scheduler you want to use')
+    parser.add_argument('--reg', type=str, default=0.1,
+                        help='Pass regularization co-efficient')
+
+    # Training params
     parser.add_argument('--num_global_epoch', type=int, default=30,
                         help='Number of Global Epochs')
     parser.add_argument('--num_local_epoch', type=int, default=20,
@@ -93,16 +99,21 @@ if __name__ == '__main__':
             client.update_local_model(model=server.global_model)
             opt = Optimization(model=client.local_model,
                                opt_alg=args.opt,
-                               lr0=args.lr0).get_optimizer()
+                               lr0=args.lr0,
+                               reg=args.reg)
+            optimizer = opt.optimizer
+            lr_scheduler = opt.scheduler
 
             client.trainer.train(data=client.local_train_data,
                                  model=client.local_model,
-                                 optimizer=opt)
+                                 optimizer=optimizer)
+            lr_scheduler.step()
             print('Client : {} loss = {}'.format(client.client_id, client.trainer.epoch_losses[-1]))
             epoch_loss += client.trainer.epoch_losses[-1]
 
         server.train_loss.append(epoch_loss/len(clients))
-        print('\nAverage Epoch Loss = {}'.format(server.train_loss[-1]))
+        print('Metrics :')
+        print('Average Epoch Loss = {}'.format(server.train_loss[-1]))
         # Now aggregate the local models and update the global models
         # so, during next epoch client local models will be updated with this aggregated model
         server.fed_average(clients=clients)
@@ -114,6 +125,9 @@ if __name__ == '__main__':
         test_acc, _ = infer(test_loader=server.test_loader, model=server.global_model)
         server.test_acc = test_acc
         print("Test Accuracy = {}".format(test_acc))
+
+    plt.plot(server.train_loss)
+    plt.show()
 
 
 

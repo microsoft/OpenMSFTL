@@ -20,7 +20,10 @@ class Optimization:
         self.nesterov = nesterov
         self.damp = dampening
 
-    def get_optimizer(self):
+        self.optimizer = self._get_optimizer()
+        self.scheduler = self._get_scheduler()
+
+    def _get_optimizer(self):
         if self.opt_alg == 'SGD':
             return optim.SGD(params=self.params,
                              lr=self.lr0,
@@ -33,6 +36,6 @@ class Optimization:
 
     def _get_scheduler(self):
         if self.lrs == 'step':
-            return optim.lr_scheduler.StepLR(optimizer=self.opt, step_size=1, gamma=0.9)
+            return optim.lr_scheduler.StepLR(optimizer=self.optimizer, step_size=1, gamma=0.9)
         else:
-            return None
+            raise NotImplementedError

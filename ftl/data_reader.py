@@ -72,7 +72,11 @@ class DataReader:
         self.no_of_labels = 10
         mnist_train = datasets.MNIST(root=root, download=self.download, train=True, transform=trans)
         mnist_test = datasets.MNIST(root=root, download=self.download, train=False, transform=trans)
-        self.test_loader = DataLoader(mnist_test, batch_size=self.batch_size)  # We don't need to partition this
+
+        x_test = mnist_test.data
+        y_test = mnist_test.targets
+        self.test_loader = DataLoader(TensorDataset(x_test, y_test), batch_size=self.batch_size)
+        # self.test_loader = DataLoader(mnist_test.data, batch_size=self.batch_size)  # We don't need to partition this
 
         # compute number of data points
         self.num_dev = int(self.split * mnist_train.data.shape[0])
@@ -91,6 +95,7 @@ class DataReader:
         self.no_of_labels = 10
         cifar_train = datasets.CIFAR10(root=root, download=self.download, train=True, transform=trans)
         cifar_test = datasets.CIFAR10(root=root, download=self.download, train=False, transform=trans)
+
         self.test_loader = DataLoader(cifar_test, batch_size=self.batch_size)  # We don't need to partition this
 
         self.num_dev = int(self.split * cifar_train.data.shape[0])

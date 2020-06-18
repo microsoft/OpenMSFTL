@@ -23,6 +23,9 @@ class Server:
         self.test_loader = None
         self.aggregation = None
         self.global_model = None
+        self.test_acc = 0.0
+        self.val_acc = []
+        self.train_loss = []
 
     def fed_average(self, clients: List[Client]):
         epoch_params = []

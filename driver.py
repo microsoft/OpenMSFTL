@@ -25,7 +25,7 @@ def _parse_args():
                         help='Training mini Batch Size')
 
     # Network Params
-    parser.add_argument('--num_clients', type=int, default=9)
+    parser.add_argument('--num_clients', type=int, default=10)
 
     # Model Params
     parser.add_argument('--m', type=str, default='mlp',
@@ -88,6 +88,7 @@ if __name__ == '__main__':
         print(' ----------------------- ')
         print('         epoch {}        '. format(epoch))
         print(' ----------------------- ')
+        epoch_loss = 0.0
         for client in clients:
             client.update_local_model(model=server.global_model)
             opt = Optimization(model=client.local_model,
@@ -98,12 +99,22 @@ if __name__ == '__main__':
                                  model=client.local_model,
                                  optimizer=opt)
             print('Client : {} loss = {}'.format(client.client_id, client.trainer.epoch_losses[-1]))
+            epoch_loss += client.trainer.epoch_losses[-1]
 
+        server.train_loss.append(epoch_loss/len(clients))
+        print('\nAverage Epoch Loss = {}'.format(server.train_loss[-1]))
         # Now aggregate the local models and update the global models
         # so, during next epoch client local models will be updated with this aggregated model
         server.fed_average(clients=clients)
-        acc, _ = infer(test_loader=server.val_loader, model=server.global_model)
-        print("Validation Accuracy = {}".format(acc))
+
+        val_acc, _ = infer(test_loader=server.val_loader, model=server.global_model)
+        print("Validation Accuracy = {}".format(val_acc))
+        server.val_acc.append(val_acc)
+
+        test_acc, _ = infer(test_loader=server.test_loader, model=server.global_model)
+        server.test_acc = test_acc
+        print("Test Accuracy = {}".format(test_acc))
+
 
 
 

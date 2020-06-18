@@ -4,26 +4,27 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Trainer:
     def __init__(self):
-        self.iteration_losses = []
+        # self.iteration_losses = []
         self.epoch_losses = []
 
-    def train(self, data, model, optimizer):
+    def train(self, data, model, optimizer, epochs=1):
         model = model.to(device)
         model.train()
-        epoch_loss = 0
-        # for batch_idx, (x, y) in enumerate(tqdm.tqdm(data)):
-        for batch_idx, (x, y) in enumerate(data):
-            x, y = x.float(), y
-            x, y = x.to(device), y.to(device)
-            optimizer.zero_grad()
-            y_hat = model(x)
-            loss = torch.nn.functional.cross_entropy(y_hat, y)
-            loss.backward()
-            optimizer.step()
-            self.iteration_losses.append(loss.item())
-            # print("  Iteration Loss = {}".format(loss.item()))
-            epoch_loss += loss.item()
-        self.epoch_losses.append(epoch_loss/(batch_idx+1))
+
+        for epoch in range(1, epochs+1):
+            epoch_loss = 0
+            for batch_idx, (x, y) in enumerate(data):
+                x, y = x.float(), y
+                x, y = x.to(device), y.to(device)
+                optimizer.zero_grad()
+                y_hat = model(x)
+                loss = torch.nn.functional.cross_entropy(y_hat, y)
+                loss.backward()
+                optimizer.step()
+                # self.iteration_losses.append(loss.item())
+                # print("  Iteration Loss = {}".format(loss.item()))
+                epoch_loss += loss.item()
+            self.epoch_losses.append(epoch_loss/(batch_idx+1))
 
 
 def infer(test_loader, model):

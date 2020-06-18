@@ -18,7 +18,7 @@ def _parse_args():
     parser = argparse.ArgumentParser(description='driver.py')
 
     # Data IO Related Params
-    parser.add_argument('--data_set', type=str, default='cifar10',
+    parser.add_argument('--data_set', type=str, default='mnist',
                         help='Pass data-set')
     parser.add_argument('--dev_split', type=float, default=0.1,
                         help='Provide train test split | '
@@ -47,10 +47,10 @@ def _parse_args():
                         help='Pass regularization co-efficient')
 
     # Training params
-    parser.add_argument('--num_global_epoch', type=int, default=30,
+    parser.add_argument('--num_total_epoch', type=int, default=100,
                         help='Number of Global Epochs')
-    parser.add_argument('--num_local_epoch', type=int, default=20,
-                        help='Number of Local Epochs')
+    parser.add_argument('--num_comm_round', type=int, default=10,
+                        help='Number of Server Client Communication Round')
 
     args = parser.parse_args()
     return args
@@ -89,7 +89,9 @@ if __name__ == '__main__':
     # Set up model architecture
     server.global_model = get_model(args=args, dim_out=data_reader.no_of_labels)
 
-    for epoch in range(1, args.num_global_epoch + 1):
+    # Compute number of local gradient steps per communication round
+    num_local_steps = args.num_total_epoch // args.num_comm_round
+    for epoch in range(1, args.num_comm_round + 1):
         # Now loop over each client and update the local models
         print(' ----------------------- ')
         print('         epoch {}        '. format(epoch))
@@ -106,7 +108,8 @@ if __name__ == '__main__':
 
             client.trainer.train(data=client.local_train_data,
                                  model=client.local_model,
-                                 optimizer=optimizer)
+                                 optimizer=optimizer,
+                                 epochs=num_local_steps)
             lr_scheduler.step()
             print('Client : {} loss = {}'.format(client.client_id, client.trainer.epoch_losses[-1]))
             epoch_loss += client.trainer.epoch_losses[-1]

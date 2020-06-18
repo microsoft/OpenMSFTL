@@ -18,7 +18,7 @@ def _parse_args():
     parser = argparse.ArgumentParser(description='driver.py')
 
     # Data IO Related Params
-    parser.add_argument('--data_set', type=str, default='mnist',
+    parser.add_argument('--data_set', type=str, default='cifar10',
                         help='Pass data-set')
     parser.add_argument('--dev_split', type=float, default=0.1,
                         help='Provide train test split | '

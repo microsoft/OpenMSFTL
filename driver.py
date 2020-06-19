@@ -28,8 +28,8 @@ def _parse_args():
                         help='Training mini Batch Size')
 
     # Network Params
-    parser.add_argument('--num_clients', type=int, default=10)
-    parser.add_argument('--frac_clients', type=float, default=0.5,
+    parser.add_argument('--num_clients', type=int, default=100)
+    parser.add_argument('--frac_clients', type=float, default=0.1,
                         help='For SGD pick frac of clients each round')
 
     # Model Params
@@ -50,9 +50,9 @@ def _parse_args():
                         help='Pass regularization co-efficient')
 
     # Training params
-    parser.add_argument('--num_total_epoch', type=int, default=100,
+    parser.add_argument('--num_total_epoch', type=int, default=500,
                         help='Number of Global Epochs')
-    parser.add_argument('--num_comm_round', type=int, default=10,
+    parser.add_argument('--num_comm_round', type=int, default=100,
                         help='Number of Server Client Communication Round')
 
     args = parser.parse_args()
@@ -96,9 +96,9 @@ if __name__ == '__main__':
     num_local_steps = args.num_total_epoch // args.num_comm_round
     for epoch in range(1, args.num_comm_round + 1):
         # Now loop over each client and update the local models
-        print(' ----------------------- ')
-        print('         epoch {}        '. format(epoch))
-        print(' ----------------------- ')
+        print(' ------------------------------------------ ')
+        print('         Communication Round {}             '. format(epoch))
+        print(' -------------------------------------------')
         epoch_loss = 0.0
         sampled_clients = random.sample(clients, k=int(args.frac_clients*len(clients)))
         for client in sampled_clients:

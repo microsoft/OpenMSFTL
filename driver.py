@@ -6,6 +6,7 @@ from ftl.trainer import Trainer, infer
 
 import matplotlib.pyplot as plt
 import argparse
+import random
 
 
 """
@@ -28,6 +29,8 @@ def _parse_args():
 
     # Network Params
     parser.add_argument('--num_clients', type=int, default=10)
+    parser.add_argument('--frac_clients', type=float, default=0.5,
+                        help='For SGD pick frac of clients each round')
 
     # Model Params
     parser.add_argument('--m', type=str, default='mlp',
@@ -97,7 +100,8 @@ if __name__ == '__main__':
         print('         epoch {}        '. format(epoch))
         print(' ----------------------- ')
         epoch_loss = 0.0
-        for client in clients:
+        sampled_clients = random.sample(clients, k=int(args.frac_clients*len(clients)))
+        for client in sampled_clients:
             client.update_local_model(model=server.global_model)
             opt = Optimization(model=client.local_model,
                                opt_alg=args.opt,
@@ -114,12 +118,12 @@ if __name__ == '__main__':
             print('Client : {} loss = {}'.format(client.client_id, client.trainer.epoch_losses[-1]))
             epoch_loss += client.trainer.epoch_losses[-1]
 
-        server.train_loss.append(epoch_loss/len(clients))
+        server.train_loss.append(epoch_loss/len(sampled_clients))
         print('Metrics :')
         print('Average Epoch Loss = {}'.format(server.train_loss[-1]))
         # Now aggregate the local models and update the global models
         # so, during next epoch client local models will be updated with this aggregated model
-        server.fed_average(clients=clients)
+        server.fed_average(clients=sampled_clients)
 
         val_acc, _ = infer(test_loader=server.val_loader, model=server.global_model)
         print("Validation Accuracy = {}".format(val_acc))

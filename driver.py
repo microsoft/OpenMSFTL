@@ -91,16 +91,17 @@ if __name__ == '__main__':
     # ------------------------------------------------- #
     # Set up model architecture
     server.global_model = get_model(args=args, dim_out=data_reader.no_of_labels)
-
     # Compute number of local gradient steps per communication round
     num_local_steps = args.num_total_epoch // args.num_comm_round
+
     for epoch in range(1, args.num_comm_round + 1):
-        # Now loop over each client and update the local models
         print(' ------------------------------------------ ')
         print('         Communication Round {}             '. format(epoch))
         print(' -------------------------------------------')
         epoch_loss = 0.0
+        # sample fraction of clients who will participate in this round
         sampled_clients = random.sample(clients, k=int(args.frac_clients*len(clients)))
+        # Now loop over each client and update the local models
         for client in sampled_clients:
             client.update_local_model(model=server.global_model)
             opt = Optimization(model=client.local_model,

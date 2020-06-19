@@ -133,6 +133,8 @@ if __name__ == '__main__':
         server.test_acc = test_acc
         print("Test Accuracy = {}".format(test_acc))
 
+    plt.title('MLP', fontsize=14)
+    plt.legend(fontsize=11)
     plt.plot(server.train_loss)
     plt.show()
 

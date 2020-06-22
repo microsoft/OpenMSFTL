@@ -18,7 +18,7 @@ class Client:
 
 
 class Server:
-    def __init__(self):
+    def __init__(self, aggregation='fed_avg'):
         self.val_loader = None
         self.test_loader = None
         self.aggregation = None
@@ -26,8 +26,18 @@ class Server:
         self.test_acc = 0.0
         self.val_acc = []
         self.train_loss = []
+        self.aggregation = aggregation
 
-    def fed_average(self, clients: List[Client]):
+    def aggregate(self, clients):
+        if self.aggregation == 'fed_avg':
+            agg_params = self._fed_average(clients=clients)
+        else:
+            raise NotImplementedError
+
+        self.global_model.load_state_dict(agg_params)
+
+    @staticmethod
+    def _fed_average(clients: List[Client]):
         epoch_params = []
         for client in clients:
             epoch_params.append(copy.deepcopy(client.local_model.state_dict()))
@@ -38,5 +48,9 @@ class Server:
                 server_param[key] += epoch_params[i][key]
             server_param[key] = torch.div(server_param[key], len(epoch_params))
 
-        self.global_model.load_state_dict(server_param)
+        return server_param
+
+
+
+
 

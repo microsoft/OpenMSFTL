@@ -53,6 +53,8 @@ def _parse_args():
                         help='Number of Global Epochs')
     parser.add_argument('--num_comm_round', type=int, default=100,
                         help='Number of Server Client Communication Round')
+    parser.add_argument('--agg', type=str, default='fed_avg',
+                        help='Specify Aggregation Rule')
 
     args = parser.parse_args()
     return args
@@ -74,7 +76,7 @@ if __name__ == '__main__':
     print(' Setting Up the FTL Network and distributing data ')
     num_client_nodes = args.num_clients
     clients = [Client(client_id=client_id, trainer=Trainer()) for client_id in range(num_client_nodes)]
-    server = Server()
+    server = Server(aggregation=args.agg)
 
     # ------------------------------------------------- #
     #      Get Data and Distribute among clients        #
@@ -129,7 +131,7 @@ if __name__ == '__main__':
         print('Average Epoch Loss = {}'.format(server.train_loss[-1]))
         # Now aggregate the local models and update the global models
         # so, during next epoch client local models will be updated with this aggregated model
-        server.fed_average(clients=sampled_clients)
+        server.aggregate_client_updates(clients=sampled_clients)
 
         val_acc, _ = infer(test_loader=server.val_loader, model=server.global_model)
         print("Validation Accuracy = {}".format(val_acc))

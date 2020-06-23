@@ -31,7 +31,7 @@ def _parse_args():
     parser.add_argument('--num_clients', type=int, default=100)
     parser.add_argument('--frac_clients', type=float, default=0.1,
                         help='For SGD pick frac of clients each round')
-    parser.add_argument('--frac_adv', type=float, default=0.1,
+    parser.add_argument('--frac_adv', type=float, default=0,
                         help='Specify Fraction of Adversarial Nodes')
 
     # Model Params

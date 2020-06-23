@@ -24,10 +24,6 @@ class Client:
         self.local_model_prev = copy.deepcopy(self.local_model)
         self.local_model = copy.deepcopy(model)
 
-        if self.attack_mode:
-            byzantine_params = self.byzantine_update(w=self.local_model.state_dict())
-            self.local_model.load_state_dict(byzantine_params)
-
     def byzantine_update(self, w):
         # Flip a coin and decide whether to apply noise using the
         # stochastic attack probability

@@ -85,7 +85,9 @@ if __name__ == '__main__':
     #      Make some client nodes adversarial           #
     # ------------------------------------------------- #
     sampled_adv_clients = random.sample(population=clients, k=int(args.frac_adv * num_client_nodes))
-
+    for client in sampled_adv_clients:
+        client.attack_mode = 'byzantine'
+        client.attack_model = 'gaussian'
     # ------------------------------------------------- #
     #      Get Data and Distribute among clients        #
     # ------------------------------------------------- #
@@ -125,6 +127,7 @@ if __name__ == '__main__':
                                reg=args.reg)
             optimizer = opt.optimizer
             lr_scheduler = opt.scheduler
+            # ----------- Data Poisoning/ Backdoor -----------
             if client.attack_mode == 'backdoor':
                 pass
             client.trainer.train(data=client.local_train_data,
@@ -134,6 +137,8 @@ if __name__ == '__main__':
             lr_scheduler.step()
             print('Client : {} loss = {}'.format(client.client_id, client.trainer.epoch_losses[-1]))
             epoch_loss += client.trainer.epoch_losses[-1]
+
+            # --------------- Byzantine ----------------------------
             # At this point check if this client is marked as byzantine
             # if its a byzantine node then we perturb the computed parameters
             # of the client node

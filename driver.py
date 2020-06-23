@@ -82,6 +82,11 @@ if __name__ == '__main__':
     server = Server(aggregation=args.agg)
 
     # ------------------------------------------------- #
+    #      Make some client nodes adversarial           #
+    # ------------------------------------------------- #
+    sampled_adv_clients = random.sample(population=clients, k=int(args.frac_adv * num_client_nodes))
+
+    # ------------------------------------------------- #
     #      Get Data and Distribute among clients        #
     # ------------------------------------------------- #
     data_set = args.data_set
@@ -110,7 +115,7 @@ if __name__ == '__main__':
         print(' -------------------------------------------')
         epoch_loss = 0.0
         # sample fraction of clients who will participate in this round
-        sampled_clients = random.sample(clients, k=int(args.frac_clients*len(clients)))
+        sampled_clients = random.sample(population=clients, k=int(args.frac_clients * num_client_nodes))
         # Now loop over each client and update the local models
         for client in sampled_clients:
             client.update_local_model(model=server.global_model)

@@ -13,7 +13,7 @@ class Client:
         self.trainer = trainer
         self.attack_mode = attack_mode  # which attack model to use || None, byzantine, poison
         self.attack_model = attack_model  # Ex. Type of Byzantine / poisoning attack
-        self.attack_strategy = stochastic_attack  # will this node be consistently byzantine ?
+        self.stochastic_attack = stochastic_attack  # will this node be consistently byzantine ?
         self.attack_prob = stochastic_attack_prob
 
         self.local_train_data = None
@@ -38,14 +38,14 @@ class Client:
             raise NotImplementedError
 
     @staticmethod
-    def _gaussian_byzantine(w, scale=5):
+    def _gaussian_byzantine(w):
         w_attacked = copy.deepcopy(w)
         if type(w_attacked) == list:
             for k in range(len(w_attacked)):
-                noise = torch.randn(w[k].shape).cuda() * scale / 100.0 * w_attacked[k]
+                noise = torch.randn(w[k].shape) * w_attacked[k]
                 w_attacked[k] += noise
         else:
             for k in w_attacked.keys():
-                noise = torch.randn(w[k].shape).cuda() * scale / 100.0 * w_attacked[k]
+                noise = torch.randn(w[k].shape) * w_attacked[k]
                 w_attacked[k] += noise
         return w_attacked

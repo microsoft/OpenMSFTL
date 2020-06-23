@@ -128,6 +128,12 @@ if __name__ == '__main__':
             lr_scheduler.step()
             print('Client : {} loss = {}'.format(client.client_id, client.trainer.epoch_losses[-1]))
             epoch_loss += client.trainer.epoch_losses[-1]
+            # At this point check if this client is marked as byzantine
+            # if its a byzantine node then we perturb the computed parameters
+            # of the client node
+            if client.attack_mode == 'byzantine':
+                byzantine_params = client.byzantine_update(w=client.local_model.state_dict())
+                client.local_model.load_state_dict(byzantine_params)
 
         server.train_loss.append(epoch_loss/len(sampled_clients))
         print('Metrics :')

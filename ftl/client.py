@@ -3,10 +3,12 @@ import torch
 
 
 class Client:
-    def __init__(self, client_id, trainer=None, adv_noise=None):
+    def __init__(self, client_id, trainer=None, adv_noise=None, stochastic_attack=False):
         self.client_id = client_id
         self.trainer = trainer
-        self.adversary_mode = adv_noise
+        self.adversary_mode = adv_noise  # which attack model to use
+        self.attack_strategy = stochastic_attack  # will this node be consistently byzantine ?
+
         self.local_train_data = None
         self.local_model = None
         self.local_model_prev = None
@@ -14,6 +16,12 @@ class Client:
     def update_local_model(self, model):
         self.local_model_prev = copy.deepcopy(self.local_model)
         self.local_model = copy.deepcopy(model)
+
+        if self.adversary_mode:
+            raise NotImplementedError
+
+    def byzantine_update(self, w):
+        raise NotImplementedError
 
     @staticmethod
     def _gaussian_byzantine(w, scale):

@@ -1,27 +1,13 @@
+from ftl.client import Client
 import copy
 import torch
 from typing import List
-
-
-class Client:
-    def __init__(self, client_id, trainer=None, adv_noise=None):
-        self.client_id = client_id
-        self.trainer = trainer
-        self.adversary_mode = adv_noise
-        self.local_train_data = None
-        self.local_model = None
-        self.local_model_prev = None
-
-    def update_local_model(self, model):
-        self.local_model_prev = copy.deepcopy(self.local_model)
-        self.local_model = copy.deepcopy(model)
 
 
 class Server:
     def __init__(self, aggregation='fed_avg'):
         self.val_loader = None
         self.test_loader = None
-        self.aggregation = None
         self.global_model = None
         self.test_acc = 0.0
         self.val_acc = []

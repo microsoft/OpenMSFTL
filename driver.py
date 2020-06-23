@@ -120,7 +120,8 @@ if __name__ == '__main__':
                                reg=args.reg)
             optimizer = opt.optimizer
             lr_scheduler = opt.scheduler
-
+            if client.attack_mode == 'backdoor':
+                pass
             client.trainer.train(data=client.local_train_data,
                                  model=client.local_model,
                                  optimizer=optimizer,

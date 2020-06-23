@@ -11,7 +11,7 @@ class Client:
                  stochastic_attack_prob=0.8):
         self.client_id = client_id
         self.trainer = trainer
-        self.attack_mode = attack_mode  # which attack model to use || None = Benign, byzantine, poison
+        self.attack_mode = attack_mode  # which attack model to use || None, byzantine, poison
         self.attack_model = attack_model  # Ex. Type of Byzantine / poisoning attack
         self.attack_strategy = stochastic_attack  # will this node be consistently byzantine ?
         self.attack_prob = stochastic_attack_prob

@@ -39,13 +39,13 @@ class Client:
 
     @staticmethod
     def _gaussian_byzantine(w):
-        w_attacked = copy.deepcopy(w).to(device)
+        w_attacked = copy.deepcopy(w)
         if type(w_attacked) == list:
             for k in range(len(w_attacked)):
-                noise = torch.randn(w[k].shape) * w_attacked[k]
+                noise = torch.randn(w[k].shape).to(torch.device("cpu")) * w_attacked[k]
                 w_attacked[k] += noise
         else:
             for k in w_attacked.keys():
-                noise = torch.randn(w[k].shape) * w_attacked[k]
+                noise = torch.randn(w[k].shape).to(torch.device("cpu")) * w_attacked[k]
                 w_attacked[k] += noise
         return w_attacked

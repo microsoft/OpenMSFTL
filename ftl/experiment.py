@@ -30,8 +30,8 @@ def run_exp(args):
     # ------------------------------------------------- #
     sampled_adv_clients = random.sample(population=clients, k=int(args.frac_adv * num_client_nodes))
     for client in sampled_adv_clients:
-        client.attack_mode = 'byzantine'
-        client.attack_model = 'gaussian'
+        client.attack_mode = args.attack_mode
+        client.attack_model = args.attack_model
 
     # ------------------------------------------------- #
     #      Get Data and Distribute among clients        #

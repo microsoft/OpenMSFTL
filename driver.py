@@ -21,8 +21,12 @@ def _parse_args():
     parser.add_argument('--num_clients', type=int, default=100)
     parser.add_argument('--frac_clients', type=float, default=0.1,
                         help='For SGD pick frac of clients each round')
+
+    # Attack Params
     parser.add_argument('--frac_adv', type=float, default=0,
                         help='Specify Fraction of Adversarial Nodes')
+    parser.add_argument('--attack_mode', type=str, default='byzantine')
+    parser.add_argument('--attack_model', type=str, default='gaussian')
 
     # Model Params
     parser.add_argument('--m', type=str, default='mlp',
@@ -62,8 +66,10 @@ if __name__ == '__main__':
     args = _parse_args()
     print(args)
     run_exp(args=args)
+    result_file = 'num_clients_' + args.num_clients + '.frac_adv' + args.frac_clients +\
+                  '.attack_mode' + args.attack_mode + '.attack_model' + args.attack_model
     if not args.o:
-        directory = "results/" + args.data_set + "/"
+        directory = "results/" + args.data_set + "/" + args.model + "/"
     else:
         directory = "results/" + args.o + '/'
     if not os.path.exists(directory):

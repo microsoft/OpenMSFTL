@@ -29,6 +29,17 @@ def _parse_args():
     parser.add_argument('--attack_mode', type=str, default='byzantine')
     parser.add_argument('--attack_model', type=str, default='gaussian')
 
+    # Defense Params
+    parser.add_argument('--agg', type=str, default='fed_avg',
+                        help='Specify Aggregation Rule')
+    parser.add_argument('--compression_operator', type=str, default='full',
+                        help='Specify Aggregation Rule,'
+                             'Options: full, top, rand, svd, qsgd_biased, '
+                             'qsgd_unbiased, sign, dropout_biased, dropout_unbiased')
+    parser.add_argument('--num_bits', type=int, default=2)
+    parser.add_argument('--fraction_coordinates', type=float, default=0.1)
+    parser.add_argument('--dropout_p', type=float, default=0.1)
+
     # Model Params
     parser.add_argument('--m', type=str, default='mlp',
                         help='specify the network architecture you want to use')
@@ -51,8 +62,6 @@ def _parse_args():
                         help='Number of Global Epochs')
     parser.add_argument('--num_comm_round', type=int, default=50,
                         help='Number of Server Client Communication Round')
-    parser.add_argument('--agg', type=str, default='fed_avg',
-                        help='Specify Aggregation Rule')
 
     # Results Related Params
     parser.add_argument('--o', type=str, default=None, help='Pass results location')

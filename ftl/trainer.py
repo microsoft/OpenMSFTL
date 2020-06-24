@@ -29,6 +29,7 @@ class Trainer:
 
 def infer(test_loader, model):
     model.eval()
+    model.to(device)
     test_loss = 0
     correct = 0
     with torch.no_grad():

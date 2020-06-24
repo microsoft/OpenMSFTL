@@ -115,7 +115,6 @@ class DataReader:
         based on the supplied split fraction. Useful for Train: Validation split
 
         :param data_set: provide the Torch data set you need to split
-        :param batch_size: specify batch size for iterator
         :return: Returns two DataLoader object, Training, Validation
         """
         x = data_set.data

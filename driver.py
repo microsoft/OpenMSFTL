@@ -19,12 +19,12 @@ def _parse_args():
     parser.add_argument('--do_sort', type=bool, default=False)
 
     # Network Params
-    parser.add_argument('--num_clients', type=int, default=100)
-    parser.add_argument('--frac_clients', type=float, default=0.1,
+    parser.add_argument('--num_clients', type=int, default=1)
+    parser.add_argument('--frac_clients', type=float, default=1.0,
                         help='For SGD pick frac of clients each round')
 
     # Attack Params
-    parser.add_argument('--frac_adv', type=float, default=0.1,
+    parser.add_argument('--frac_adv', type=float, default=0,
                         help='Specify Fraction of Adversarial Nodes')
     parser.add_argument('--attack_mode', type=str, default='byzantine')
     parser.add_argument('--attack_model', type=str, default='gaussian')
@@ -43,13 +43,13 @@ def _parse_args():
                         help='Pass the initial LR you want to use')
     parser.add_argument('--lrs', type=str, default='step',
                         help='Pass the LR Scheduler you want to use')
-    parser.add_argument('--reg', type=str, default=0.1,
+    parser.add_argument('--reg', type=str, default=0.05,
                         help='Pass regularization co-efficient')
 
     # Training params
-    parser.add_argument('--num_total_epoch', type=int, default=500,
+    parser.add_argument('--num_total_epoch', type=int, default=100,
                         help='Number of Global Epochs')
-    parser.add_argument('--num_comm_round', type=int, default=100,
+    parser.add_argument('--num_comm_round', type=int, default=50,
                         help='Number of Server Client Communication Round')
     parser.add_argument('--agg', type=str, default='fed_avg',
                         help='Specify Aggregation Rule')

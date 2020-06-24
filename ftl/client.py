@@ -1,7 +1,7 @@
 import copy
 import torch
 import numpy as np
-
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Client:
     def __init__(self, client_id, trainer=None,
@@ -39,7 +39,7 @@ class Client:
 
     @staticmethod
     def _gaussian_byzantine(w):
-        w_attacked = copy.deepcopy(w)
+        w_attacked = copy.deepcopy(w).to(device)
         if type(w_attacked) == list:
             for k in range(len(w_attacked)):
                 noise = torch.randn(w[k].shape) * w_attacked[k]

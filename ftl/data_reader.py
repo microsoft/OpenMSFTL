@@ -18,7 +18,8 @@ class DataReader:
                  batch_size: int = 32,
                  download: bool = True,
                  split: float = 0.1,
-                 random_seed: int = 1):
+                 random_seed: int = 1,
+                 do_sorting=True):
         """
         For More Info:
         This is the universal DataLoader Class. This can support all data
@@ -41,6 +42,7 @@ class DataReader:
         self.download = download
         self.batch_size = batch_size
         self.split = split
+        self.do_sorting = do_sorting
 
         # keep track of data distribution among clients
         self.clients = clients
@@ -126,6 +128,11 @@ class DataReader:
 
         x_train = x[0: self.num_train, :, :]
         y_train = y[0:self.num_train]
+
+        if self.do_sorting:
+            y_sorted_ix = np.argsort(y_train)
+            x_train = x_train[y_sorted_ix]
+            y_train = y_train[y_sorted_ix]
 
         # Validation data goes into Aggregator only so need not distribute
         x_val = torch.from_numpy(x[self.num_train:, :, :])

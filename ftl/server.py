@@ -26,6 +26,10 @@ class Server:
 
         self.global_model.load_state_dict(agg_params)
 
+    # ----------------------- #
+    # Aggregation Strategies  #
+    # ----------------------- #
+
     @staticmethod
     def _fed_average(clients: List[Client]):
         """

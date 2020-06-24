@@ -9,7 +9,7 @@ class Server:
         self.val_loader = None
         self.test_loader = None
         self.global_model = None
-        self.test_acc = 0.0
+        self.test_acc = []
         self.val_acc = []
         self.train_loss = []
         self.aggregation = aggregation

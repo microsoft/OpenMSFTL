@@ -1,4 +1,5 @@
 from ftl.experiment import run_exp
+from ftl.utils import pickle_it
 import argparse
 import os
 import numpy as np
@@ -23,7 +24,7 @@ def _parse_args():
                         help='For SGD pick frac of clients each round')
 
     # Attack Params
-    parser.add_argument('--frac_adv', type=float, default=0,
+    parser.add_argument('--frac_adv', type=float, default=0.1,
                         help='Specify Fraction of Adversarial Nodes')
     parser.add_argument('--attack_mode', type=str, default='byzantine')
     parser.add_argument('--attack_model', type=str, default='gaussian')
@@ -55,7 +56,7 @@ def _parse_args():
 
     # Results Related Params
     parser.add_argument('--o', type=str, default=None, help='Pass results location')
-    parser.add_argument('--n_repeat', type=int, default=3, help='Specify number of repeat runs')
+    parser.add_argument('--n_repeat', type=int, default=1, help='Specify number of repeat runs')
     parser.add_argument('--seed', type=int, default=1)
 
     args = parser.parse_args()
@@ -65,11 +66,12 @@ def _parse_args():
 if __name__ == '__main__':
     args = _parse_args()
     print(args)
-    run_exp(args=args)
-    result_file = 'num_clients_' + args.num_clients + '.frac_adv' + args.frac_clients +\
-                  '.attack_mode' + args.attack_mode + '.attack_model' + args.attack_model
+
+    result_file = 'num_clients_' + str(args.num_clients) + '.frac_adv_' + str(args.frac_clients) +\
+                  '.attack_mode_' + args.attack_mode + '.attack_model_' + args.attack_model +\
+                  '.agg_' + args.agg
     if not args.o:
-        directory = "results/" + args.data_set + "/" + args.model + "/"
+        directory = "results/" + args.data_set + "/" + args.m + "/"
     else:
         directory = "results/" + args.o + '/'
     if not os.path.exists(directory):
@@ -79,6 +81,11 @@ if __name__ == '__main__':
     for random_seed in np.arange(1, args.n_repeat + 1):
         args.seed = random_seed
         results.append(run_exp(args=args))
+
+    # Dumps the results in appropriate files
+    pickle_it(args, 'parameters.' + result_file, directory)
+    pickle_it(results, result_file, directory)
+    print('results saved in "{}"'.format(directory))
 
 
 

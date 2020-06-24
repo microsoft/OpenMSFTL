@@ -26,12 +26,13 @@ def _parse_args():
                              'fraction of data used for training')
     parser.add_argument('--batch_size', type=int, default=32,
                         help='Training mini Batch Size')
+    parser.add_argument('--do_sort', type=bool, default=True)
 
     # Network Params
-    parser.add_argument('--num_clients', type=int, default=100)
-    parser.add_argument('--frac_clients', type=float, default=0.1,
+    parser.add_argument('--num_clients', type=int, default=10)
+    parser.add_argument('--frac_clients', type=float, default=1,
                         help='For SGD pick frac of clients each round')
-    parser.add_argument('--frac_adv', type=float, default=0.1,
+    parser.add_argument('--frac_adv', type=float, default=0,
                         help='Specify Fraction of Adversarial Nodes')
 
     # Model Params
@@ -88,17 +89,16 @@ if __name__ == '__main__':
     for client in sampled_adv_clients:
         client.attack_mode = 'byzantine'
         client.attack_model = 'gaussian'
+
     # ------------------------------------------------- #
     #      Get Data and Distribute among clients        #
     # ------------------------------------------------- #
-    data_set = args.data_set
-    batch_size = args.batch_size
-    split = args.dev_split
-    data_reader = DataReader(batch_size=batch_size,
-                             data_set=data_set,
+    data_reader = DataReader(batch_size=args.batch_size,
+                             data_set=args.data_set,
                              clients=clients,
                              download=True,
-                             split=split)
+                             split=args.dev_split,
+                             do_sorting=args.do_sort)
 
     server.val_loader = data_reader.val_loader
     server.test_loader = data_reader.test_loader

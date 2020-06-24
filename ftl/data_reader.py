@@ -19,7 +19,7 @@ class DataReader:
                  download: bool = True,
                  split: float = 0.1,
                  random_seed: int = 1,
-                 do_sorting=True):
+                 do_sorting=False):
         """
         For More Info:
         This is the universal DataLoader Class. This can support all data

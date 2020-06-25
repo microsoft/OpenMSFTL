@@ -40,12 +40,6 @@ class Client:
         else:
             raise NotImplementedError
 
-    def compress_message(self, w):
-        if self.compression_operator == 'full':
-            return w
-        else:
-            raise NotImplementedError
-
     @staticmethod
     def _gaussian_byzantine(w):
         w_attacked = copy.deepcopy(w)

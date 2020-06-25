@@ -61,6 +61,7 @@ def run_exp(args):
                     dropout_p=args.dropout_p,
                     fraction_coordinates=args.frac_coordinates)
 
+
     for epoch in range(1, args.num_comm_round + 1):
         print(' ------------------------------------------ ')
         print('         Communication Round {}             '. format(epoch))

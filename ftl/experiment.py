@@ -4,6 +4,7 @@ from ftl.server import Server
 from ftl.models import get_model
 from ftl.optimization import Optimization
 from ftl.trainer import Trainer, infer
+from ftl.compression import Compression
 import random
 import numpy as np
 
@@ -54,6 +55,12 @@ def run_exp(args):
     # Compute number of local gradient steps per communication round
     num_local_steps = args.num_total_epoch // args.num_comm_round
 
+    # Lets create instances of Attack, and Compression Operator
+    C = Compression(num_bits=args.num_bits,
+                    compression_function=args.compression_operator,
+                    dropout_p=args.dropout_p,
+                    fraction_coordinates=args.frac_coordinates)
+
     for epoch in range(1, args.num_comm_round + 1):
         print(' ------------------------------------------ ')
         print('         Communication Round {}             '. format(epoch))
@@ -88,6 +95,10 @@ def run_exp(args):
             if client.attack_mode == 'byzantine':
                 byzantine_params = client.byzantine_update(w=client.local_model.state_dict())
                 client.local_model.load_state_dict(byzantine_params)
+
+            # Apply compression operator to the client update
+            compressed_params = C.compress(w=client.local_model.state_dict())
+            client.local_model.load_state_dict(compressed_params)
 
         server.train_loss.append(epoch_loss/len(sampled_clients))
         print('Metrics :')

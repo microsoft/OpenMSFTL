@@ -8,13 +8,16 @@ class Client:
                  attack_mode=None,
                  attack_model=None,
                  stochastic_attack=False,
-                 stochastic_attack_prob=0.8):
+                 stochastic_attack_prob=0.8,
+                 compression_operator='full'):
         self.client_id = client_id
         self.trainer = trainer
         self.attack_mode = attack_mode  # which attack model to use || None, byzantine, poison
         self.attack_model = attack_model  # Ex. Type of Byzantine / poisoning attack
         self.stochastic_attack = stochastic_attack  # will this node be consistently byzantine ?
         self.attack_prob = stochastic_attack_prob
+
+        self.compression_operator = compression_operator
 
         self.local_train_data = None
         self.local_model = None
@@ -34,6 +37,12 @@ class Client:
 
         if self.attack_model == 'gaussian':
             return self._gaussian_byzantine(w=w)
+        else:
+            raise NotImplementedError
+
+    def compress_message(self, w):
+        if self.compression_operator == 'full':
+            return w
         else:
             raise NotImplementedError
 

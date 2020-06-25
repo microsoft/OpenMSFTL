@@ -37,7 +37,7 @@ def _parse_args():
                              'Options: full, top, rand, svd, qsgd_biased, '
                              'qsgd_unbiased, sign, dropout_biased, dropout_unbiased')
     parser.add_argument('--num_bits', type=int, default=2)
-    parser.add_argument('--fraction_coordinates', type=float, default=0.1)
+    parser.add_argument('--frac_coordinates', type=float, default=0.1)
     parser.add_argument('--dropout_p', type=float, default=0.1)
 
     # Model Params

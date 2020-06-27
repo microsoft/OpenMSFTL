@@ -16,15 +16,19 @@ class Trainer:
             for batch_idx, (x, y) in enumerate(data):
                 x, y = x.float(), y
                 x, y = x.to(device), y.to(device)
+
                 optimizer.zero_grad()
                 y_hat = model(x)
                 loss = torch.nn.functional.cross_entropy(y_hat, y)
                 loss.backward()
+
                 optimizer.step()
-                # self.iteration_losses.append(loss.item())
-                # print("  Iteration Loss = {}".format(loss.item()))
                 epoch_loss += loss.item()
             self.epoch_losses.append(epoch_loss/(batch_idx+1))
+
+    def opt_step(self, x_t, lr):
+        pass
+
 
 
 def infer(test_loader, model):

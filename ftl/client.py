@@ -3,6 +3,7 @@ import torch
 import numpy as np
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
 class Client:
     def __init__(self, client_id, trainer=None,
                  attack_mode=None,

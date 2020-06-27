@@ -5,7 +5,7 @@ from typing import List
 
 
 class Server:
-    def __init__(self, aggregation='fed_avg'):
+    def __init__(self, aggregation='fed_avg', clients: List[Client] = None):
         self.val_loader = None
         self.test_loader = None
         self.global_model = None
@@ -13,6 +13,7 @@ class Server:
         self.val_acc = []
         self.train_loss = []
         self.aggregation = aggregation
+        self.clients = clients
 
     def aggregate_client_updates(self, clients):
         """

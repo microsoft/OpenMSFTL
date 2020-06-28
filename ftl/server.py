@@ -2,22 +2,31 @@ from ftl.client import Client
 import copy
 import torch
 from typing import List
+import numpy as np
 
 
 class Server:
     def __init__(self,
+                 model,
                  aggregation_scheme='fed_avg',
                  clients: List[Client] = None,
-                 model=None,
                  val_loader=None,
                  test_loader=None):
 
+        # Server has access to Test and Dev Data Sets to evaluate Training Process
         self.val_loader = val_loader
         self.test_loader = test_loader
-        self.global_model = model
-        self.aggregation_scheme = aggregation_scheme
-        self.clients = clients
 
+        # Server has a pointer to all clients
+        self.clients = clients
+        self.aggregation_scheme = aggregation_scheme
+
+        # Server keeps track of model architecture and updated weights and grads at each round
+        self.global_model = model
+        self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.global_model.parameters()])
+        self.client_grads = np.empty((len(self.clients), len(self.w_current)), dtype=self.w_current.dtype)
+
+        # Containers to store metrics
         self.test_acc = []
         self.val_acc = []
         self.train_loss = []

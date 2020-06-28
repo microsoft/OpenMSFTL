@@ -5,22 +5,29 @@ from typing import List
 
 
 class Server:
-    def __init__(self, aggregation='fed_avg', clients: List[Client] = None):
-        self.val_loader = None
-        self.test_loader = None
-        self.global_model = None
+    def __init__(self,
+                 aggregation_scheme='fed_avg',
+                 clients: List[Client] = None,
+                 model=None,
+                 val_loader=None,
+                 test_loader=None):
+
+        self.val_loader = val_loader
+        self.test_loader = test_loader
+        self.global_model = model
+        self.aggregation_scheme = aggregation_scheme
+        self.clients = clients
+
         self.test_acc = []
         self.val_acc = []
         self.train_loss = []
-        self.aggregation = aggregation
-        self.clients = clients
 
     def aggregate_client_updates(self, clients):
         """
         :param clients: Takes in a set of client compute nodes to aggregate
         :return: Updates the global model in the server with the aggregated parameters of the local models
         """
-        if self.aggregation == 'fed_avg':
+        if self.aggregation_scheme == 'fed_avg':
             agg_params = self._fed_average(clients=clients)
         else:
             raise NotImplementedError

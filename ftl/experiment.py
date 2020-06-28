@@ -19,24 +19,20 @@ def run_exp(args):
         plot_flag = False
 
     # ------------------------------------------------- #
-    #      Initialize Network , Server and Clients      #
+    #               Initialize Network                  #
     # ------------------------------------------------- #
+    # Set up Client Nodes
     print(' Setting Up the FTL Network and distributing data ')
     num_client_nodes = args.num_clients
     clients = [Client(client_id=client_id, trainer=Trainer()) for client_id in range(num_client_nodes)]
-    server = Server(aggregation=args.agg)
 
-    # ------------------------------------------------- #
-    #      Make some client nodes adversarial           #
-    # ------------------------------------------------- #
+    # Make some client nodes adversarial
     sampled_adv_clients = random.sample(population=clients, k=int(args.frac_adv * num_client_nodes))
     for client in sampled_adv_clients:
         client.attack_mode = args.attack_mode
         client.attack_model = args.attack_model
 
-    # ------------------------------------------------- #
-    #      Get Data and Distribute among clients        #
-    # ------------------------------------------------- #
+    # Get Data and Distribute among clients
     data_reader = DataReader(batch_size=args.batch_size,
                              data_set=args.data_set,
                              clients=clients,
@@ -44,14 +40,17 @@ def run_exp(args):
                              split=args.dev_split,
                              do_sorting=args.do_sort)
 
+    # Set up Server (Master Node)
+    # Set up model architecture
+    model_net = get_model(args=args, dim_out=data_reader.no_of_labels)
+    server = Server(aggregation_scheme=args.agg, clients=clients)
     server.val_loader = data_reader.val_loader
     server.test_loader = data_reader.test_loader
 
     # ------------------------------------------------- #
     #             Training Models                       #
     # ------------------------------------------------- #
-    # Set up model architecture
-    server.global_model = get_model(args=args, dim_out=data_reader.no_of_labels)
+
     # Compute number of local gradient steps per communication round
     num_local_steps = args.num_total_epoch // args.num_comm_round
 

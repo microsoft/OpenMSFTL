@@ -43,14 +43,15 @@ def run_exp(args):
     # Set up Server (Master Node)
     # Set up model architecture
     model_net = get_model(args=args, dim_out=data_reader.no_of_labels)
-    server = Server(aggregation_scheme=args.agg, clients=clients)
-    server.val_loader = data_reader.val_loader
-    server.test_loader = data_reader.test_loader
+    server = Server(aggregation_scheme=args.agg,
+                    clients=clients,
+                    model=model_net,
+                    val_loader=data_reader.val_loader,
+                    test_loader=data_reader.test_loader)
 
     # ------------------------------------------------- #
     #             Training Models                       #
     # ------------------------------------------------- #
-
     # Compute number of local gradient steps per communication round
     num_local_steps = args.num_total_epoch // args.num_comm_round
 

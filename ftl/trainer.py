@@ -26,7 +26,7 @@ class Trainer:
                 epoch_loss += loss.item()
             self.epoch_losses.append(epoch_loss/(batch_idx+1))
 
-    def opt_step(self, x_t, lr):
+    def grad_step(self, x_t, lr):
         pass
 
 

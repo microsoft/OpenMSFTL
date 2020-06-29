@@ -21,7 +21,7 @@ class Optimization:
         self.damp = dampening
 
         self.optimizer = self._get_optimizer()
-        self.scheduler = self._get_scheduler
+        # self.scheduler = self._get_scheduler
 
     def _get_optimizer(self):
         if self.opt_alg == 'SGD':
@@ -34,12 +34,12 @@ class Optimization:
         else:
             raise NotImplementedError
 
-    @property
-    def _get_scheduler(self):
-        if self.lrs == 'step':
-            return optim.lr_scheduler.StepLR(optimizer=self.optimizer, step_size=1, gamma=0.9)
-        else:
-            raise NotImplementedError
+    # @property
+    # def _get_scheduler(self):
+    #     if self.lrs == 'step':
+    #         return optim.lr_scheduler.StepLR(optimizer=self.optimizer, step_size=1, gamma=0.9)
+    #     else:
+    #         raise NotImplementedError
 
 
 def _get_lr(current_lr, epoch, decay_rate: int = 100):

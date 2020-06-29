@@ -1,4 +1,4 @@
-from ftl.optimization import _get_lr
+from ftl.trainer import Trainer
 import copy
 import torch
 import numpy as np
@@ -6,14 +6,17 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class Client:
-    def __init__(self, client_id, trainer=None,
+    def __init__(self,
+                 client_id,
                  attack_mode=None,
                  attack_model=None,
                  stochastic_attack=False,
                  stochastic_attack_prob=0.8,
                  compression_operator='full'):
+
         self.client_id = client_id
-        self.trainer = trainer
+        self.trainer = Trainer()
+
         self.attack_mode = attack_mode  # which attack model to use || None, byzantine, poison
         self.attack_model = attack_model  # Ex. Type of Byzantine / poisoning attack
         self.stochastic_attack = stochastic_attack  # will this node be consistently byzantine ?
@@ -22,14 +25,11 @@ class Client:
         self.compression_operator = compression_operator
 
         self.local_train_data = None
-        self.local_model = None
-        self.local_model_prev = None
 
         self.w_init = None
 
-    # def update_local_model(self, model):
-    #     self.local_model_prev = copy.deepcopy(self.local_model)
-    #     self.local_model = copy.deepcopy(model)
+    def train_step(self):
+        pass
 
     def byzantine_update(self, w):
         # Flip a coin and decide whether to apply noise using the

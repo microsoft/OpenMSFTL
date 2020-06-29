@@ -2,9 +2,9 @@ from ftl.data_reader import DataReader
 from ftl.client import Client
 from ftl.server import Server
 from ftl.models import get_model
-from ftl.optimization import Optimization
 from ftl.trainer import Trainer, infer
 from ftl.compression import Compression
+import copy
 import random
 import numpy as np
 
@@ -24,7 +24,7 @@ def run_exp(args):
     # Set up Client Nodes
     print(' Setting Up the FTL Network and distributing data ')
     num_client_nodes = args.num_clients
-    clients = [Client(client_id=client_id, trainer=Trainer()) for client_id in range(num_client_nodes)]
+    clients = [Client(client_id=client_id) for client_id in range(num_client_nodes)]
 
     # Make some client nodes adversarial
     sampled_adv_clients = random.sample(population=clients, k=int(args.frac_adv * num_client_nodes))
@@ -43,9 +43,10 @@ def run_exp(args):
     # Set up Server (Master Node)
     # Set up model architecture
     model_net = get_model(args=args, dim_out=data_reader.no_of_labels)
-    server = Server(aggregation_scheme=args.agg,
+    server = Server(args=args,
+                    aggregation_scheme=args.agg,
                     clients=clients,
-                    model=model_net,
+                    model=copy.deepcopy(model_net),
                     val_loader=data_reader.val_loader,
                     test_loader=data_reader.test_loader)
 

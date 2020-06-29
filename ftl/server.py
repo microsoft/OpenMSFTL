@@ -1,4 +1,5 @@
 from ftl.client import Client
+from ftl.optimization import Optimization, _get_lr
 import copy
 import torch
 from typing import List
@@ -8,12 +9,14 @@ import random
 
 class Server:
     def __init__(self,
+                 args,
                  model,
                  aggregation_scheme='fed_avg',
                  clients: List[Client] = None,
                  val_loader=None,
                  test_loader=None):
 
+        self.args = args
         # Server has access to Test and Dev Data Sets to evaluate Training Process
         self.val_loader = val_loader
         self.test_loader = test_loader
@@ -43,7 +46,7 @@ class Server:
 
         # Now we will loop through these clients and do training steps
         for client in sampled_clients:
-            pass
+            client.train_step()
 
 
 

@@ -21,11 +21,12 @@ def run_exp(args):
     # ------------------------------------------------- #
     #               Initialize Network                  #
     # ------------------------------------------------- #
+
     # Set up Client Nodes
+    # ----------------------
     print(' Setting Up the FTL Network and distributing data ')
     num_client_nodes = args.num_clients
     clients = [Client(client_id=client_id) for client_id in range(num_client_nodes)]
-
     # Make some client nodes adversarial
     sampled_adv_clients = random.sample(population=clients, k=int(args.frac_adv * num_client_nodes))
     for client in sampled_adv_clients:
@@ -40,9 +41,14 @@ def run_exp(args):
                              split=args.dev_split,
                              do_sorting=args.do_sort)
 
-    # Set up Server (Master Node)
-    # Set up model architecture
+    # Set up model architecture (learner)
+    # -------------------------------------
     model_net = get_model(args=args, dim_out=data_reader.no_of_labels)
+    for client in clients:
+        client.learner = copy.deepcopy(model_net)
+
+    # Set up Server (Master Node)
+    # -----------------------------
     server = Server(args=args,
                     aggregation_scheme=args.agg,
                     clients=clients,

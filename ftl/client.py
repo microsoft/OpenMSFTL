@@ -8,6 +8,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class Client:
     def __init__(self,
                  client_id,
+                 learner=None,
                  attack_mode=None,
                  attack_model=None,
                  stochastic_attack=False,
@@ -16,6 +17,7 @@ class Client:
 
         self.client_id = client_id
         self.trainer = Trainer()
+        self.learner = learner
 
         self.attack_mode = attack_mode  # which attack model to use || None, byzantine, poison
         self.attack_model = attack_model  # Ex. Type of Byzantine / poisoning attack

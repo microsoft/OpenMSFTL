@@ -66,8 +66,9 @@ def run_exp(args):
         print('         Communication Round {}             '. format(epoch))
         print(' -------------------------------------------')
         epoch_loss = 0.0
+
         # sample fraction of clients who will participate in this round
-        sampled_clients = random.sample(population=clients, k=int(args.frac_clients * num_client_nodes))
+        sampled_clients = random.sample(population=server.clients, k=int(args.frac_clients * num_client_nodes))
         # Now loop over each client and update the local models
         for client in sampled_clients:
             client.update_local_model(model=server.global_model)

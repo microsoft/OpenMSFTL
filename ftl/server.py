@@ -32,7 +32,7 @@ class Server:
         self.val_acc = []
         self.train_loss = []
 
-    def update_client_models(self):
+    def init_client_models(self):
         # Loop over all clients and update the current params
         for client in self.clients:
             client.w_init = copy.deepcopy(self.w_current)

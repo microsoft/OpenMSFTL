@@ -67,10 +67,10 @@ def run_exp(args):
         print(' -------------------------------------------')
         epoch_loss = 0.0
         # We update the weights of all client and set to server global params
-        server.update_client_models()
-
+        server.init_client_models()
         # sample fraction of clients who will participate in this round
         sampled_clients = random.sample(population=server.clients, k=int(args.frac_clients * num_client_nodes))
+
         # Now loop over each client and update the local models
         for client in sampled_clients:
             client.update_local_model(model=server.global_model)

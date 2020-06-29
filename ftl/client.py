@@ -1,3 +1,4 @@
+from ftl.optimization import _get_lr
 import copy
 import torch
 import numpy as np
@@ -26,9 +27,9 @@ class Client:
 
         self.w_init = None
 
-    def update_local_model(self, model):
-        self.local_model_prev = copy.deepcopy(self.local_model)
-        self.local_model = copy.deepcopy(model)
+    # def update_local_model(self, model):
+    #     self.local_model_prev = copy.deepcopy(self.local_model)
+    #     self.local_model = copy.deepcopy(model)
 
     def byzantine_update(self, w):
         # Flip a coin and decide whether to apply noise using the

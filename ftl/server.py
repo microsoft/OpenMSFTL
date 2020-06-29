@@ -41,6 +41,12 @@ class Server:
         # Sample Clients to Train this round
         sampled_clients = random.sample(population=self.clients, k=k)
 
+        # Now we will loop through these clients and do training steps
+        for client in sampled_clients:
+            pass
+
+
+
     def aggregate_client_updates(self, clients):
         """
         :param clients: Takes in a set of client compute nodes to aggregate

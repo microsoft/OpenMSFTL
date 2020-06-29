@@ -4,8 +4,8 @@ import torch.optim as optim
 class Optimization:
     def __init__(self,
                  model,
-                 opt_alg: str,
                  lr0: float,
+                 opt_alg: str = 'SGD',
                  lrs: str = 'step',
                  reg: float = 0,
                  nesterov: bool = True,
@@ -21,7 +21,7 @@ class Optimization:
         self.damp = dampening
 
         self.optimizer = self._get_optimizer()
-        self.scheduler = self._get_scheduler()
+        self.scheduler = self._get_scheduler
 
     def _get_optimizer(self):
         if self.opt_alg == 'SGD':
@@ -34,8 +34,14 @@ class Optimization:
         else:
             raise NotImplementedError
 
+    @property
     def _get_scheduler(self):
         if self.lrs == 'step':
             return optim.lr_scheduler.StepLR(optimizer=self.optimizer, step_size=1, gamma=0.9)
         else:
             raise NotImplementedError
+
+
+def _get_lr(current_lr, epoch, decay_rate: int = 100):
+    lr = current_lr * decay_rate / (epoch + decay_rate)
+    return lr

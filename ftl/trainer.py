@@ -30,7 +30,6 @@ class Trainer:
         pass
 
 
-
 def infer(test_loader, model):
     model.eval()
     model.to(device)

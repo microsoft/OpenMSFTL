@@ -1,7 +1,9 @@
 import numpy as np
 
 
-class Attack:
+class ByzAttack:
     def __init__(self):
-        pass
+        self.mean = None
+        self.std = None
+
 

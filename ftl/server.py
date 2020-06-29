@@ -37,6 +37,10 @@ class Server:
         for client in self.clients:
             client.w_init = copy.deepcopy(self.w_current)
 
+    def train_client_models(self, k, epoch):
+        # Sample Clients to Train this round
+        sampled_clients = random.sample(population=self.clients, k=k)
+
     def aggregate_client_updates(self, clients):
         """
         :param clients: Takes in a set of client compute nodes to aggregate

@@ -3,6 +3,7 @@ import copy
 import torch
 from typing import List
 import numpy as np
+import random
 
 
 class Server:
@@ -30,6 +31,11 @@ class Server:
         self.test_acc = []
         self.val_acc = []
         self.train_loss = []
+
+    def update_client_models(self):
+        # Loop over all clients and update the current params
+        for client in self.clients:
+            client.w_init = copy.deepcopy(self.w_current)
 
     def aggregate_client_updates(self, clients):
         """

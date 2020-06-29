@@ -24,6 +24,8 @@ class Client:
         self.local_model = None
         self.local_model_prev = None
 
+        self.w_init = None
+
     def update_local_model(self, model):
         self.local_model_prev = copy.deepcopy(self.local_model)
         self.local_model = copy.deepcopy(model)

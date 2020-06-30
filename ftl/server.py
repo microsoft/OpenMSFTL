@@ -73,3 +73,5 @@ class Server:
         # Now update model weights
         # x_t+1 = x_t - lr * grad
         self.w_current += -self.current_lr * agg_grad
+        # update the model params with these weights
+        dist_weights_to_model(weights=self.w_current, parameters=self.global_model.parameters())

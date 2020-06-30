@@ -1,5 +1,5 @@
 from ftl.trainer import Trainer
-from ftl.optimization import Optimization, _get_lr
+from ftl.optimization import Optimization
 import numpy as np
 
 

@@ -81,45 +81,6 @@ def run_exp(args):
         print('Metrics :')
         print('Average Epoch Loss = {}'.format(server.train_loss[-1]))
 
-        # # Now loop over each client and update the local models
-        # for client in sampled_clients:
-        #     client.update_local_model(model=server.global_model)
-        #     opt = Optimization(model=client.local_model,
-        #                        opt_alg=args.opt,
-        #                        lr0=args.lr0,
-        #                        reg=args.reg)
-        #     optimizer = opt.optimizer
-        #     lr_scheduler = opt.scheduler
-        #     # ----------- Data Poisoning/ Backdoor -----------
-        #     if client.attack_mode == 'backdoor':
-        #         pass
-        #     client.trainer.train(data=client.local_train_data,
-        #                          model=client.local_model,
-        #                          optimizer=optimizer,
-        #                          epochs=num_local_steps)
-        #     lr_scheduler.step()
-        #     print('Client : {} loss = {}'.format(client.client_id, client.trainer.epoch_losses[-1]))
-        #     epoch_loss += client.trainer.epoch_losses[-1]
-        #
-        #     # --------------- Byzantine ----------------------------
-        #     # At this point check if this client is marked as byzantine
-        #     # if its a byzantine node then we perturb the computed parameters
-        #     # of the client node
-        #     if client.attack_mode == 'byzantine':
-        #         byzantine_params = client.byzantine_update(w=client.local_model.state_dict())
-        #         client.local_model.load_state_dict(byzantine_params)
-        #
-        #     # Apply compression operator to the client update
-        #     compressed_params = C.compress(w=client.local_model.state_dict())
-        #     client.local_model.load_state_dict(compressed_params)
-        #
-        # server.train_loss.append(epoch_loss/len(sampled_clients))
-        # print('Metrics :')
-        # print('Average Epoch Loss = {}'.format(server.train_loss[-1]))
-        # # Now aggregate the local models and update the global models
-        # # so, during next epoch client local models will be updated with this aggregated model
-        # server.aggregate_client_updates(clients=sampled_clients)
-
         val_acc, _ = infer(test_loader=server.val_loader, model=server.global_model)
         print("Validation Accuracy = {}".format(val_acc))
         server.val_acc.append(val_acc)

@@ -61,6 +61,9 @@ class Server:
         # Update Metrics
         self.train_loss.append(epoch_loss / len(sampled_clients))
 
+        # aggregate client updates
+        self.aggregate_client_updates(clients=sampled_clients)
+
     def aggregate_client_updates(self, clients):
         """
         :param clients: Takes in a set of client compute nodes to aggregate
@@ -72,6 +75,6 @@ class Server:
         agg_grad = self.aggregator.compute_grad(clients=clients, client_grads=client_grads)
         # Now update model weights
         # x_t+1 = x_t - lr * grad
-        self.w_current += -self.current_lr * agg_grad
+        self.w_current = self.w_current - self.current_lr * agg_grad
         # update the model params with these weights
         dist_weights_to_model(weights=self.w_current, parameters=self.global_model.parameters())

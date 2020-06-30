@@ -58,11 +58,12 @@ class Server:
         # Update Metrics
         self.train_loss.append(epoch_loss / len(sampled_clients))
 
-    # def aggregate_client_updates(self, clients):
-    #     """
-    #     :param clients: Takes in a set of client compute nodes to aggregate
-    #     :return: Updates the global model in the server with the aggregated parameters of the local models
-    #     """
+    def aggregate_client_updates(self, clients):
+        """
+        :param clients: Takes in a set of client compute nodes to aggregate
+        :return: Updates the global model in the server with the aggregated parameters of the local models
+        """
+
     #     if self.aggregation_scheme == 'fed_avg':
     #         agg_params = self._fed_average(clients=clients)
     #     else:

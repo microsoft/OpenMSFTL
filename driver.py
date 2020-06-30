@@ -26,12 +26,14 @@ def _parse_args():
     # Attack Params
     parser.add_argument('--frac_adv', type=float, default=0,
                         help='Specify Fraction of Adversarial Nodes')
-    parser.add_argument('--attack_mode', type=str, default='byzantine')
+    parser.add_argument('--attack_mode', type=str, default='byzantine',
+                        help='Options: Byzantine, Backdoor')
     parser.add_argument('--attack_model', type=str, default='gaussian')
 
     # Defense Params
     parser.add_argument('--agg', type=str, default='fed_avg',
-                        help='Specify Aggregation Rule')
+                        help='Specify Aggregation/ Defence Rule. '
+                             'Options: fed_avg, krum, trimmed_mean, bulyan')
     parser.add_argument('--compression_operator', type=str, default='full',
                         help='Specify Aggregation Rule,'
                              'Options: full, top, rand, svd, qsgd_biased, '

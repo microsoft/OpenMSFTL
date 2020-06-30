@@ -1,9 +1,5 @@
 from ftl.trainer import Trainer
 from ftl.optimization import Optimization, _get_lr
-import copy
-import torch
-import numpy as np
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class Client:
@@ -41,28 +37,28 @@ class Client:
                            optimizer=opt,
                            epochs=iterations)
 
-    def byzantine_update(self, w):
-        # Flip a coin and decide whether to apply noise using the
-        # stochastic attack probability
-        # This ensures that the node while being byzantine has some
-        # stochasticity i.e. it doesn't act as byzantine all the time
-        if np.random.random_sample() > self.attack_prob:
-            return w
-
-        if self.attack_model == 'gaussian':
-            return self._gaussian_byzantine(w=w)
-        else:
-            raise NotImplementedError
-
-    @staticmethod
-    def _gaussian_byzantine(w):
-        w_attacked = copy.deepcopy(w)
-        if type(w_attacked) == list:
-            for k in range(len(w_attacked)):
-                noise = torch.randn(w[k].shape).to(device) * w_attacked[k].to(device)
-                w_attacked[k] += noise
-        else:
-            for k in w_attacked.keys():
-                noise = torch.randn(w[k].shape).to(device) * w_attacked[k].to(device)
-                w_attacked[k] += noise
-        return w_attacked
+    # def byzantine_update(self, w):
+    #     # Flip a coin and decide whether to apply noise using the
+    #     # stochastic attack probability
+    #     # This ensures that the node while being byzantine has some
+    #     # stochasticity i.e. it doesn't act as byzantine all the time
+    #     if np.random.random_sample() > self.attack_prob:
+    #         return w
+    #
+    #     if self.attack_model == 'gaussian':
+    #         return self._gaussian_byzantine(w=w)
+    #     else:
+    #         raise NotImplementedError
+    #
+    # @staticmethod
+    # def _gaussian_byzantine(w):
+    #     w_attacked = copy.deepcopy(w)
+    #     if type(w_attacked) == list:
+    #         for k in range(len(w_attacked)):
+    #             noise = torch.randn(w[k].shape).to(device) * w_attacked[k].to(device)
+    #             w_attacked[k] += noise
+    #     else:
+    #         for k in w_attacked.keys():
+    #             noise = torch.randn(w[k].shape).to(device) * w_attacked[k].to(device)
+    #             w_attacked[k] += noise
+    #     return w_attacked

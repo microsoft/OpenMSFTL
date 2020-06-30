@@ -65,9 +65,8 @@ def run_exp(args):
                     test_loader=data_reader.test_loader)
 
     # ------------------------------------------------- #
-    #             Training Models                       #
+    #             FTL Training                          #
     # ------------------------------------------------- #
-
 
     for epoch in range(1, args.num_comm_round + 1):
         print(' ------------------------------------------ ')

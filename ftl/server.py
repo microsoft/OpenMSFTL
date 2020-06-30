@@ -54,8 +54,6 @@ class Server:
                               reg=self.args.reg,
                               iterations=num_local_steps)
 
-
-
     def aggregate_client_updates(self, clients):
         """
         :param clients: Takes in a set of client compute nodes to aggregate

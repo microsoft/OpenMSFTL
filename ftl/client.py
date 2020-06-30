@@ -28,8 +28,7 @@ class Client:
 
         self.grads = None
 
-    def train_step(self, epoch, lr0, reg, iterations):
-        lr = _get_lr(current_lr=lr0, epoch=epoch)
+    def train_step(self, lr, reg, iterations):
         opt = Optimization(model=self.learner,
                            lr0=lr,
                            reg=reg).optimizer

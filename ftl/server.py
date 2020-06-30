@@ -1,5 +1,6 @@
 from ftl.client import Client
 from ftl.models import dist_weights_to_model
+from ftl.optimization import _get_lr
 from typing import List
 import numpy as np
 import random
@@ -27,6 +28,7 @@ class Server:
         self.global_model = model
         self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.global_model.parameters()])
         self.client_grads = np.empty((len(self.clients), len(self.w_current)), dtype=self.w_current.dtype)
+        self.current_lr = args.lr0
 
         # Containers to store metrics
         self.test_acc = []
@@ -47,9 +49,9 @@ class Server:
         # Compute number of local gradient steps per communication round
         epoch_loss = 0.0
         num_local_steps = self.args.num_total_epoch // self.args.num_comm_round
+        self.current_lr = _get_lr(current_lr=self.current_lr, epoch=epoch)
         for client in sampled_clients:
-            client.train_step(epoch=epoch,
-                              lr0=self.args.lr0,
+            client.train_step(lr=self.current_lr,
                               reg=self.args.reg,
                               iterations=num_local_steps)
             print('Client : {} loss = {}'.format(client.client_id, client.trainer.epoch_losses[-1]))

@@ -69,10 +69,8 @@ class Server:
         :param clients: Takes in a set of client compute nodes to aggregate
         :return: Updates the global model in the server with the aggregated parameters of the local models
         """
-        # Create a container to accumulate client grads
-        client_grads = np.empty((len(clients), len(self.w_current)), dtype=self.w_current.dtype)
         # Now aggregate gradients and get aggregated gradient
-        agg_grad = self.aggregator.compute_grad(clients=clients, client_grads=client_grads)
+        agg_grad = self.aggregator.compute_grad(clients=clients, client_grads=self.client_grads)
         # Now update model weights
         # x_t+1 = x_t - lr * grad
         self.w_current = self.w_current - self.current_lr * agg_grad

@@ -26,7 +26,7 @@ class Client:
 
         self.local_train_data = None
 
-        self.grads = None
+        self.grad = None
 
     def train_step(self, lr, reg, iterations):
         opt = Optimization(model=self.learner,
@@ -37,7 +37,7 @@ class Client:
                            optimizer=opt,
                            epochs=iterations)
         # Now, we must have done iterations number of gradient steps
-        self.grads = np.concatenate([param.grad.data.cpu().numpy().flatten() for param in self.learner.parameters()])
+        self.grad = np.concatenate([param.grad.data.cpu().numpy().flatten() for param in self.learner.parameters()])
 
     # def byzantine_update(self, w):
     #     # Flip a coin and decide whether to apply noise using the

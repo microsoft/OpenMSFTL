@@ -1,6 +1,7 @@
 from ftl.client import Client
 from ftl.models import dist_weights_to_model
 from ftl.optimization import _get_lr
+from ftl.aggregation import Aggregator
 from typing import List
 import numpy as np
 import random
@@ -22,7 +23,7 @@ class Server:
 
         # Server has a pointer to all clients
         self.clients = clients
-        self.aggregation_scheme = aggregation_scheme
+        self.aggregator = Aggregator(agg_strategy=aggregation_scheme)
 
         # Server keeps track of model architecture and updated weights and grads at each round
         self.global_model = model
@@ -65,39 +66,10 @@ class Server:
         :param clients: Takes in a set of client compute nodes to aggregate
         :return: Updates the global model in the server with the aggregated parameters of the local models
         """
-
-    #     if self.aggregation_scheme == 'fed_avg':
-    #         agg_params = self._fed_average(clients=clients)
-    #     else:
-    #         raise NotImplementedError
-    #
-    #     self.global_model.load_state_dict(agg_params)
-    #
-    # # ----------------------- #
-    # # Aggregation Strategies  #
-    # # ----------------------- #
-    #
-    # @staticmethod
-    # def _fed_average(clients: List[Client]):
-    #     """
-    #     Implements simple Fed Avg aggregation as introduced in:
-    #     McMahan et.al. 'Communication-Efficient Learning of Deep Networks from Decentralized Data'
-    #     http://proceedings.mlr.press/v54/mcmahan17a/mcmahan17a.pdf
-    #     """
-    #     epoch_params = []
-    #     for client in clients:
-    #         epoch_params.append(copy.deepcopy(client.local_model.state_dict()))
-    #     server_param = copy.deepcopy(epoch_params[0])
-    #     for key in server_param.keys():
-    #         for i in range(1, len(epoch_params)):
-    #             server_param[key] += epoch_params[i][key]
-    #         server_param[key] = torch.div(server_param[key], len(epoch_params))
-    #     return server_param
-    #
-    # @staticmethod
-    # def _median(clients: List[Client]):
-    #     raise NotImplementedError
-
-
-
-
+        # Create a container to accumulate client grads
+        client_grads = np.empty((len(clients), len(self.w_current)), dtype=self.w_current.dtype)
+        # Now aggregate gradients and get aggregated gradient
+        agg_grad = self.aggregator.compute_grad(clients=clients, client_grads=client_grads)
+        # Now update model weights
+        # x_t+1 = x_t - lr * grad
+        self.w_current += -self.current_lr * agg_grad

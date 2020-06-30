@@ -28,9 +28,7 @@ class Client:
 
         self.local_train_data = None
 
-        self.w_init = None
-
-    def train_step(self):
+    def train_step(self, epoch):
         pass
 
     def byzantine_update(self, w):

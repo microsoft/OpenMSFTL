@@ -46,7 +46,7 @@ class Server:
 
         # Now we will loop through these clients and do training steps
         for client in sampled_clients:
-            client.train_step()
+            client.train_step(epoch=epoch)
 
 
 

@@ -1,4 +1,16 @@
 from torch import nn
+import torch
+import functools
+
+
+def dist_weights_to_model(weights, parameters):
+    offset = 0
+    for param in parameters:
+        new_size = functools.reduce(lambda x, y: x*y, param.shape)
+        current_data = weights[offset:offset + new_size]
+
+        param.data[:] = torch.from_numpy(current_data.reshape(param.shape))
+        offset += new_size
 
 
 def get_model(args, dim_out: int):

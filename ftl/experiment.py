@@ -22,16 +22,12 @@ def run_exp(args):
     #               Initialize Network                  #
     # ------------------------------------------------- #
 
-    # Set up Client Nodes
-    # ----------------------
+    # *** Set up Client Nodes ****
+    # -----------------------------
+
     print(' Setting Up the FTL Network and distributing data ')
     num_client_nodes = args.num_clients
     clients = [Client(client_id=client_id) for client_id in range(num_client_nodes)]
-    # Make some client nodes adversarial
-    sampled_adv_clients = random.sample(population=clients, k=int(args.frac_adv * num_client_nodes))
-    for client in sampled_adv_clients:
-        client.attack_mode = args.attack_mode
-        client.attack_model = args.attack_model
 
     # Get Data and Distribute among clients
     data_reader = DataReader(batch_size=args.batch_size,
@@ -42,13 +38,25 @@ def run_exp(args):
                              do_sorting=args.do_sort)
 
     # Set up model architecture (learner)
-    # -------------------------------------
     model_net = get_model(args=args, dim_out=data_reader.no_of_labels)
+
+    # Make some client nodes adversarial
+    sampled_adv_clients = random.sample(population=clients, k=int(args.frac_adv * num_client_nodes))
+    for client in sampled_adv_clients:
+        client.attack_mode = args.attack_mode
+        client.attack_model = args.attack_model
+
+    # Copy model architecture to clients
+    # Also pass instances of compression operator
     for client in clients:
         client.learner = copy.deepcopy(model_net)
+        client.compression_operator = Compression(num_bits=args.num_bits,
+                                                  compression_function=args.compression_operator,
+                                                  dropout_p=args.dropout_p,
+                                                  fraction_coordinates=args.frac_coordinates)
 
-    # Set up Server (Master Node)
-    # -----------------------------
+    # **** Set up Server (Master Node)  ****
+    # ---------------------------------------
     server = Server(args=args,
                     aggregation_scheme=args.agg,
                     clients=clients,
@@ -62,15 +70,9 @@ def run_exp(args):
     # Compute number of local gradient steps per communication round
     num_local_steps = args.num_total_epoch // args.num_comm_round
 
-    # Lets create instances of Attack, and Compression Operator
-    C = Compression(num_bits=args.num_bits,
-                    compression_function=args.compression_operator,
-                    dropout_p=args.dropout_p,
-                    fraction_coordinates=args.frac_coordinates)
-
     for epoch in range(1, args.num_comm_round + 1):
         print(' ------------------------------------------ ')
-        print('         Communication Round {}             '. format(epoch))
+        print('         Communication Round {}             '.format(epoch))
         print(' -------------------------------------------')
         epoch_loss = 0.0
         # We update the weights of all client and set to server global params

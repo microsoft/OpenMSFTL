@@ -53,6 +53,7 @@ class Server:
                               lr0=self.args.lr0,
                               reg=self.args.reg,
                               iterations=num_local_steps)
+            print('Client : {} loss = {}'.format(client.client_id, client.trainer.epoch_losses[-1]))
 
     def aggregate_client_updates(self, clients):
         """

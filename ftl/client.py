@@ -1,5 +1,6 @@
 from ftl.trainer import Trainer
 from ftl.optimization import Optimization, _get_lr
+import numpy as np
 
 
 class Client:
@@ -36,6 +37,8 @@ class Client:
                            model=self.learner,
                            optimizer=opt,
                            epochs=iterations)
+        # Now, we must have done iterations number of gradient steps
+        self.grads = np.concatenate([param.grad.data.cpu().numpy().flatten() for param in self.learner.parameters()])
 
     # def byzantine_update(self, w):
     #     # Flip a coin and decide whether to apply noise using the

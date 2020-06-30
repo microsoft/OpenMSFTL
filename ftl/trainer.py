@@ -4,7 +4,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Trainer:
     def __init__(self):
-        # self.iteration_losses = []
         self.epoch_losses = []
 
     def train(self, data, model, optimizer, epochs=1):
@@ -21,10 +20,7 @@ class Trainer:
                 y_hat = model(x)
                 loss = torch.nn.functional.cross_entropy(y_hat, y)
                 loss.backward()
-
-                # We won't do optim step since we will just get
-                # the grads and do this in the server
-                # optimizer.step()
+                optimizer.step()
                 epoch_loss += loss.item()
             self.epoch_losses.append(epoch_loss/(batch_idx+1))
 

@@ -47,6 +47,7 @@ class Server:
 
         # Now we will loop through these clients and do training steps
         # Compute number of local gradient steps per communication round
+        epoch_loss = 0.0
         num_local_steps = self.args.num_total_epoch // self.args.num_comm_round
         for client in sampled_clients:
             client.train_step(epoch=epoch,
@@ -54,6 +55,10 @@ class Server:
                               reg=self.args.reg,
                               iterations=num_local_steps)
             print('Client : {} loss = {}'.format(client.client_id, client.trainer.epoch_losses[-1]))
+            epoch_loss += client.trainer.epoch_losses[-1]
+
+        # Get Metrics
+        self.train_loss.append(epoch_loss / len(sampled_clients))
 
     def aggregate_client_updates(self, clients):
         """

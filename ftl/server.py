@@ -46,8 +46,13 @@ class Server:
         sampled_clients = random.sample(population=self.clients, k=k)
 
         # Now we will loop through these clients and do training steps
+        # Compute number of local gradient steps per communication round
+        num_local_steps = self.args.num_total_epoch // self.args.num_comm_round
         for client in sampled_clients:
-            client.train_step(epoch=epoch)
+            client.train_step(epoch=epoch,
+                              lr0=self.args.lr0,
+                              reg=self.args.reg,
+                              iterations=num_local_steps)
 
 
 

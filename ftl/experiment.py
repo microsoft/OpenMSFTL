@@ -67,8 +67,7 @@ def run_exp(args):
     # ------------------------------------------------- #
     #             Training Models                       #
     # ------------------------------------------------- #
-    # Compute number of local gradient steps per communication round
-    num_local_steps = args.num_total_epoch // args.num_comm_round
+
 
     for epoch in range(1, args.num_comm_round + 1):
         print(' ------------------------------------------ ')

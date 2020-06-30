@@ -1,4 +1,5 @@
 from ftl.trainer import Trainer
+from ftl.optimization import Optimization, _get_lr
 import copy
 import torch
 import numpy as np
@@ -28,8 +29,17 @@ class Client:
 
         self.local_train_data = None
 
-    def train_step(self, epoch):
-        pass
+        self.grads = None
+
+    def train_step(self, epoch, lr0, reg, iterations):
+        lr = _get_lr(current_lr=lr0, epoch=epoch)
+        opt = Optimization(model=self.learner,
+                           lr0=lr,
+                           reg=reg).optimizer
+        self.trainer.train(data=self.local_train_data,
+                           model=self.learner,
+                           optimizer=opt,
+                           epochs=iterations)
 
     def byzantine_update(self, w):
         # Flip a coin and decide whether to apply noise using the

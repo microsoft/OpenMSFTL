@@ -22,12 +22,11 @@ class Trainer:
                 loss = torch.nn.functional.cross_entropy(y_hat, y)
                 loss.backward()
 
-                optimizer.step()
+                # We won't do optim step since we will just get
+                # the grads and do this in the server
+                # optimizer.step()
                 epoch_loss += loss.item()
             self.epoch_losses.append(epoch_loss/(batch_idx+1))
-
-    def grad_step(self, x_t, lr):
-        pass
 
 
 def infer(test_loader, model):

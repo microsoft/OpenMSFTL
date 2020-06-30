@@ -1,5 +1,5 @@
 from ftl.client import Client
-from ftl.optimization import Optimization, _get_lr
+from ftl.models import dist_weights_to_model
 import copy
 import torch
 from typing import List
@@ -38,7 +38,8 @@ class Server:
     def init_client_models(self):
         # Loop over all clients and update the current params
         for client in self.clients:
-            client.w_init = copy.deepcopy(self.w_current)
+            # client.w_init = copy.deepcopy(self.w_current)
+            dist_weights_to_model(weights=self.w_current, parameters=client.learner.parameters())
 
     def train_client_models(self, k, epoch):
         # Sample Clients to Train this round

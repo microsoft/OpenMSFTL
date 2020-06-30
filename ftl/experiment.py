@@ -75,7 +75,7 @@ def run_exp(args):
         print('         Communication Round {}             '.format(epoch))
         print(' -------------------------------------------')
         epoch_loss = 0.0
-        # We update the weights of all client and set to server global params
+        # We update the weights of all client learners and set to server global params
         server.init_client_models()
         # sample fraction of clients who will participate in this round and kick off training
         server.train_client_models(k=int(args.frac_clients * num_client_nodes), epoch=epoch)

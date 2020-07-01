@@ -53,9 +53,12 @@ class Server:
         # Compute number of local gradient steps per communication round
         epoch_loss = 0.0
 
-        if epoch % 1000 == 0:
-            self.current_lr = self.args.lr0 / 100
-        self.current_lr = _get_lr(current_lr=self.current_lr, epoch=epoch)
+        if epoch % self.args.lr_restart == 0:
+            self.current_lr = self.args.lr0/2
+        self.current_lr = _get_lr(current_lr=self.current_lr,
+                                  epoch=epoch,
+                                  lr_decay_rate=self.args.lr_decay_rate)
+        print('current lr = {}'.format(self.current_lr))
 
         for client in sampled_clients:
             client.client_step(lr=self.current_lr,

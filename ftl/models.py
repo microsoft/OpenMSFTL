@@ -25,13 +25,14 @@ def get_model(args, dim_out: int):
 
 
 class MLP(nn.Module):
-    def __init__(self, dim_in, dim_out, dim_hidden=100, p=0.5):
+    def __init__(self, dim_in, dim_out, dim_hidden1=100, dim_hidden2=50, p=0.5):
         super(MLP, self).__init__()
-        self.fc_in = nn.Linear(dim_in, dim_hidden)
+        self.fc_in = nn.Linear(dim_in, dim_hidden1)
         nn.init.xavier_uniform_(self.fc_in.weight)
+        self.fc_hidden = nn.Linear(dim_hidden1, dim_hidden2)
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(p=p)
-        self.fc_out = nn.Linear(dim_hidden, dim_out)
+        self.fc_out = nn.Linear(dim_hidden2, dim_out)
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
@@ -39,6 +40,9 @@ class MLP(nn.Module):
         x = self.fc_in(x)
         x = self.dropout(x)
         x = self.relu(x)
+        x = self.fc_hidden(x)
+        x = self.relu(x)
+        x = self.dropout(x)
         x = self.fc_out(x)
         z = self.softmax(x)
 

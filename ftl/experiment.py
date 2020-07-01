@@ -80,6 +80,7 @@ def run_exp(args):
         server.train_client_models(k=int(args.frac_clients * num_client_nodes), epoch=epoch)
 
         print('Metrics :')
+        print('--------------------------------')
         print('Average Epoch Loss = {}'.format(server.train_loss[-1]))
 
         val_acc, _ = infer(test_loader=server.val_loader, model=server.global_model)

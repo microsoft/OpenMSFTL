@@ -14,13 +14,13 @@ def _parse_args():
     parser.add_argument('--dev_split', type=float, default=0.1,
                         help='Provide train test split | '
                              'fraction of data used for training')
-    parser.add_argument('--batch_size', type=int, default=128,
+    parser.add_argument('--batch_size', type=int, default=100,
                         help='Training mini Batch Size')
     parser.add_argument('--do_sort', type=bool, default=False)
 
     # Network Params
-    parser.add_argument('--num_clients', type=int, default=50)
-    parser.add_argument('--frac_clients', type=float, default=1,
+    parser.add_argument('--num_clients', type=int, default=100)
+    parser.add_argument('--frac_clients', type=float, default=0.5,
                         help='For SGD pick frac of clients each round')
 
     # Attack Params
@@ -56,17 +56,17 @@ def _parse_args():
                         help='Pass the initial LR you want to use')
     parser.add_argument('--lrs', type=str, default='step',
                         help='Pass the LR Scheduler you want to use')
-    parser.add_argument('--reg', type=str, default=0.005,
+    parser.add_argument('--reg', type=str, default=0.1,
                         help='Pass regularization co-efficient')
     parser.add_argument('--drop_p', type=float, default=0.5,
                         help='Prob dropout model weights')
     parser.add_argument('--momentum', type=float, default=0.9,
                         help='Momentum')
-    parser.add_argument('--lr_decay_rate', type=int, default=1500,
+    parser.add_argument('--lr_decay_rate', type=int, default=10000,
                         help='check optim _get_lr')
     parser.add_argument('--lr_restart', type=int, default=100)
     # Training params
-    parser.add_argument('--num_total_epoch', type=int, default=1000,
+    parser.add_argument('--num_total_epoch', type=int, default=10000,
                         help='Number of Global Epochs')
     parser.add_argument('--num_comm_round', type=int, default=1000,
                         help='Number of Server Client Communication Round')

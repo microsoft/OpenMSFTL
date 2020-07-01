@@ -25,14 +25,15 @@ class Client:
         self.compression_operator = compression_operator
 
         self.local_train_data = None
-        # self.train_iter = None
 
         self.grad = None
 
-    def train_step(self, lr, reg, iterations):
+    def client_step(self, lr, reg, momentum):
         opt = Optimization(model=self.learner,
-                           lr0=lr,
-                           reg=reg).optimizer
+                           lr=lr,
+                           reg=reg,
+                           momentum=momentum).optimizer
+
         self.trainer.train(model=self.learner,
                            optimizer=opt)
         # Now, we must have done iterations number of gradient steps

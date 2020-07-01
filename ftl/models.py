@@ -25,11 +25,12 @@ def get_model(args, dim_out: int):
 
 
 class MLP(nn.Module):
-    def __init__(self, dim_in, dim_out, dim_hidden1=100, dim_hidden2=50, p=0.5):
+    def __init__(self, dim_in, dim_out, dim_hidden1=300, dim_hidden2=100, p=0.5):
         super(MLP, self).__init__()
         self.fc_in = nn.Linear(dim_in, dim_hidden1)
         nn.init.xavier_uniform_(self.fc_in.weight)
         self.fc_hidden = nn.Linear(dim_hidden1, dim_hidden2)
+        nn.init.xavier_uniform_(self.fc_hidden.weight)
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(p=p)
         self.fc_out = nn.Linear(dim_hidden2, dim_out)

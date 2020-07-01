@@ -1,5 +1,6 @@
 from ftl.trainer import Trainer
 from ftl.optimization import Optimization
+from ftl.compression import Compression
 import numpy as np
 
 
@@ -11,7 +12,7 @@ class Client:
                  attack_model=None,
                  stochastic_attack=False,
                  stochastic_attack_prob=0.8,
-                 compression_operator='full'):
+                 C: Compression = None):
 
         self.client_id = client_id
         self.trainer = Trainer()
@@ -22,7 +23,7 @@ class Client:
         self.stochastic_attack = stochastic_attack  # will this node be consistently byzantine ?
         self.attack_prob = stochastic_attack_prob
 
-        self.compression_operator = compression_operator
+        self.C = C
 
         self.local_train_data = None
 
@@ -36,8 +37,10 @@ class Client:
 
         self.trainer.train(model=self.learner,
                            optimizer=opt)
-        # Now, we must have done iterations number of gradient steps
+        # Accumulate the gradient learnt
         self.grad = np.concatenate([param.grad.data.cpu().numpy().flatten() for param in self.learner.parameters()])
+        # now we can apply the compression operator before passing to Server
+        self.grad = self.C.compress(w=self.grad)
 
 
 

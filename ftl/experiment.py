@@ -51,10 +51,10 @@ def run_exp(args):
     for client in clients:
         client.learner = copy.deepcopy(model_net)
         client.trainer.train_iter = iter(cycle(client.local_train_data))
-        client.compression_operator = Compression(num_bits=args.num_bits,
-                                                  compression_function=args.compression_operator,
-                                                  dropout_p=args.dropout_p,
-                                                  fraction_coordinates=args.frac_coordinates)
+        client.C = Compression(num_bits=args.num_bits,
+                               compression_function=args.compression_operator,
+                               dropout_p=args.dropout_p,
+                               fraction_coordinates=args.frac_coordinates)
 
     # **** Set up Server (Master Node)  ****
     # ---------------------------------------

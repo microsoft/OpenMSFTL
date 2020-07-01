@@ -39,7 +39,7 @@ def _parse_args():
                              'Options: full, top, rand, svd, qsgd_biased, '
                              'qsgd_unbiased, sign, dropout_biased, dropout_unbiased')
     parser.add_argument('--num_bits', type=int, default=2)
-    parser.add_argument('--frac_coordinates', type=float, default=0.1)
+    parser.add_argument('--frac_coordinates', type=float, default=0.5)
     parser.add_argument('--dropout_p', type=float, default=0.1)
 
     # Model Params
@@ -56,7 +56,7 @@ def _parse_args():
                         help='Pass the initial LR you want to use')
     parser.add_argument('--lrs', type=str, default='step',
                         help='Pass the LR Scheduler you want to use')
-    parser.add_argument('--reg', type=str, default=0.1,
+    parser.add_argument('--reg', type=str, default=0.05,
                         help='Pass regularization co-efficient')
     parser.add_argument('--drop_p', type=float, default=0.5,
                         help='Prob dropout model weights')
@@ -66,7 +66,7 @@ def _parse_args():
                         help='check optim _get_lr')
     parser.add_argument('--lr_restart', type=int, default=100)
     # Training params
-    parser.add_argument('--num_total_epoch', type=int, default=10000,
+    parser.add_argument('--num_total_epoch', type=int, default=500,
                         help='Number of Global Epochs')
     parser.add_argument('--num_comm_round', type=int, default=1000,
                         help='Number of Server Client Communication Round')

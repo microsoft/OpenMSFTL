@@ -5,24 +5,21 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class Trainer:
     def __init__(self):
         self.epoch_losses = []
+        self.train_iter = None
 
-    def train(self, data, model, optimizer, epochs=1):
+    def train(self, model, optimizer):
         model = model.to(device)
         model.train()
 
-        for epoch in range(1, epochs+1):
-            epoch_loss = 0
-            for batch_idx, (x, y) in enumerate(data):
-                x, y = x.float(), y
-                x, y = x.to(device), y.to(device)
-
-                optimizer.zero_grad()
-                y_hat = model(x)
-                loss = torch.nn.functional.cross_entropy(y_hat, y)
-                loss.backward()
-                optimizer.step()
-                epoch_loss += loss.item()
-            self.epoch_losses.append(epoch_loss/(batch_idx+1))
+        x, y = next(self.train_iter)
+        x, y = x.float(), y
+        x, y = x.to(device), y.to(device)
+        y_hat = model(x)
+        optimizer.zero_grad()
+        loss = torch.nn.functional.cross_entropy(y_hat, y)
+        loss.backward()
+        self.epoch_losses.append(loss)
+        # optimizer.step()
 
 
 def infer(test_loader, model):
@@ -41,3 +38,9 @@ def infer(test_loader, model):
     test_loss /= len(test_loader.dataset)
     accuracy = 100. * correct / len(test_loader.dataset)
     return accuracy, test_loss
+
+
+def cycle(iterable):
+    while True:
+        for x in iterable:
+            yield x

@@ -25,7 +25,7 @@ def get_model(args, dim_out: int):
 
 
 class MLP(nn.Module):
-    def __init__(self, dim_in, dim_out, dim_hidden=64):
+    def __init__(self, dim_in, dim_out, dim_hidden=300):
         super(MLP, self).__init__()
         self.fc_in = nn.Linear(dim_in, dim_hidden)
         nn.init.xavier_uniform_(self.fc_in.weight)

@@ -2,7 +2,7 @@ from ftl.data_reader import DataReader
 from ftl.client import Client
 from ftl.server import Server
 from ftl.models import get_model
-from ftl.trainer import infer
+from ftl.trainer import infer, cycle
 from ftl.compression import Compression
 import copy
 import random
@@ -50,6 +50,7 @@ def run_exp(args):
     # Also pass instances of compression operator
     for client in clients:
         client.learner = copy.deepcopy(model_net)
+        client.trainer.train_iter = iter(cycle(client.local_train_data))
         client.compression_operator = Compression(num_bits=args.num_bits,
                                                   compression_function=args.compression_operator,
                                                   dropout_p=args.dropout_p,

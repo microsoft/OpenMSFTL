@@ -25,6 +25,7 @@ class Client:
         self.compression_operator = compression_operator
 
         self.local_train_data = None
+        # self.train_iter = None
 
         self.grad = None
 
@@ -32,35 +33,11 @@ class Client:
         opt = Optimization(model=self.learner,
                            lr0=lr,
                            reg=reg).optimizer
-        self.trainer.train(data=self.local_train_data,
-                           model=self.learner,
-                           optimizer=opt,
-                           epochs=iterations)
+        self.trainer.train(model=self.learner,
+                           optimizer=opt)
         # Now, we must have done iterations number of gradient steps
         self.grad = np.concatenate([param.grad.data.cpu().numpy().flatten() for param in self.learner.parameters()])
 
-    # def byzantine_update(self, w):
-    #     # Flip a coin and decide whether to apply noise using the
-    #     # stochastic attack probability
-    #     # This ensures that the node while being byzantine has some
-    #     # stochasticity i.e. it doesn't act as byzantine all the time
-    #     if np.random.random_sample() > self.attack_prob:
-    #         return w
-    #
-    #     if self.attack_model == 'gaussian':
-    #         return self._gaussian_byzantine(w=w)
-    #     else:
-    #         raise NotImplementedError
-    #
-    # @staticmethod
-    # def _gaussian_byzantine(w):
-    #     w_attacked = copy.deepcopy(w)
-    #     if type(w_attacked) == list:
-    #         for k in range(len(w_attacked)):
-    #             noise = torch.randn(w[k].shape).to(device) * w_attacked[k].to(device)
-    #             w_attacked[k] += noise
-    #     else:
-    #         for k in w_attacked.keys():
-    #             noise = torch.randn(w[k].shape).to(device) * w_attacked[k].to(device)
-    #             w_attacked[k] += noise
-    #     return w_attacked
+
+
+

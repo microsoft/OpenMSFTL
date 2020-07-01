@@ -42,6 +42,6 @@ class Optimization:
     #         raise NotImplementedError
 
 
-def _get_lr(current_lr, epoch, decay_rate: int = 100):
-    lr = current_lr * decay_rate / (epoch + decay_rate)
+def _get_lr(current_lr, epoch, decay_rate: int = 10000):
+    lr = current_lr * decay_rate / (epoch - 1 + decay_rate)
     return lr

@@ -34,7 +34,7 @@ def _parse_args():
     parser.add_argument('--agg', type=str, default='fed_avg',
                         help='Specify Aggregation/ Defence Rule. '
                              'Options: fed_avg, krum, trimmed_mean, bulyan')
-    parser.add_argument('--compression_operator', type=str, default='full',
+    parser.add_argument('--compression_operator', type=str, default='rand',
                         help='Specify Aggregation Rule,'
                              'Options: full, top, rand, svd, qsgd_biased, '
                              'qsgd_unbiased, sign, dropout_biased, dropout_unbiased')

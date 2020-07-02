@@ -12,22 +12,27 @@ class Compression:
         self.dropout_p = dropout_p
 
     def compress(self, w):
+
         if self.compression_function == 'full':
+            """ Implements no compression i.e. returns full precision i.e all co-ordinates """
             return w
+
         elif self.compression_function == 'top':
+            """ Retains only top k highest co-ordinates (in a norm sense) sets rest to zero """
             q = np.zeros_like(w)
             k = round(self.fraction_coordinates * q.shape[0])
-            for i in range(0, q.shape[1]):
-                indexes = np.argsort(np.abs(w[:, i]))[::-1]
-                q[indexes[:k], i] = w[indexes[:k], i]
+            indices = np.argsort(np.abs(w))[::-1][:k]
+            q[indices] = w[indices]
             return q
+
         elif self.compression_function == 'rand':
+            """ Randomly chooses k co-ordinates to retain and set remaining to zero """
             q = np.zeros_like(w)
             k = round(self.fraction_coordinates * q.shape[0])
-            for i in range(0, q.shape[1]):
-                perm_i = np.random.permutation(q.shape[0])
-                q[perm_i[0:k], i] = w[perm_i[0:k], i]
+            indices = np.random.permutation(q.shape[0])[:k]
+            q[indices] = w[indices]
             return q
+
         elif self.compression_function == 'dropout-biased':
             q = np.zeros_like(w)
             p = self.dropout_p
@@ -35,6 +40,7 @@ class Compression:
                 bin_i = np.random.binomial(1, p, (q.shape[0],))
                 q[:, i] = w[:, i] * bin_i
             return q
+
         elif self.compression_function == 'dropout-unbiased':
             q = np.zeros_like(w)
             p = self.dropout_p
@@ -42,6 +48,7 @@ class Compression:
                 bin_i = np.random.binomial(1, p, (q.shape[0],))
                 q[:, i] = w[:, i] * bin_i
             return q / p
+
         elif self.compression_function == 'qsgd':
             q = np.zeros_like(w)
             bits = self.num_bits
@@ -53,5 +60,6 @@ class Compression:
                 q[:, i] = ((np.sign(x_i) * np.linalg.norm(x_i))/(s*tau)) * \
                           np.floor((s*np.abs(x_i)/np.linalg.norm(x_i)) + unif_i)
             return q
+
         else:
             raise NotImplementedError

@@ -28,6 +28,7 @@ class Client:
         self.local_train_data = None
 
         self.grad = None
+        self.params = None
 
     def client_step(self, lr, reg, momentum):
         opt = Optimization(model=self.learner,
@@ -38,7 +39,8 @@ class Client:
         self.trainer.train(model=self.learner,
                            optimizer=opt)
         # Accumulate the gradient learnt
-        self.grad = np.concatenate([param.grad.data.cpu().numpy().flatten() for param in self.learner.parameters()])
+        self.params = self.learner.parameters()
+        self.grad =
         # now we can apply the compression operator before passing to Server
         self.grad = self.C.compress(w=self.grad)
 

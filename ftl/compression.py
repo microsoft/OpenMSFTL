@@ -12,7 +12,7 @@ class Compression:
         self.dropout_p = dropout_p
 
     def compress(self, w):
-
+        grad = np.concatenate([param.grad.data.cpu().numpy().flatten() for param in self.params])
         if self.compression_function == 'full':
             """ Implements no compression i.e. returns full precision i.e all co-ordinates """
             return w
@@ -34,19 +34,18 @@ class Compression:
             return q
 
         elif self.compression_function == 'dropout-biased':
+            """ Retain each co-ordinate with a probability p """
             q = np.zeros_like(w)
             p = self.dropout_p
-            for i in range(0, q.shape[1]):
-                bin_i = np.random.binomial(1, p, (q.shape[0],))
-                q[:, i] = w[:, i] * bin_i
+            bin_trials = np.random.binomial(1, p, (q.shape[0],))
+            q = w * bin_trials
             return q
 
         elif self.compression_function == 'dropout-unbiased':
             q = np.zeros_like(w)
             p = self.dropout_p
-            for i in range(0, q.shape[1]):
-                bin_i = np.random.binomial(1, p, (q.shape[0],))
-                q[:, i] = w[:, i] * bin_i
+            bin_trials = np.random.binomial(1, p, (q.shape[0],))
+            q = w * bin_trials
             return q / p
 
         elif self.compression_function == 'qsgd':

@@ -14,13 +14,13 @@ def _parse_args():
     parser.add_argument('--dev_split', type=float, default=0.1,
                         help='Provide train test split | '
                              'fraction of data used for training')
-    parser.add_argument('--batch_size', type=int, default=100,
+    parser.add_argument('--batch_size', type=int, default=128,
                         help='Training mini Batch Size')
     parser.add_argument('--do_sort', type=bool, default=False)
 
     # Network Params
     parser.add_argument('--num_clients', type=int, default=100)
-    parser.add_argument('--frac_clients', type=float, default=0.5,
+    parser.add_argument('--frac_clients', type=float, default=1,
                         help='For SGD pick frac of clients each round')
 
     # Attack Params
@@ -34,7 +34,7 @@ def _parse_args():
     parser.add_argument('--agg', type=str, default='fed_avg',
                         help='Specify Aggregation/ Defence Rule. '
                              'Options: fed_avg, krum, trimmed_mean, bulyan')
-    parser.add_argument('--compression_operator', type=str, default='rand',
+    parser.add_argument('--compression_operator', type=str, default='full',
                         help='Specify Aggregation Rule,'
                              'Options: full, top, rand, svd, qsgd_biased, '
                              'qsgd_unbiased, sign, dropout_biased, dropout_unbiased')
@@ -52,11 +52,11 @@ def _parse_args():
     # Opt Params
     parser.add_argument('--opt', type=str, default='SGD',
                         help='Pass the Optimizer you want to use')
-    parser.add_argument('--lr0', type=float, default=1,
+    parser.add_argument('--lr0', type=float, default=2,
                         help='Pass the initial LR you want to use')
     parser.add_argument('--lrs', type=str, default='step',
                         help='Pass the LR Scheduler you want to use')
-    parser.add_argument('--reg', type=str, default=0.05,
+    parser.add_argument('--reg', type=str, default=0.005,
                         help='Pass regularization co-efficient')
     parser.add_argument('--drop_p', type=float, default=0.5,
                         help='Prob dropout model weights')
@@ -64,7 +64,7 @@ def _parse_args():
                         help='Momentum')
     parser.add_argument('--lr_decay_rate', type=int, default=10000,
                         help='check optim _get_lr')
-    parser.add_argument('--lr_restart', type=int, default=100)
+    parser.add_argument('--lr_restart', type=int, default=1000)
     # Training params
     parser.add_argument('--num_total_epoch', type=int, default=500,
                         help='Number of Global Epochs')
@@ -84,9 +84,10 @@ if __name__ == '__main__':
     args = _parse_args()
     print(args)
 
-    result_file = 'num_clients_' + str(args.num_clients) + '.frac_adv_' + str(args.frac_clients) +\
+    result_file = 'clients_' + str(args.num_clients) + '.frac_adv_' + str(args.frac_clients) +\
                   '.attack_mode_' + args.attack_mode + '.attack_model_' + args.attack_model +\
-                  '.agg_' + args.agg
+                  '.agg_' + args.agg + '.c_' + args.compression_operator + '.fc_' + args.frac_coordinates +\
+                  '.nb_' + args.num_bits + '.dp_' + args.dropout_p
     if not args.o:
         directory = "results/" + args.data_set + "/" + args.m + "/"
     else:

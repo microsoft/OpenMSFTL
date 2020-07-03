@@ -41,7 +41,7 @@ class Client:
         # Accumulate the gradient learnt
         self.params = self.learner.parameters()
         # now we can apply the compression operator ('full' is no compression) before passing to Server
-        self.grad = self.C.compress(w=self.grad)
+        self.grad = self.C.compress(w=self.params)
 
 
 

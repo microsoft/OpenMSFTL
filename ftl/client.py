@@ -36,11 +36,12 @@ class Client:
                                     ).optimizer
 
         self.trainer.train(model=self.learner,
-                           optimizer=opt)  # TODO: change this naive way since keeping the graph consumes a lot of meomry
+                           optimizer=opt)
+        # TODO: change this naive way since keeping the graph consumes a lot of meomry
         # Accumulate the gradient learnt
         self.grad = np.concatenate([param.grad.data.cpu().numpy().flatten() for param in self.learner.parameters()])
         # now we can apply the compression operator before passing to Server
-        self.grad = self.C.compress(w=self.grad)
+#        self.grad = self.C.compress(w=self.grad)
 
 
 

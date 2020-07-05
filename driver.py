@@ -20,7 +20,7 @@ def _parse_args():
 
     # Network Params
     parser.add_argument('--num_clients', type=int, default=100)
-    parser.add_argument('--frac_clients', type=float, default=1,
+    parser.add_argument('--frac_clients', type=float, default=0.5,
                         help='For SGD pick frac of clients each round')
 
     # Attack Params
@@ -39,7 +39,7 @@ def _parse_args():
                              'Options: full, top, rand, svd, qsgd_biased, '
                              'qsgd_unbiased, sign, dropout_biased, dropout_unbiased')
     parser.add_argument('--num_bits', type=int, default=2)
-    parser.add_argument('--frac_coordinates', type=float, default=0.1)
+    parser.add_argument('--frac_coordinates', type=float, default=0.5)
     parser.add_argument('--dropout_p', type=float, default=0.1)
 
     # Model Params
@@ -50,25 +50,27 @@ def _parse_args():
     parser.add_argument('--num_channels', type=int, default=1,
                         help='num of image channels')
     # Opt Params
+    parser.add_argument('--server_opt', type=str, default='Adam',
+                        help='Name of the federated optimizer: "None", "SGD" or "Adam"')
     parser.add_argument('--opt', type=str, default='SGD',
                         help='Pass the Optimizer you want to use')
-    parser.add_argument('--lr0', type=float, default=1,
+    parser.add_argument('--lr0', type=float, default=0.002,
                         help='Pass the initial LR you want to use')
     parser.add_argument('--lrs', type=str, default='step',
                         help='Pass the LR Scheduler you want to use')
-    parser.add_argument('--reg', type=str, default=0.005,
+    parser.add_argument('--reg', type=str, default=0.05,
                         help='Pass regularization co-efficient')
     parser.add_argument('--drop_p', type=float, default=0.5,
                         help='Prob dropout model weights')
     parser.add_argument('--momentum', type=float, default=0.9,
                         help='Momentum')
-    parser.add_argument('--lr_decay_rate', type=int, default=1000,
+    parser.add_argument('--lr_decay_rate', type=int, default=10000,
                         help='check optim _get_lr')
     parser.add_argument('--lr_restart', type=int, default=100)
     # Training params
-    parser.add_argument('--num_total_epoch', type=int, default=1000,
+    parser.add_argument('--num_total_epoch', type=int, default=500,
                         help='Number of Global Epochs')
-    parser.add_argument('--num_comm_round', type=int, default=1000,
+    parser.add_argument('--num_comm_round', type=int, default=2048,
                         help='Number of Server Client Communication Round')
 
     # Results Related Params
@@ -84,10 +86,9 @@ if __name__ == '__main__':
     args = _parse_args()
     print(args)
 
-    result_file = 'clients_' + str(args.num_clients) + '.frac_adv_' + str(args.frac_clients) +\
+    result_file = 'num_clients_' + str(args.num_clients) + '.frac_adv_' + str(args.frac_clients) +\
                   '.attack_mode_' + args.attack_mode + '.attack_model_' + args.attack_model +\
-                  '.agg_' + args.agg + '.c_' + args.compression_operator + '.fc_' + str(args.frac_coordinates) +\
-                  '.nb_' + str(args.num_bits) + '.dp_' + str(args.dropout_p)
+                  '.agg_' + args.agg
     if not args.o:
         directory = "results/" + args.data_set + "/" + args.m + "/"
     else:

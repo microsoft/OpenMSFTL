@@ -58,8 +58,9 @@ def run_exp(args):
 
     # **** Set up Server (Master Node)  ****
     # ---------------------------------------
-    server = Server(args=args,
+    server = Server(args=args,  # TODO: Pass the minimum set of parameters instead of this lazy way
                     aggregation_scheme=args.agg,
+                    optimizer_scheme=args.server_opt,
                     clients=clients,
                     model=copy.deepcopy(model_net),
                     val_loader=data_reader.val_loader,
@@ -83,11 +84,11 @@ def run_exp(args):
         print('--------------------------------')
         print('Average Epoch Loss = {}'.format(server.train_loss[-1]))
 
-        val_acc, _ = infer(test_loader=server.val_loader, model=server.global_model)
+        val_acc, _ = infer(test_loader=server.val_loader, model=server.get_global_model())
         print("Validation Accuracy = {}".format(val_acc))
         server.val_acc.append(val_acc)
 
-        test_acc, _ = infer(test_loader=server.test_loader, model=server.global_model)
+        test_acc, _ = infer(test_loader=server.test_loader, model=server.get_global_model())
         server.test_acc.append(test_acc)
         print("Test Accuracy = {}".format(test_acc))
 
@@ -95,7 +96,6 @@ def run_exp(args):
         plt.title('MLP', fontsize=14)
         plt.legend(fontsize=11)
         plt.plot(server.train_loss)
-        plt.grid(axis='both')
         plt.show()
 
     return server.train_loss, server.test_acc

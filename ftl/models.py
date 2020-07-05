@@ -13,6 +13,33 @@ def dist_weights_to_model(weights, parameters):
         offset += new_size
 
 
+def add_grads_to_model(grads, parameters, init=True):
+    """
+    Adding gradient values to those contained in the model parameter.
+
+    :param grads: gradient
+    :type grads: class:`ftl.Client`.grad
+    :param parameters: model parameter container
+    :type parameters: class:`nn.Module`.parameters()
+    :param int: whether you want to add gradient or just initialize the value
+    :type init: boolean
+    """
+    offset = 0
+    for param in parameters:
+        new_size = functools.reduce(lambda x, y: x*y, param.shape)
+        current_data = grads[offset:offset + new_size]
+
+        if init is True:
+            param.grad = torch.from_numpy(current_data.reshape(param.shape))
+        else:
+            param.grad += torch.from_numpy(current_data.reshape(param.shape))
+
+        if torch.cuda.is_available():
+            param.grad = param.grad.cuda()
+
+        offset += new_size
+
+
 def get_model(args, dim_out: int):
     if args.m == 'mlp':
         model = MLP(dim_in=args.dim_in, dim_out=dim_out, p=args.drop_p)
@@ -25,7 +52,7 @@ def get_model(args, dim_out: int):
 
 
 class MLP(nn.Module):
-    def __init__(self, dim_in, dim_out, dim_hidden1=150, dim_hidden2=100, p=0.5):
+    def __init__(self, dim_in, dim_out, dim_hidden1=300, dim_hidden2=100, p=0.5):
         super(MLP, self).__init__()
         self.fc_in = nn.Linear(dim_in, dim_hidden1)
         nn.init.xavier_uniform_(self.fc_in.weight)

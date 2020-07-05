@@ -1,5 +1,5 @@
 from ftl.trainer import Trainer
-from ftl.optimization import Optimization
+from ftl.optimization import SchedulingOptimizater
 from ftl.compression import Compression
 import numpy as np
 
@@ -28,20 +28,19 @@ class Client:
         self.local_train_data = None
 
         self.grad = None
-        self.params = None
 
-    def client_step(self, lr, reg, momentum):
-        opt = Optimization(model=self.learner,
-                           lr=lr,
-                           reg=reg,
-                           momentum=momentum).optimizer
+    def client_step(self, opt_alg, opt_group):
+        opt = SchedulingOptimizater(model=self.learner,
+                                    opt_alg=opt_alg,
+                                    opt_group=opt_group
+                                    ).optimizer
 
         self.trainer.train(model=self.learner,
-                           optimizer=opt)
+                           optimizer=opt)  # TODO: change this naive way since keeping the graph consumes a lot of meomry
         # Accumulate the gradient learnt
-        self.params = self.learner.parameters()
-        # now we can apply the compression operator ('full' is no compression) before passing to Server
-        self.grad = self.C.compress(w=self.params)
+        self.grad = np.concatenate([param.grad.data.cpu().numpy().flatten() for param in self.learner.parameters()])
+        # now we can apply the compression operator before passing to Server
+        self.grad = self.C.compress(w=self.grad)
 
 
 

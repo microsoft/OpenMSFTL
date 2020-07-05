@@ -14,7 +14,7 @@ def _parse_args():
     parser.add_argument('--dev_split', type=float, default=0.1,
                         help='Provide train test split | '
                              'fraction of data used for training')
-    parser.add_argument('--batch_size', type=int, default=128,
+    parser.add_argument('--batch_size', type=int, default=100,
                         help='Training mini Batch Size')
     parser.add_argument('--do_sort', type=bool, default=False)
 
@@ -52,7 +52,7 @@ def _parse_args():
     # Opt Params
     parser.add_argument('--opt', type=str, default='SGD',
                         help='Pass the Optimizer you want to use')
-    parser.add_argument('--lr0', type=float, default=2,
+    parser.add_argument('--lr0', type=float, default=1,
                         help='Pass the initial LR you want to use')
     parser.add_argument('--lrs', type=str, default='step',
                         help='Pass the LR Scheduler you want to use')
@@ -62,11 +62,11 @@ def _parse_args():
                         help='Prob dropout model weights')
     parser.add_argument('--momentum', type=float, default=0.9,
                         help='Momentum')
-    parser.add_argument('--lr_decay_rate', type=int, default=10000,
+    parser.add_argument('--lr_decay_rate', type=int, default=1000,
                         help='check optim _get_lr')
-    parser.add_argument('--lr_restart', type=int, default=1000)
+    parser.add_argument('--lr_restart', type=int, default=100)
     # Training params
-    parser.add_argument('--num_total_epoch', type=int, default=500,
+    parser.add_argument('--num_total_epoch', type=int, default=1000,
                         help='Number of Global Epochs')
     parser.add_argument('--num_comm_round', type=int, default=1000,
                         help='Number of Server Client Communication Round')
@@ -86,8 +86,8 @@ if __name__ == '__main__':
 
     result_file = 'clients_' + str(args.num_clients) + '.frac_adv_' + str(args.frac_clients) +\
                   '.attack_mode_' + args.attack_mode + '.attack_model_' + args.attack_model +\
-                  '.agg_' + args.agg + '.c_' + args.compression_operator + '.fc_' + args.frac_coordinates +\
-                  '.nb_' + args.num_bits + '.dp_' + args.dropout_p
+                  '.agg_' + args.agg + '.c_' + args.compression_operator + '.fc_' + str(args.frac_coordinates) +\
+                  '.nb_' + str(args.num_bits) + '.dp_' + str(args.dropout_p)
     if not args.o:
         directory = "results/" + args.data_set + "/" + args.m + "/"
     else:

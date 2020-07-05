@@ -28,5 +28,5 @@ class Optimization:
 
 
 def _get_lr(current_lr, epoch, lr_decay_rate: int = 100):
-    lr = current_lr * lr_decay_rate / (epoch - 1 + lr_decay_rate)
+    lr = current_lr * lr_decay_rate / ((epoch - 1)/10 + lr_decay_rate)
     return lr

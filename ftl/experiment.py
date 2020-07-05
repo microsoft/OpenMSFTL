@@ -95,6 +95,7 @@ def run_exp(args):
         plt.title('MLP', fontsize=14)
         plt.legend(fontsize=11)
         plt.plot(server.train_loss)
+        plt.grid(axis='both')
         plt.show()
 
     return server.train_loss, server.test_acc

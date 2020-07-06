@@ -11,11 +11,12 @@ class Compression:
         self.fraction_coordinates = fraction_coordinates
         self.dropout_p = dropout_p
 
-    def compress(self, w, layer_wise=False):
+    def compress(self, grad, layer_wise=False):
         if layer_wise:
             raise NotImplementedError
-        else:
-            grad = np.concatenate([param.grad.data.cpu().numpy().flatten() for param in w])
+
+        # else:
+        #    grad = np.concatenate([param.grad.data.cpu().numpy().flatten() for param in w])
 
         if self.compression_function == 'full':
             """ Implements no compression i.e. returns full precision i.e all co-ordinates """

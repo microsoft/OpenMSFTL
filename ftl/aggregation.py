@@ -1,5 +1,4 @@
 import numpy as np
-import torch
 import torch.nn as nn
 from ftl.models import dist_weights_to_model, add_grads_to_model
 from ftl.optimization import SchedulingOptimization
@@ -32,8 +31,8 @@ class Aggregator:
         :param max_grad_norm: max norm of the gradients for gradient clipping, default to None
         :type max_grad_norm: float
         """
-        self.agg_strategy  = agg_strategy
-        self.model         = model
+        self.agg_strategy = agg_strategy
+        self.model = model
         # Instantiate the optimizer for an aggregator
         if opt_alg is None or opt_alg == "None":  # simple model averaging
             self.optimizer = None
@@ -46,7 +45,7 @@ class Aggregator:
             self.lr_scheduler = sopt.lr_scheduler
 
         self.max_grad_norm = max_grad_norm
-        self.w_current     = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
+        self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
 
     def set_lr(self, current_lr):
         if self.optimizer is not None:
@@ -57,6 +56,7 @@ class Aggregator:
         """
         Update a model with aggregated gradients
 
+        :param current_lr:
         :param clients: A set of client compute nodes
         :type clients: list of class:`ftl.Client`
         :return: The weights of the updated global model
@@ -64,7 +64,7 @@ class Aggregator:
 
         if self.agg_strategy is 'fed_avg':
             if self.optimizer is None:  # perform the simplified FEDAVG
-                client_grads  = np.empty((len(clients), len(self.w_current)), dtype=self.w_current.dtype)
+                client_grads = np.empty((len(clients), len(self.w_current)), dtype=self.w_current.dtype)
                 for ix, client in enumerate(clients):
                     client_grads[ix, :] = client.grad
 
@@ -78,11 +78,12 @@ class Aggregator:
                     self.set_lr(current_lr)
                 # set gradients to the model instance
                 for ix, client in enumerate(clients):
-                    add_grads_to_model(grads=client.grad, parameters=self.model.parameters(), init=True if ix==0 else False)
+                    add_grads_to_model(grads=client.grad, parameters=self.model.parameters(),
+                                       init=True if ix == 0 else False)
                 # apply gradient clipping
                 if self.max_grad_norm is not None:
                     grad_norm = nn.utils.clip_grad_norm_(self.model.parameters(),
-                                                        self.max_grad_norm)
+                                                         self.max_grad_norm)
 
                 # do optimizer step
                 self.optimizer.step()

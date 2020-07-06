@@ -9,13 +9,15 @@ class Aggregator:
     This class updates a global model with gradients aggregated from clients and
     keeps track of the model object and weights.
 
-    This implements the following federated optimization algorithms:
-    1. Simple FedAvg aggregation as introduced in:
-        McMahan et al., "Communication-Efficient Learning of Deep Networks from Decentralized Data",
-        http://proceedings.mlr.press/v54/mcmahan17a/mcmahan17a.pdf
-    2. Federated dual optimization described in:
-        D. Dimitriadis et al., "On a Federated Approach for Training Acoustic Models ", Interspeech 2021 and
-        S. J. Reddi et al., "Adaptive Federated Optimization", arXiv:2003.00295
+    This implements the following aggregation algorithmss:
+    1. FedAvg :
+    -------------------
+        a.  Simple FedAvg aggregation as introduced in:
+            McMahan et al., "Communication-Efficient Learning of Deep Networks from Decentralized Data",
+            http://proceedings.mlr.press/v54/mcmahan17a/mcmahan17a.pdf
+        b.  Federated dual optimization described in:
+            D. Dimitriadis et al., "On a Federated Approach for Training Acoustic Models ", Interspeech 2021,
+            S. J. Reddi et al., "Adaptive Federated Optimization", arXiv:2003.00295
     """
 
     def __init__(self, agg_strategy, model, opt_alg=None, opt_group={}, max_grad_norm=None):
@@ -63,34 +65,42 @@ class Aggregator:
         """
 
         if self.agg_strategy is 'fed_avg':
-            if self.optimizer is None:  # perform the simplified FEDAVG
-                client_grads = np.empty((len(clients), len(self.w_current)), dtype=self.w_current.dtype)
-                for ix, client in enumerate(clients):
-                    client_grads[ix, :] = client.grad
-
-                lr = current_lr if current_lr is not None else 1.0
-                self.w_current -= lr * np.mean(client_grads, axis=0)
-                # update the model params with these weights
-                dist_weights_to_model(weights=self.w_current, parameters=self.model.parameters())
-            else:  # run an adaptive federated optimizer
-                # change the learning rate of the optimizer
-                if current_lr is not None:
-                    self.set_lr(current_lr)
-                # set gradients to the model instance
-                for ix, client in enumerate(clients):
-                    add_grads_to_model(grads=client.grad, parameters=self.model.parameters(),
-                                       init=True if ix == 0 else False)
-                # apply gradient clipping
-                if self.max_grad_norm is not None:
-                    grad_norm = nn.utils.clip_grad_norm_(self.model.parameters(),
-                                                         self.max_grad_norm)
-
-                # do optimizer step
-                self.optimizer.step()
-                self.optimizer.zero_grad()
-                # get the model weights
-                self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
+            self.w_current = self.fed_avg(clients=clients, current_lr=current_lr)
         else:
             raise NotImplementedError
-
         return self.w_current
+
+    def fed_avg(self, clients, current_lr: float):
+        if self.optimizer is None:
+            """ perform the Vanilla FedAvg """
+            client_grads = np.empty((len(clients), len(self.w_current)), dtype=self.w_current.dtype)
+            for ix, client in enumerate(clients):
+                client_grads[ix, :] = client.grad
+
+            lr = current_lr if current_lr is not None else 1.0
+            self.w_current -= lr * np.mean(client_grads, axis=0)
+            # update the model params with these weights
+            dist_weights_to_model(weights=self.w_current, parameters=self.model.parameters())
+
+        else:
+            """ Perform Dual Optimization """
+            # change the learning rate of the optimizer
+            if current_lr is not None:
+                self.set_lr(current_lr)
+            # set gradients to the model instance
+            for ix, client in enumerate(clients):
+                add_grads_to_model(grads=client.grad, parameters=self.model.parameters(),
+                                   init=True if ix == 0 else False)
+            # apply gradient clipping
+            if self.max_grad_norm is not None:
+                grad_norm = nn.utils.clip_grad_norm_(self.model.parameters(),
+                                                     self.max_grad_norm)
+
+            # do optimizer step
+            self.optimizer.step()
+            self.optimizer.zero_grad()
+
+            # get the model weights
+            w_current = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
+
+            return w_current

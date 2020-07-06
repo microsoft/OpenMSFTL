@@ -1,16 +1,15 @@
 from ftl.models import dist_weights_to_model, add_grads_to_model
 from ftl.optimization import SchedulingOptimization
+from ftl.client import Client
 import numpy as np
 import torch.nn as nn
-from typing import Dict
+from typing import Dict, List
 
 
 class Aggregator:
     """
     This class updates a global model with gradients aggregated from clients and
     keeps track of the model object and weights.
-
-
     """
 
     def __init__(self, agg_strategy: str,
@@ -21,7 +20,7 @@ class Aggregator:
         """
         :param agg_strategy: aggregation strategy, default to "fed_avg"
         :param model: class:`nn.Module`, the global model
-        :param dual_opt_alg: type of (adaptive) federated optimizer; see examples:  ftl/optimization.py
+        :param dual_opt_alg: type of (adaptive) Dual optimizer; see examples:  ftl/optimization.py
         :param opt_group: parameters for the optimizer; see details for ftl/optimization.py
         :param max_grad_norm: max norm of the gradients for gradient clipping, default to None
         """
@@ -51,13 +50,11 @@ class Aggregator:
             for param_group in self.optimizer.param_groups:
                 param_group['lr'] = current_lr
 
-    def update_model(self, clients, current_lr=None):
+    def update_model(self, clients: List[Client], current_lr: float = None) -> np.array:
         """
         Update a model with aggregated gradients
-
         :param current_lr:
         :param clients: A set of client compute nodes
-        :type clients: list of class:`ftl.Client`
         :return: The weights of the updated global model
         """
 

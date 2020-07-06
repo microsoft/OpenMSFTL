@@ -58,9 +58,9 @@ def run_exp(args):
 
     # **** Set up Server (Master Node)  ****
     # ---------------------------------------
-    server = Server(args=args,  # TODO: Pass the minimum set of parameters instead of this lazy way
-                    aggregation_scheme=args.agg,
+    server = Server(aggregation_scheme=args.agg,
                     optimizer_scheme=args.server_opt,
+                    server_config={"lr0":args.server_lr0, "lr_restart":args.lr_restart},
                     clients=clients,
                     model=copy.deepcopy(model_net),
                     val_loader=data_reader.val_loader,
@@ -78,7 +78,15 @@ def run_exp(args):
         # We update the weights of all client learners and set to server global params
         server.init_client_models()
         # sample fraction of clients who will participate in this round and kick off training
-        server.train_client_models(k=int(args.frac_clients * num_client_nodes), epoch=epoch)
+        server.train_client_models(k=int(args.frac_clients * num_client_nodes),
+                                   epoch=epoch,
+                                   client_config={'optimizer_scheme':args.opt,
+                                                  'lr': args.lr0 / 2 if epoch % args.lr_restart == 0 else args.lr0,
+                                                  'weight_decay':args.reg,
+                                                  'momentum':args.momentum,
+                                                  'num_batches':args.num_batches
+                                                 }
+                                )
 
         print('Metrics :')
         print('--------------------------------')

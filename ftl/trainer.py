@@ -19,7 +19,7 @@ class Trainer:
         loss = torch.nn.functional.cross_entropy(y_hat, y)
         loss.backward()
         self.epoch_losses.append(loss)
-        # optimizer.step()
+        optimizer.step()
 
 
 def infer(test_loader, model):

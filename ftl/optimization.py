@@ -84,11 +84,17 @@ class SchedulingOptimizater:
             return optim.lr_scheduler.StepLR(optimizer=self.optimizer,
                                              step_size=self.lrs_group.get('step_size', 1),
                                              gamma=self.lrs_group.get('gamma', 0.9))
+        elif self.lrs == 'MultiStepLR':
+            return optim.lr_scheduler.MultiStepLR(optimizer=self.optimizer,
+                                                  milestones=self.lrs_group.get('milestones', [100]),
+                                                  gamma=self.lrs_group.get('gamma', 0.5),
+                                                  last_epoch=self.lrs_group.get('last_epoch', -1))
         elif self.lrs is None:
             return None
         else:
             raise NotImplementedError
 
-    def get_lr(self):
-        for param_group in self.optimizer.param_groups:
-            return param_group['lr']
+
+def get_lr(optimizer):
+    for param_group in optimizer.param_groups:
+        return param_group['lr']

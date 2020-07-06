@@ -52,13 +52,15 @@ def _parse_args():
     # Opt Params
     parser.add_argument('--server_opt', type=str, default='Adam',
                         help='Name of the federated optimizer: "None", "SGD" or "Adam"')
+    parser.add_argument('--server_lr0', type=float, default=0.002,
+                        help='Pass the initial LR for the server optimizer')
     parser.add_argument('--opt', type=str, default='SGD',
                         help='Pass the Optimizer you want to use')
     parser.add_argument('--lr0', type=float, default=0.002,
                         help='Pass the initial LR you want to use')
     parser.add_argument('--lrs', type=str, default='step',
                         help='Pass the LR Scheduler you want to use')
-    parser.add_argument('--reg', type=str, default=0.05,
+    parser.add_argument('--reg', type=float, default=0.05,
                         help='Pass regularization co-efficient')
     parser.add_argument('--drop_p', type=float, default=0.5,
                         help='Prob dropout model weights')
@@ -67,6 +69,7 @@ def _parse_args():
     parser.add_argument('--lr_decay_rate', type=int, default=10000,
                         help='check optim _get_lr')
     parser.add_argument('--lr_restart', type=int, default=100)
+    parser.add_argument('--num_batches', type=int, default=1)
     # Training params
     parser.add_argument('--num_total_epoch', type=int, default=500,
                         help='Number of Global Epochs')

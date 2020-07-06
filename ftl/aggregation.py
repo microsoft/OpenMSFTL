@@ -37,13 +37,21 @@ class Aggregator:
         # Instantiate the optimizer for an aggregator
         if opt_alg is None or opt_alg == "None":  # simple model averaging
             self.optimizer = None
+            self.lr_scheduler = None
         else:  # dual optimization
-            self.optimizer = SchedulingOptimizater(model=model,
-                                                   opt_alg=opt_alg,
-                                                   opt_group=opt_group).optimizer
+            sopt = SchedulingOptimizater(model=model,
+                                         opt_alg=opt_alg,
+                                         opt_group=opt_group)
+            self.optimizer = sopt.optimizer
+            self.lr_scheduler = sopt.lr_scheduler
 
         self.max_grad_norm = max_grad_norm
         self.w_current     = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
+
+    def set_lr(self, current_lr):
+        if self.optimizer is not None:
+            for param_group in self.optimizer.param_groups:
+                param_group['lr'] = current_lr
 
     def update_model(self, clients, current_lr=None):
         """
@@ -67,8 +75,7 @@ class Aggregator:
             else:  # run an adaptive federated optimizer
                 # change the learning rate of the optimizer
                 if current_lr is not None:
-                    for param_group in self.optimizer.param_groups:
-                        param_group['lr'] = current_lr
+                    self.set_lr(current_lr)
                 # set gradients to the model instance
                 for ix, client in enumerate(clients):
                     add_grads_to_model(grads=client.grad, parameters=self.model.parameters(), init=True if ix==0 else False)

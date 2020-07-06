@@ -2,7 +2,7 @@ from ftl.trainer import Trainer
 from ftl.optimization import SchedulingOptimizater
 from ftl.compression import Compression
 import numpy as np
-
+import torch
 
 class Client:
     def __init__(self,
@@ -29,20 +29,21 @@ class Client:
 
         self.grad = None
 
-    def client_step(self, opt_alg, opt_group):
+    def client_step(self, opt_alg, opt_group, num_batches=1):
         opt = SchedulingOptimizater(model=self.learner,
                                     opt_alg=opt_alg,
                                     opt_group=opt_group
                                     ).optimizer
 
-        self.trainer.train(model=self.learner,
-                           optimizer=opt)
-        # TODO: change this naive way since keeping the graph consumes a lot of meomry
-        # Accumulate the gradient learnt
-        self.grad = np.concatenate([param.grad.data.cpu().numpy().flatten() for param in self.learner.parameters()])
+        src_model_weights = np.concatenate([w.data.cpu().numpy().flatten() for w in self.learner.parameters()])
+        # Reset gradient just in case
+        self.learner.zero_grad()
+        for bi in range(num_batches):
+            self.trainer.train(model=self.learner,
+                               optimizer=opt)
+        # compute the local gradient
+        dst_model_weights = np.concatenate([w.data.cpu().numpy().flatten() for w in self.learner.parameters()])
+        self.grad = src_model_weights - dst_model_weights
         # now we can apply the compression operator before passing to Server
-#        self.grad = self.C.compress(w=self.grad)
-
-
-
+        self.grad = self.C.compress(w=self.grad)
 

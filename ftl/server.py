@@ -1,4 +1,5 @@
 from ftl.client import Client
+from ftl.optimization import get_lr
 from ftl.models import dist_weights_to_model
 from ftl.aggregation import Aggregator
 from typing import List
@@ -8,15 +9,18 @@ import random
 
 class Server:
     def __init__(self,
-                 args,
                  model,
                  aggregation_scheme='fed_avg',
                  optimizer_scheme=None,
+                 server_config={"lr0":1.0, "lr_restart":100},
                  clients: List[Client] = None,
                  val_loader=None,
                  test_loader=None):
 
-        self.args = args  # TODO: Pass the minimum set of parameters instead of this lazy way
+        # keep server parameters
+        self.server_lr0 = server_config["lr0"]
+        self.server_lr_restart = server_config["lr_restart"]
+        self.num_rounds = 0
 
         # Server has access to Test and Dev Data Sets to evaluate Training Process
         self.val_loader = val_loader
@@ -24,7 +28,7 @@ class Server:
 
         # Server has a pointer to all clients
         self.clients = clients
-        self.current_lr = args.lr0
+        self.current_lr = self.server_lr0
         # Aggregator tracks the model and optimizer
         self.aggregator = Aggregator(agg_strategy=aggregation_scheme,
                                      model=model,
@@ -51,20 +55,27 @@ class Server:
             # client.w_init = copy.deepcopy(self.w_current)
             dist_weights_to_model(weights=self.w_current, parameters=client.learner.parameters())
 
-    def _update_lr(self, epoch):
-        # TODO: This should be replaced with optim.lr_scheduler
-        if epoch % self.args.lr_restart == 0:
-            self.current_lr = self.args.lr0/2
+    def _update_server_lr(self):
+        if self.num_rounds % self.server_lr_restart == 0:
+            self.current_lr = self.server_lr0/2
+            self.aggregator.set_lr(self.current_lr)
 
-        # Commented this out snce it does not work. self.current_lr = self.current_lr * args.lr_decay_rate / (epoch - 1 + args.lr_decay_rate)
+        # take a step in lr_scheduler
+        if self.aggregator.lr_scheduler is not None:
+            self.aggregator.lr_scheduler.step()
+            self.current_lr = get_lr(self.aggregator.optimizer)
+
         print('current lr = {}'.format(self.current_lr))
 
-    def train_client_models(self, k, epoch):
+    def train_client_models(self, k, epoch, client_config={'optimizer_scheme':'SGD', 'lr':0.002, 'weight_decay':0.0, 'momentum':0.9, 'num_batches':1}):
         """
         Update each client model
 
         :param k: number of clients to be selected
+        :type k: int
         :param epoch: number of rounds
+        :param client_config: specifying parameters for client trainer
+        :type client_config: dict
         """
         # Sample Clients to Train this round
         sampled_clients = random.sample(population=self.clients, k=k)
@@ -72,14 +83,13 @@ class Server:
         # Now we will loop through these clients and do training steps
         # Compute number of local gradient steps per communication round
         epoch_loss = 0.0
-
-        # update the learning rate: self.current_lr
-        self._update_lr(epoch)
         for client in sampled_clients:
-            client.client_step(opt_alg=self.args.opt,
-                               opt_group={'lr': self.current_lr,
-                                          'weight_decay': self.args.reg,
-                                          'momentum': self.args.momentum}
+            client.client_step(opt_alg=client_config['optimizer_scheme'],
+                               opt_group={'lr': client_config['lr'],
+                                          'weight_decay': client_config['weight_decay'],
+                                          'momentum': client_config['momentum']
+                                         },
+                               num_batches=client_config['num_batches']
                               )
             # print('Client : {} loss = {}'.format(client.client_id, client.trainer.epoch_losses[-1]))
             epoch_loss += client.trainer.epoch_losses[-1]
@@ -87,6 +97,8 @@ class Server:
         # Update Metrics
         self.train_loss.append(epoch_loss / len(sampled_clients))
 
+        # update the learning rate: self.current_lr
+        self.num_rounds += 1
+        self._update_server_lr()
         # aggregate client updates
         self.w_current = self.aggregator.update_model(clients=sampled_clients, current_lr=self.current_lr)
-

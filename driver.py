@@ -34,7 +34,7 @@ def _parse_args():
     parser.add_argument('--agg', type=str, default='fed_avg',
                         help='Specify Aggregation/ Defence Rule. '
                              'Options: fed_avg, krum, trimmed_mean, bulyan')
-    parser.add_argument('--compression_operator', type=str, default='top',
+    parser.add_argument('--compression_operator', type=str, default='full',
                         help='Specify Aggregation Rule,'
                              'Options: full, top, rand, svd, qsgd_biased, '
                              'qsgd_unbiased, sign, dropout_biased, dropout_unbiased')
@@ -74,7 +74,7 @@ def _parse_args():
     # Training params
     parser.add_argument('--num_total_epoch', type=int, default=500,
                         help='Number of Global Epochs')
-    parser.add_argument('--num_comm_round', type=int, default=500,
+    parser.add_argument('--num_comm_round', type=int, default=200,
                         help='Number of Server Client Communication Round')
 
     # Results Related Params
@@ -92,7 +92,8 @@ if __name__ == '__main__':
 
     result_file = 'num_clients_' + str(args.num_clients) + '.frac_adv_' + str(args.frac_clients) +\
                   '.attack_mode_' + args.attack_mode + '.attack_model_' + args.attack_model +\
-                  '.agg_' + args.agg
+                  '.agg_' + args.agg + '.compression_' + args.compression_operator + '.bits_' + \
+                  str(args.num_bits) + '.frac_cd_' + str(args.frac_coordinates) + '.p_' + str(args.dropout_p)
     if not args.o:
         directory = "results/" + args.data_set + "/" + args.m + "/"
     else:

@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class ByzAttack:
+class Attack:
     """
     This class implements several algorithms to modify the gradients of
     byzantine nodes using different strategies.

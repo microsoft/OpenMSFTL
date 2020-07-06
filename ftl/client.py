@@ -2,7 +2,7 @@ from ftl.trainer import Trainer
 from ftl.optimization import SchedulingOptimization
 from ftl.compression import Compression
 import numpy as np
-import torch
+
 
 class Client:
     def __init__(self,

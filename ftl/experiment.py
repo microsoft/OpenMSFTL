@@ -4,6 +4,7 @@ from ftl.server import Server
 from ftl.models import get_model
 from ftl.trainer import infer, cycle
 from ftl.compression import Compression
+from ftl.attacks import Attack
 import copy
 import random
 import numpy as np
@@ -75,17 +76,19 @@ def run_exp(args):
         print('         Communication Round {}             '.format(epoch))
         print(' -------------------------------------------')
 
-        # We update the weights of all client learners and set to server global params
         server.init_client_models()
-        # sample fraction of clients who will participate in this round and kick off training
+        if args.attack_mode == 'byzantine':
+            attacker = Attack(k=args.k_std, attack_model=args.attack_model)
+        else:
+            attacker = None
         server.train_client_models(k=int(args.frac_clients * num_client_nodes),
                                    client_config={'optimizer_scheme': args.opt,
                                                   'lr': args.lr0 / 2 if epoch % args.lr_restart == 0 else args.lr0,
                                                   'weight_decay': args.reg,
                                                   'momentum': args.momentum,
                                                   'num_batches': args.num_batches
-                                                  }
-                                   )
+                                                  },
+                                   attacker=attacker)
 
         print('Metrics :')
         print('--------------------------------')

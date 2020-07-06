@@ -71,10 +71,10 @@ class Server:
 
         print('current lr = {}'.format(self.current_lr))
 
-    def train_client_models(self, k: int, client_config: Dict = None):
+    def train_client_models(self, k: int, client_config: Dict = None, attacker = None):
         """
         Update each client model
-
+        :param attacker: Attack Object
         :param k: number of clients to be selected
         :param client_config: specifying parameters for client trainer
         """
@@ -101,11 +101,13 @@ class Server:
             # print('Client : {} loss = {}'.format(client.client_id, client.trainer.epoch_losses[-1]))
             epoch_loss += client.trainer.epoch_losses[-1]
 
-        for client in sampled_clients:
-            if client.attack_mode == 'byzantine':
-                pass
+        # Modify the gradients of malicious nodes if attack is defined
+        if attacker:
+            mal_nodes = [c for c in sampled_clients if c.attack_mode]
+            attacker.attack(byz_clients=mal_nodes)
 
-            # now we can apply the compression operator before communicating to Server
+        # now we can apply the compression operator before communicating to Server
+        for client in sampled_clients:
             client.grad = client.C.compress(grad=client.grad)
 
         # Update Metrics

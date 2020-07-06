@@ -70,6 +70,7 @@ def _parse_args():
                         help='check optim _get_lr')
     parser.add_argument('--lr_restart', type=int, default=100)
     parser.add_argument('--num_batches', type=int, default=1)
+
     # Training params
     parser.add_argument('--num_total_epoch', type=int, default=500,
                         help='Number of Global Epochs')

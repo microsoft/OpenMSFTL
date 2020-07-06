@@ -25,9 +25,9 @@ class SchedulingOptimization:
     def __init__(self,
                  model,
                  opt_alg='SGD',
-                 opt_group={},
+                 opt_group=None,
                  lrs=None,
-                 lrs_group={},
+                 lrs_group=None,
                  verbose=0):
         """
         :param model: model instance to be optimized
@@ -41,6 +41,10 @@ class SchedulingOptimization:
         :param lrs_group: specifying parameters of the LR scheduler
         :type lrs_group: dict
         """
+        if lrs_group is None:
+            lrs_group = {}
+        if opt_group is None:
+            opt_group = {}
         self.opt_alg = opt_alg
         self.opt_group = opt_group
         self.lrs = lrs

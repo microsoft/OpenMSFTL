@@ -20,7 +20,7 @@ class Aggregator:
             S. J. Reddi et al., "Adaptive Federated Optimization", arXiv:2003.00295
     """
 
-    def __init__(self, agg_strategy, model, opt_alg=None, opt_group={}, max_grad_norm=None):
+    def __init__(self, agg_strategy, model, opt_alg=None, opt_group=None, max_grad_norm=None):
         """
         :param agg_strategy: aggregation strategy, default to "fed_avg"
         :type agg_strategy: str
@@ -33,6 +33,8 @@ class Aggregator:
         :param max_grad_norm: max norm of the gradients for gradient clipping, default to None
         :type max_grad_norm: float
         """
+        if opt_group is None:
+            opt_group = {}
         self.agg_strategy = agg_strategy
         self.model = model
         # Instantiate the optimizer for an aggregator

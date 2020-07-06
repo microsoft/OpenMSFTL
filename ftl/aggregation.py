@@ -59,14 +59,14 @@ class Aggregator:
         """
 
         if self.agg_strategy is 'fed_avg':
-            self.fed_avg(clients=clients, current_lr=current_lr)
+            self.__fed_avg(clients=clients, current_lr=current_lr)
             # update the model params with these weights
             dist_weights_to_model(weights=self.w_current, parameters=self.model.parameters())
         else:
             raise NotImplementedError
         return self.w_current
 
-    def fed_avg(self, clients, current_lr: float):
+    def __fed_avg(self, clients, current_lr: float):
         """
         This implements two flavors the Federated Averaging GAR:
             a.  Simple FedAvg aggregation as introduced in:

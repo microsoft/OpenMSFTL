@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from ftl.models import dist_weights_to_model, add_grads_to_model
-from ftl.optimization import SchedulingOptimizater
+from ftl.optimization import SchedulingOptimization
 
 
 class Aggregator:
@@ -39,9 +39,9 @@ class Aggregator:
             self.optimizer = None
             self.lr_scheduler = None
         else:  # dual optimization
-            sopt = SchedulingOptimizater(model=model,
-                                         opt_alg=opt_alg,
-                                         opt_group=opt_group)
+            sopt = SchedulingOptimization(model=model,
+                                          opt_alg=opt_alg,
+                                          opt_group=opt_group)
             self.optimizer = sopt.optimizer
             self.lr_scheduler = sopt.lr_scheduler
 

@@ -2,7 +2,7 @@ import torch.optim as optim
 import json
 
 
-class SchedulingOptimizater:
+class SchedulingOptimization:
     """
     This class contains an optimizer and LR scheduler.
 
@@ -24,11 +24,11 @@ class SchedulingOptimizater:
 
     def __init__(self,
                  model,
-                 opt_alg = 'SGD',
-                 opt_group = {},
-                 lrs = None,
-                 lrs_group = {},
-                 verbose = 0):
+                 opt_alg='SGD',
+                 opt_group={},
+                 lrs=None,
+                 lrs_group={},
+                 verbose=0):
         """
         :param model: model instance to be optimized
         :type model: subclass of class:`nn.Module`
@@ -74,7 +74,7 @@ class SchedulingOptimizater:
                               betas=self.opt_group.get('betas', (0.9, 0.999)),
                               eps=self.opt_group.get('eps', 1e-08),
                               weight_decay=self.opt_group.get('weight_decay', 0.0),
-                              amsgrad=self.opt_group.get('amsgrad', True) # default to False in pytorch
+                              amsgrad=self.opt_group.get('amsgrad', True)  # default to False in pytorch
                             )
         else:
             raise NotImplementedError("Not supported opt_alg: {}".format(self.opt_alg))

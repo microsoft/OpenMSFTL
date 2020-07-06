@@ -1,5 +1,5 @@
 from ftl.trainer import Trainer
-from ftl.optimization import SchedulingOptimizater
+from ftl.optimization import SchedulingOptimization
 from ftl.compression import Compression
 import numpy as np
 import torch
@@ -30,10 +30,10 @@ class Client:
         self.grad = None
 
     def client_step(self, opt_alg, opt_group, num_batches=1):
-        opt = SchedulingOptimizater(model=self.learner,
-                                    opt_alg=opt_alg,
-                                    opt_group=opt_group
-                                    ).optimizer
+        opt = SchedulingOptimization(model=self.learner,
+                                     opt_alg=opt_alg,
+                                     opt_group=opt_group
+                                     ).optimizer
 
         src_model_weights = np.concatenate([w.data.cpu().numpy().flatten() for w in self.learner.parameters()])
         # Reset gradient just in case

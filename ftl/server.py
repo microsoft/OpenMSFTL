@@ -3,7 +3,8 @@ from ftl.optimization import get_lr
 from ftl.models import dist_weights_to_model
 from ftl.aggregation import Aggregator
 from typing import List
-import numpy as np
+from typing import Dict
+from torch.utils.data import DataLoader
 import random
 
 
@@ -11,11 +12,14 @@ class Server:
     def __init__(self,
                  model,
                  aggregation_scheme='fed_avg',
-                 optimizer_scheme=None,
-                 server_config={"lr0":1.0, "lr_restart":100},
+                 optimizer_scheme: str = None,
+                 server_config: Dict = None,
                  clients: List[Client] = None,
-                 val_loader=None,
-                 test_loader=None):
+                 val_loader: DataLoader = None,
+                 test_loader: DataLoader = None):
+
+        if not server_config:
+            server_config = {"lr0": 1.0, "lr_restart": 100}
 
         # keep server parameters
         self.server_lr0 = server_config["lr0"]
@@ -57,7 +61,7 @@ class Server:
 
     def _update_server_lr(self):
         if self.num_rounds % self.server_lr_restart == 0:
-            self.current_lr = self.server_lr0/2
+            self.current_lr = self.server_lr0 / 2
             self.aggregator.set_lr(self.current_lr)
 
         # take a step in lr_scheduler
@@ -67,16 +71,19 @@ class Server:
 
         print('current lr = {}'.format(self.current_lr))
 
-    def train_client_models(self, k, epoch, client_config={'optimizer_scheme':'SGD', 'lr':0.002, 'weight_decay':0.0, 'momentum':0.9, 'num_batches':1}):
+    def train_client_models(self, k: int, client_config: Dict = None):
         """
         Update each client model
 
         :param k: number of clients to be selected
-        :type k: int
-        :param epoch: number of rounds
         :param client_config: specifying parameters for client trainer
-        :type client_config: dict
         """
+        if not client_config:
+            client_config = {'optimizer_scheme': 'SGD',
+                             'lr': 0.002,
+                             'weight_decay': 0.0,
+                             'momentum': 0.9,
+                             'num_batches': 1}
         # Sample Clients to Train this round
         sampled_clients = random.sample(population=self.clients, k=k)
 
@@ -88,9 +95,9 @@ class Server:
                                opt_group={'lr': client_config['lr'],
                                           'weight_decay': client_config['weight_decay'],
                                           'momentum': client_config['momentum']
-                                         },
+                                          },
                                num_batches=client_config['num_batches']
-                              )
+                               )
             # print('Client : {} loss = {}'.format(client.client_id, client.trainer.epoch_losses[-1]))
             epoch_loss += client.trainer.epoch_losses[-1]
 
@@ -100,5 +107,6 @@ class Server:
         # update the learning rate: self.current_lr
         self.num_rounds += 1
         self._update_server_lr()
+
         # aggregate client updates
         self.w_current = self.aggregator.update_model(clients=sampled_clients, current_lr=self.current_lr)

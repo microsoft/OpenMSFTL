@@ -44,6 +44,7 @@ class Client:
         # compute the local gradient
         dst_model_weights = np.concatenate([w.data.cpu().numpy().flatten() for w in self.learner.parameters()])
         self.grad = src_model_weights - dst_model_weights
+
         # now we can apply the compression operator before passing to Server
         self.grad = self.C.compress(grad=self.grad)
 

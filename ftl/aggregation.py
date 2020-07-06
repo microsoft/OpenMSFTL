@@ -1,7 +1,8 @@
-import numpy as np
-import torch.nn as nn
 from ftl.models import dist_weights_to_model, add_grads_to_model
 from ftl.optimization import SchedulingOptimization
+import numpy as np
+import torch.nn as nn
+from typing import Dict
 
 
 class Aggregator:
@@ -9,44 +10,38 @@ class Aggregator:
     This class updates a global model with gradients aggregated from clients and
     keeps track of the model object and weights.
 
-    This implements the following aggregation algorithms:
-    1. FedAvg :
-    -------------------
-        a.  Simple FedAvg aggregation as introduced in:
-            McMahan et al., "Communication-Efficient Learning of Deep Networks from Decentralized Data",
-            http://proceedings.mlr.press/v54/mcmahan17a/mcmahan17a.pdf
-        b.  Federated dual optimization described in:
-            D. Dimitriadis et al., "On a Federated Approach for Training Acoustic Models ", Interspeech 2021,
-            S. J. Reddi et al., "Adaptive Federated Optimization", arXiv:2003.00295
+
     """
 
-    def __init__(self, agg_strategy, model, opt_alg=None, opt_group=None, max_grad_norm=None):
+    def __init__(self, agg_strategy: str,
+                 model: nn.Module,
+                 dual_opt_alg: str = None,
+                 opt_group: Dict = None,
+                 max_grad_norm: float = None):
         """
         :param agg_strategy: aggregation strategy, default to "fed_avg"
-        :type agg_strategy: str
         :param model: class:`nn.Module`, the global model
-        :type model: subclass of class:`nn.Module`
-        :param opt_alg: type of (adaptive) federated optimizater; see exmaples for ftl/optimization.py
-        :type opt_alg: string
+        :param dual_opt_alg: type of (adaptive) federated optimizer; see examples:  ftl/optimization.py
         :param opt_group: parameters for the optimizer; see details for ftl/optimization.py
-        :type opt_group: dict
         :param max_grad_norm: max norm of the gradients for gradient clipping, default to None
-        :type max_grad_norm: float
         """
         if opt_group is None:
             opt_group = {}
         self.agg_strategy = agg_strategy
         self.model = model
+
         # Instantiate the optimizer for an aggregator
-        if opt_alg is None or opt_alg == "None":  # simple model averaging
+        if dual_opt_alg is None or dual_opt_alg == "None":
+            # simple model averaging
             self.optimizer = None
             self.lr_scheduler = None
-        else:  # dual optimization
-            sopt = SchedulingOptimization(model=model,
-                                          opt_alg=opt_alg,
-                                          opt_group=opt_group)
-            self.optimizer = sopt.optimizer
-            self.lr_scheduler = sopt.lr_scheduler
+        else:
+            # dual optimization
+            server_opt = SchedulingOptimization(model=model,
+                                                opt_alg=dual_opt_alg,
+                                                opt_group=opt_group)
+            self.optimizer = server_opt.optimizer
+            self.lr_scheduler = server_opt.lr_scheduler
 
         self.max_grad_norm = max_grad_norm
         self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
@@ -75,6 +70,19 @@ class Aggregator:
         return self.w_current
 
     def fed_avg(self, clients, current_lr: float):
+        """
+        This implements two flavors the Federated Averaging GAR:
+            a.  Simple FedAvg aggregation as introduced in:
+                McMahan et al., "Communication-Efficient Learning of Deep Networks from Decentralized Data",
+                http://proceedings.mlr.press/v54/mcmahan17a/mcmahan17a.pdf
+            b.  FedAvg with dual optimization described in:
+                D. Dimitriadis et al., "On a Federated Approach for Training Acoustic Models ", Interspeech 2021,
+                S. J. Reddi et al., "Adaptive Federated Optimization", arXiv:2003.00295
+
+        :param clients:
+        :param current_lr:
+        :return:
+        """
         if self.optimizer is None:
             """ perform the Vanilla FedAvg """
             client_grads = np.empty((len(clients), len(self.w_current)), dtype=self.w_current.dtype)
@@ -105,5 +113,3 @@ class Aggregator:
 
             # get the model weights
             self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
-
-

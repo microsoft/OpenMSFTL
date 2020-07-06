@@ -36,7 +36,7 @@ class Server:
         # Aggregator tracks the model and optimizer
         self.aggregator = Aggregator(agg_strategy=aggregation_scheme,
                                      model=model,
-                                     opt_alg=optimizer_scheme,
+                                     dual_opt_alg=optimizer_scheme,
                                      opt_group={'lr': self.current_lr})
 
         # Server only keeps track of the pointer to the updated weights at each round

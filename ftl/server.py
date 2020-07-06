@@ -101,6 +101,13 @@ class Server:
             # print('Client : {} loss = {}'.format(client.client_id, client.trainer.epoch_losses[-1]))
             epoch_loss += client.trainer.epoch_losses[-1]
 
+        for client in sampled_clients:
+            if client.attack_mode == 'byzantine':
+                pass
+
+            # now we can apply the compression operator before communicating to Server
+            client.grad = client.C.compress(grad=client.grad)
+
         # Update Metrics
         self.train_loss.append(epoch_loss / len(sampled_clients))
 

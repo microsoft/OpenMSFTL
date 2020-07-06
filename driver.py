@@ -28,8 +28,8 @@ def _parse_args():
                         help='Specify Fraction of Adversarial Nodes')
     parser.add_argument('--attack_mode', type=str, default='byzantine',
                         help='Options: Byzantine, Backdoor')
-    parser.add_argument('--attack_model', type=str, default='gaussian')
-
+    parser.add_argument('--attack_model', type=str, default='drift')
+    parser.add_argument('--k_std', type=float, default=1.5)
     # Defense Params
     parser.add_argument('--agg', type=str, default='fed_avg',
                         help='Specify Aggregation/ Defence Rule. '

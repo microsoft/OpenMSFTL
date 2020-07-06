@@ -34,12 +34,12 @@ def _parse_args():
     parser.add_argument('--agg', type=str, default='fed_avg',
                         help='Specify Aggregation/ Defence Rule. '
                              'Options: fed_avg, krum, trimmed_mean, bulyan')
-    parser.add_argument('--compression_operator', type=str, default='full',
+    parser.add_argument('--compression_operator', type=str, default='top',
                         help='Specify Aggregation Rule,'
                              'Options: full, top, rand, svd, qsgd_biased, '
                              'qsgd_unbiased, sign, dropout_biased, dropout_unbiased')
     parser.add_argument('--num_bits', type=int, default=2)
-    parser.add_argument('--frac_coordinates', type=float, default=0.5)
+    parser.add_argument('--frac_coordinates', type=float, default=0.1)
     parser.add_argument('--dropout_p', type=float, default=0.1)
 
     # Model Params
@@ -73,7 +73,7 @@ def _parse_args():
     # Training params
     parser.add_argument('--num_total_epoch', type=int, default=500,
                         help='Number of Global Epochs')
-    parser.add_argument('--num_comm_round', type=int, default=2048,
+    parser.add_argument('--num_comm_round', type=int, default=500,
                         help='Number of Server Client Communication Round')
 
     # Results Related Params

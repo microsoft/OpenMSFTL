@@ -6,6 +6,20 @@ class Compression:
                  compression_function: str,
                  dropout_p: float,
                  fraction_coordinates: float):
+        """
+        This class applies a compression operator to the passed
+        client gradient update.
+
+        We implements the following algorithms:
+        1. QSGD described in:
+           Dan Alistarh et.al. QSGD: Communication-Efficient SGD via Gradient Quantization and Encoding, NeuRips 2017
+
+        :param num_bits:
+        :param compression_function:
+        :param dropout_p:
+        :param fraction_coordinates:
+        """
+
         self.compression_function = compression_function
         self.num_bits = num_bits
         self.fraction_coordinates = fraction_coordinates
@@ -14,9 +28,6 @@ class Compression:
     def compress(self, grad, layer_wise=False):
         if layer_wise:
             raise NotImplementedError
-
-        # else:
-        #    grad = np.concatenate([param.grad.data.cpu().numpy().flatten() for param in w])
 
         if self.compression_function == 'full':
             """ Implements no compression i.e. returns full precision i.e all co-ordinates """
@@ -54,6 +65,7 @@ class Compression:
             return q / p
 
         elif self.compression_function == 'qsgd':
+
             raise NotImplementedError
             # q = np.zeros_like(grad)
             # bits = self.num_bits

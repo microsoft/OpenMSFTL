@@ -9,7 +9,7 @@ class Aggregator:
     This class updates a global model with gradients aggregated from clients and
     keeps track of the model object and weights.
 
-    This implements the following aggregation algorithmss:
+    This implements the following aggregation algorithms:
     1. FedAvg :
     -------------------
         a.  Simple FedAvg aggregation as introduced in:
@@ -65,7 +65,9 @@ class Aggregator:
         """
 
         if self.agg_strategy is 'fed_avg':
-            self.w_current = self.fed_avg(clients=clients, current_lr=current_lr)
+            self.fed_avg(clients=clients, current_lr=current_lr)
+            # update the model params with these weights
+            dist_weights_to_model(weights=self.w_current, parameters=self.model.parameters())
         else:
             raise NotImplementedError
         return self.w_current
@@ -79,8 +81,6 @@ class Aggregator:
 
             lr = current_lr if current_lr is not None else 1.0
             self.w_current -= lr * np.mean(client_grads, axis=0)
-            # update the model params with these weights
-            dist_weights_to_model(weights=self.w_current, parameters=self.model.parameters())
 
         else:
             """ Perform Dual Optimization """
@@ -89,7 +89,8 @@ class Aggregator:
                 self.set_lr(current_lr)
             # set gradients to the model instance
             for ix, client in enumerate(clients):
-                add_grads_to_model(grads=client.grad, parameters=self.model.parameters(),
+                add_grads_to_model(grads=client.grad,
+                                   parameters=self.model.parameters(),
                                    init=True if ix == 0 else False)
             # apply gradient clipping
             if self.max_grad_norm is not None:
@@ -101,6 +102,6 @@ class Aggregator:
             self.optimizer.zero_grad()
 
             # get the model weights
-            w_current = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
+            self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
 
-            return w_current
+

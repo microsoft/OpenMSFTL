@@ -56,7 +56,6 @@ class Aggregator:
         :param clients: A set of client compute nodes
         :return: The weights of the updated global model
         """
-
         if self.agg_strategy is 'fed_avg':
             self.__fed_avg(clients=clients, current_lr=current_lr)
             # update the model params with these weights
@@ -65,7 +64,7 @@ class Aggregator:
             raise NotImplementedError
         return self.w_current
 
-    def __fed_avg(self, clients, current_lr: float = 0.01):
+    def __fed_avg(self, clients: List[Client], current_lr: float = 0.01):
         """
         This implements two flavors the Federated Averaging GAR:
             a.  Simple FedAvg aggregation as introduced in:
@@ -75,7 +74,7 @@ class Aggregator:
                 D. Dimitriadis et al., "On a Federated Approach for Training Acoustic Models ", Interspeech 2021,
                 S. J. Reddi et al., "Adaptive Federated Optimization", arXiv:2003.00295
 
-        :param clients:
+        :param clients: List of client nodes to aggregate over
         :param current_lr: supply the current lr for the Update step
         """
         # compute average grad

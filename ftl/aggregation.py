@@ -31,7 +31,6 @@ class Aggregator:
 
         # Instantiate the optimizer for an aggregator
         if dual_opt_alg is None or dual_opt_alg == "None":
-            # simple model averaging
             self.optimizer = None
             self.lr_scheduler = None
         else:
@@ -66,7 +65,7 @@ class Aggregator:
             raise NotImplementedError
         return self.w_current
 
-    def __fed_avg(self, clients, current_lr: float):
+    def __fed_avg(self, clients, current_lr: float = 0.01):
         """
         This implements two flavors the Federated Averaging GAR:
             a.  Simple FedAvg aggregation as introduced in:
@@ -77,12 +76,8 @@ class Aggregator:
                 S. J. Reddi et al., "Adaptive Federated Optimization", arXiv:2003.00295
 
         :param clients:
-        :param current_lr:
-        :return:
+        :param current_lr: supply the current lr for the Update step
         """
-        # Set lr first
-        if current_lr is None:
-            current_lr = 1.0
         # compute average grad
         agg_grad = self.__weighted_average(clients=clients)
         if self.optimizer is None:
@@ -97,7 +92,6 @@ class Aggregator:
             if self.max_grad_norm is not None:
                 grad_norm = nn.utils.clip_grad_norm_(self.model.parameters(),
                                                      self.max_grad_norm)
-
             # do optimizer step
             self.optimizer.step()
             self.optimizer.zero_grad()
@@ -111,10 +105,8 @@ class Aggregator:
         then its equivalent to simple average / Fed Avg."""
         if alphas is None:
             alphas = [1] * len(clients)
-
         agg_grad = np.zeros_like(clients[0].grad)
         tot = np.sum(alphas)
-
         for alpha, client in zip(alphas, clients):
             agg_grad += (alpha / tot) * client.grad
 

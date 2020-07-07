@@ -71,7 +71,7 @@ class Server:
 
         print('current lr = {}'.format(self.current_lr))
 
-    def train_client_models(self, k: int, client_config: Dict = None, attacker = None):
+    def train_client_models(self, k: int, client_config: Dict = None, attacker=None):
         """
         Update each client model
         :param attacker: Attack Object

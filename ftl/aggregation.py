@@ -82,13 +82,13 @@ class Aggregator:
         """
         if self.optimizer is None:
             """ perform the Vanilla FedAvg """
-            client_grads = np.empty((len(clients), len(self.w_current)), dtype=self.w_current.dtype)
-            for ix, client in enumerate(clients):
-                client_grads[ix, :] = client.grad
-
+            # client_grads = np.empty((len(clients), len(self.w_current)), dtype=self.w_current.dtype)
+            # for ix, client in enumerate(clients):
+            #     client_grads[ix, :] = client.grad
             lr = current_lr if current_lr is not None else 1.0
-            self.w_current -= lr * np.mean(client_grads, axis=0)
-
+            # self.w_current -= lr * np.mean(client_grads, axis=0)
+            agg_grad = self.__weighted_average(clients=clients)
+            self.w_current -= lr * agg_grad
         else:
             """ Perform Dual Optimization """
             # change the learning rate of the optimizer
@@ -112,11 +112,23 @@ class Aggregator:
             self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
 
     @staticmethod
-    def __weighted_average(self):
-        pass
+    def __weighted_average(clients, alphas=None):
+        """ Implements weighted average of vectors if no weights are supplied
+        then its equivalent to simple average / Fed Avg."""
+        if alphas is None:
+            alphas = [1] * len(clients)
+
+        agg_grad = np.zeros_like(clients[0].grad)
+        tot = np.sum(alphas)
+
+        for alpha, client in zip(alphas, clients):
+            agg_grad += (alpha / tot) * client
+
+        return agg_grad
 
     @staticmethod
     def __geo_median(points):
+        """ Computes Geometric median of given points (vectors) using Weiszfeld's Algorithm """
         pass
 
 

@@ -94,6 +94,13 @@ class Aggregator:
             # get the model weights
             self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
 
+    def __fed_median(self, clients: List[Client]):
+        """
+        This is implementation of Geometric Median Aggregation proposed in :
+        Pillutla et.al. Robust Aggregation for Federated Learning. 	arXiv:1912.13445
+        """
+        raise NotImplementedError
+
     @staticmethod
     def __weighted_average(clients, alphas=None):
         """ Implements weighted average of vectors if no weights are supplied
@@ -109,7 +116,8 @@ class Aggregator:
 
     @staticmethod
     def __geo_median(points):
-        """ Computes Geometric median of given points (vectors) using Weiszfeld's Algorithm """
+        """ Computes Geometric median of given points (vectors) using Weiszfeld's Algorithm.
+         """
         pass
 
 

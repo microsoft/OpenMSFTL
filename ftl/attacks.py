@@ -1,4 +1,6 @@
+from ftl.agg_utils import weighted_average
 import numpy as np
+import warnings
 
 
 class Attack:
@@ -6,10 +8,7 @@ class Attack:
     This class implements several algorithms to modify the gradients of
     byzantine nodes using different strategies.
 
-    In particular this has implementations of the following algorithms:
 
-    1. Gilad Baruch et.al. "A Little Is Enough: Circumventing Defenses For Distributed Learning" (NeurIPS 2019)
-       Ref: https://github.com/moranant/attacking_distributed_learning
 
     """
     def __init__(self, k: float = 1.5, attack_model: str = 'drift'):
@@ -20,6 +19,7 @@ class Attack:
 
     def attack(self, byz_clients):
         if len(byz_clients) == 0 or self.k == 0:
+            warnings.warn(" Applying attack failed. Please check Attack.attack ")
             return
 
         clients_grad = []
@@ -41,6 +41,11 @@ class Attack:
 
     @staticmethod
     def drift(k, grad_mean, grad_std):
+        """
+        Implementation of the powerful drift attack algorithm proposed in:
+        Gilad Baruch et.al. "A Little Is Enough: Circumventing Defenses For Distributed Learning" (NeurIPS 2019)
+        Ref: https://github.com/moranant/attacking_distributed_learning
+        """
         # Drift Attack | " A Little Is Enough: Circumventing Defenses For Distributed Learning NeuRips 2019 "
         return grad_mean[:] - k * grad_std[:]
 

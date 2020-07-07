@@ -1,10 +1,10 @@
 from ftl.models import dist_weights_to_model, dist_grads_to_model
 from ftl.optimization import SchedulingOptimization
 from ftl.client import Client
+from ftl.agg_utils import weighted_average
 import numpy as np
 import torch.nn as nn
 from typing import Dict, List
-from collections import defaultdict
 
 
 class Aggregator:
@@ -78,7 +78,7 @@ class Aggregator:
         :param current_lr: supply the current lr for the Update step
         """
         # compute average grad
-        agg_grad = self.__weighted_average(clients=clients)
+        agg_grad = weighted_average(clients=clients)
         if self.optimizer is None:
             # In case of no dual optimizer, do a manual GD update
             self.w_current -= current_lr * agg_grad
@@ -108,38 +108,4 @@ class Aggregator:
     def __krum(self):
         raise NotImplementedError
 
-    # ------------------------------------------------- #
-    #             GAR implementation utils              #
-    # ------------------------------------------------- #
-    # TODO: Considering moving to a util file (Defer)
-    @staticmethod
-    def __weighted_average(clients, alphas=None):
-        """
-        Implements weighted average of vectors if no weights are supplied
-        then its equivalent to simple average / Fed Avg
-        """
-        if alphas is None:
-            alphas = [1] * len(clients)
-        agg_grad = np.zeros_like(clients[0].grad)
-        tot = np.sum(alphas)
-        for alpha, client in zip(alphas, clients):
-            agg_grad += (alpha / tot) * client.grad
 
-        return agg_grad
-
-    @staticmethod
-    def __geo_median(clients):
-        """
-        Computes Geometric median of given points (vectors) using a Alternating Minimization
-        based numerically stable variant of Weiszfeld's Algorithm.
-        """
-        pass
-
-    @staticmethod
-    def __get_krum_dist(clients) -> defaultdict:
-        """ Computes a dist matrix between each pair of client based on grad value """
-        dist = defaultdict(dict)
-        for i in range(len(clients)):
-            for j in range(i):
-                dist[i][j] = dist[j][i] = np.linalg.norm(clients[i].grad - clients[j].grad)
-        return dist

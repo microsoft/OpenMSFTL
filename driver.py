@@ -1,5 +1,5 @@
 from ftl.experiment import run_exp
-from ftl.utils import pickle_it
+from ftl.misc_utils import pickle_it
 import argparse
 import os
 import numpy as np

@@ -4,6 +4,7 @@ from ftl.client import Client
 import numpy as np
 import torch.nn as nn
 from typing import Dict, List
+from collections import defaultdict
 
 
 class Aggregator:
@@ -60,6 +61,9 @@ class Aggregator:
             raise NotImplementedError
         return self.w_current
 
+    # ------------------------------------------------- #
+    #             GAR Algorithms                        #
+    # ------------------------------------------------- #
     def __fed_avg(self, clients: List[Client], current_lr: float = 0.01):
         """
         This implements two flavors the Federated Averaging GAR:
@@ -101,10 +105,19 @@ class Aggregator:
         """
         raise NotImplementedError
 
+    def __krum(self):
+        raise NotImplementedError
+
+    # ------------------------------------------------- #
+    #             GAR implementation utils              #
+    # ------------------------------------------------- #
+    # TODO: Considering moving to a util file (Defer)
     @staticmethod
     def __weighted_average(clients, alphas=None):
-        """ Implements weighted average of vectors if no weights are supplied
-        then its equivalent to simple average / Fed Avg."""
+        """
+        Implements weighted average of vectors if no weights are supplied
+        then its equivalent to simple average / Fed Avg
+        """
         if alphas is None:
             alphas = [1] * len(clients)
         agg_grad = np.zeros_like(clients[0].grad)
@@ -115,9 +128,18 @@ class Aggregator:
         return agg_grad
 
     @staticmethod
-    def __geo_median(points):
-        """ Computes Geometric median of given points (vectors) using Weiszfeld's Algorithm.
-         """
+    def __geo_median(clients):
+        """
+        Computes Geometric median of given points (vectors) using a Alternating Minimization
+        based numerically stable variant of Weiszfeld's Algorithm.
+        """
         pass
 
-
+    @staticmethod
+    def __get_krum_dist(clients) -> defaultdict:
+        """ Computes a dist matrix between each pair of client based on grad value """
+        dist = defaultdict(dict)
+        for i in range(len(clients)):
+            for j in range(i):
+                dist[i][j] = dist[j][i] = np.linalg.norm(clients[i].grad - clients[j].grad)
+        return dist

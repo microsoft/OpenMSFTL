@@ -110,3 +110,13 @@ class Aggregator:
 
             # get the model weights
             self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
+
+    @staticmethod
+    def __weighted_average(self):
+        pass
+
+    @staticmethod
+    def __geo_median(points):
+        pass
+
+

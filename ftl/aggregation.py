@@ -50,26 +50,18 @@ class Aggregator:
         :return: The weights of the updated global model
         """
         if self.agg_strategy is 'fed_avg':
-            self.__fed_avg(clients=clients, current_lr=current_lr)
+            self.__fed_avg(clients=clients)
             dist_weights_to_model(weights=self.w_current, parameters=self.model.parameters())
         else:
             raise NotImplementedError
         return self.w_current
 
-    def __fed_avg(self, clients: List[Client], current_lr: float = 0.01):
+    def __server_step(self, agg_grad, current_lr: float = 0.01):
         """
-        This implements two flavors the Federated Averaging GAR:
-        a.  Simple FedAvg :
-            McMahan et al., "Communication-Efficient Learning of Deep Networks from Decentralized Data",
-            http://proceedings.mlr.press/v54/mcmahan17a/mcmahan17a.pdf
-        b.  Adaptive FedAvg :
-            D. Dimitriadis et al., "On a Federated Approach for Training Acoustic Models ", Interspeech 2021,
-            S. J. Reddi et al., "Adaptive Federated Optimization", arXiv:2003.00295
-        :param clients: List of client nodes to aggregate over
-        :param current_lr: supply the current lr for the Update step
+        Implements Server (Dual) Optimization with the option to use Adaptive Optimization
+        D. Dimitriadis et al., "On a Federated Approach for Training Acoustic Models ", Interspeech 2021,
+        S. J. Reddi et al., "Adaptive Federated Optimization", arXiv:2003.00295
         """
-        # compute average grad
-        agg_grad = weighted_average(clients=clients)
         self.set_lr(current_lr)
         # Update the model with aggregated gradient
         dist_grads_to_model(grads=agg_grad, parameters=self.model.parameters())
@@ -81,8 +73,19 @@ class Aggregator:
         self.optimizer.step()
         self.optimizer.zero_grad()
 
-        # get the model weights
+        # update the model weights
         self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
+
+    def __fed_avg(self, clients: List[Client], current_lr: float = 0.01):
+        """
+        This implements classic FedAvg: McMahan et al., Communication-Efficient Learning of Deep
+        Networks from Decentralized Data, NeuRips 2017
+        :param clients: List of client nodes to aggregate over
+        """
+        # compute average grad
+        agg_grad = weighted_average(clients=clients)
+        # Call Server Optimization Step
+        self.__server_step(agg_grad=agg_grad, current_lr=current_lr)
 
     def __fed_median(self, clients: List[Client]):
         """
@@ -91,11 +94,11 @@ class Aggregator:
         """
         raise NotImplementedError
 
-    def __m_krum(self, clients: List[Client], frac_m: float = 0.7) -> np.ndarray:
+    def __m_krum(self, clients: List[Client], frac_m: float = 0.7):
         """
         This is an implementation of m-krum
         :param clients: List of all clients participating in training
-        :param m: m=n-f i.e. total-mal_nodes , since in practice server won't know this treat as hyper-param
+        :param frac_m: m=n-f i.e. total-mal_nodes , since in practice server won't know this treat as hyper-param
         :return: List of clients that satisfies alpha-f byz resilience.
         """
         # compute mutual distance of each clients in terms of their grads

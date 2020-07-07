@@ -91,7 +91,11 @@ class Aggregator:
         """
         raise NotImplementedError
 
-    def __krum(self):
+    def __m_krum(self) -> List[Client]:
+        """
+        This is an implementation of m-krum
+        :return: List of clients that satisfies alpha-f byz resilience.
+        """
         raise NotImplementedError
 
 

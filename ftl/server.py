@@ -33,6 +33,7 @@ class Server:
         # Server has a pointer to all clients
         self.clients = clients
         self.current_lr = self.server_lr0
+
         # Aggregator tracks the model and optimizer
         self.aggregator = Aggregator(agg_strategy=aggregation_scheme,
                                      model=model,

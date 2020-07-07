@@ -1,4 +1,4 @@
-from ftl.models import dist_weights_to_model, add_grads_to_model
+from ftl.models import dist_weights_to_model, dist_grads_to_model
 from ftl.optimization import SchedulingOptimization
 from ftl.client import Client
 import numpy as np
@@ -80,25 +80,19 @@ class Aggregator:
         :param current_lr:
         :return:
         """
+        # Set lr first
+        if current_lr is None:
+            current_lr = 1.0
+        # compute average grad
+        agg_grad = self.__weighted_average(clients=clients)
         if self.optimizer is None:
-            """ perform the Vanilla FedAvg """
-            # client_grads = np.empty((len(clients), len(self.w_current)), dtype=self.w_current.dtype)
-            # for ix, client in enumerate(clients):
-            #     client_grads[ix, :] = client.grad
-            lr = current_lr if current_lr is not None else 1.0
-            # self.w_current -= lr * np.mean(client_grads, axis=0)
-            agg_grad = self.__weighted_average(clients=clients)
-            self.w_current -= lr * agg_grad
+            # In case of no dual optimizer, do a manual GD update
+            self.w_current -= current_lr * agg_grad
         else:
-            """ Perform Dual Optimization """
-            # change the learning rate of the optimizer
-            if current_lr is not None:
-                self.set_lr(current_lr)
-            # set gradients to the model instance
-            for ix, client in enumerate(clients):
-                add_grads_to_model(grads=client.grad,
-                                   parameters=self.model.parameters(),
-                                   init=True if ix == 0 else False)
+            # perform Dual Optimization
+            self.set_lr(current_lr)
+            # Update the model with aggregated gradient
+            dist_grads_to_model(grads=agg_grad, parameters=self.model.parameters())
             # apply gradient clipping
             if self.max_grad_norm is not None:
                 grad_norm = nn.utils.clip_grad_norm_(self.model.parameters(),
@@ -122,7 +116,7 @@ class Aggregator:
         tot = np.sum(alphas)
 
         for alpha, client in zip(alphas, clients):
-            agg_grad += (alpha / tot) * client
+            agg_grad += (alpha / tot) * client.grad
 
         return agg_grad
 

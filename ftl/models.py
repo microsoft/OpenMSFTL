@@ -4,39 +4,24 @@ import functools
 
 
 def dist_weights_to_model(weights, parameters):
+    """ Given Weights and a model architecture this method updates the model
+    parameters with the supplied weights """
     offset = 0
     for param in parameters:
         new_size = functools.reduce(lambda x, y: x*y, param.shape)
         current_data = weights[offset:offset + new_size]
-
         param.data[:] = torch.from_numpy(current_data.reshape(param.shape))
         offset += new_size
 
 
-def add_grads_to_model(grads, parameters, init=True):
-    """
-    Adding gradient values to those contained in the model parameter.
-
-    :param grads: gradient
-    :type grads: class:`ftl.Client`.grad
-    :param parameters: model parameter container
-    :type parameters: class:`nn.Module`.parameters()
-    :param int: whether you want to add gradient or just initialize the value
-    :type init: boolean
-    """
+def dist_grads_to_model(grads, parameters):
+    """ Given Gradients and a model architecture this method updates the model
+        gradients (Corresponding to each param) with the supplied grads """
     offset = 0
     for param in parameters:
         new_size = functools.reduce(lambda x, y: x*y, param.shape)
         current_data = grads[offset:offset + new_size]
-
-        if init is True:
-            param.grad = torch.from_numpy(current_data.reshape(param.shape))
-        else:
-            param.grad += torch.from_numpy(current_data.reshape(param.shape))
-
-        if torch.cuda.is_available():
-            param.grad = param.grad.cuda()
-
+        param.grad = torch.from_numpy(current_data.reshape(param.shape))
         offset += new_size
 
 

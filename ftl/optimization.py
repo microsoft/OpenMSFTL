@@ -1,45 +1,23 @@
 import torch.optim as optim
 import json
+from typing import Dict
 
 
 class SchedulingOptimization:
-    """
-    This class contains an optimizer and LR scheduler.
-
-    :param opt_alg: type of a optimizer algorithm being used: 'SGD' or 'Adam'
-    :type opt_alg: string
-    :param opt_group: specifying parameters of the optimizer
-    :type opt_group: dict
-    :param lrs: name of LR scheduler class, defaults to None
-    :type lrs: string
-    :param lrs_group: specifying parameters of the LR scheduler
-    :type lrs_group: dict
-    :param params: model parameters
-    :type params: class:`nn.Module`.parameters()
-    :param optimizer: optimizer instance
-    :type optimizer: subclass of class:`torch.optim.Optimizer'
-    :param lr_scheduler: learning scheduler instance
-    :type lr_scheduler: subclass of class:`optim.lr_scheduler._LRScheduler'
-    """
-
     def __init__(self,
                  model,
-                 opt_alg='SGD',
-                 opt_group=None,
-                 lrs=None,
-                 lrs_group=None,
+                 opt_alg: str = 'SGD',
+                 opt_group: Dict = None,
+                 lrs: str = None,
+                 lrs_group: Dict = None,
                  verbose=0):
         """
         :param model: model instance to be optimized
         :type model: subclass of class:`nn.Module`
         :param opt_alg: name of torch optimizer class, defaults to 'SGD'
-        :type opt_alg: string
         :param opt_group: specifying parameters of the optimizer
-        :type opt_group: dict
         :param lrs: name of LR scheduler class, defaults to None
-        :type lrs: string
         :param lrs_group: specifying parameters of the LR scheduler
-        :type lrs_group: dict
         """
         if lrs_group is None:
             lrs_group = {}

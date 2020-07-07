@@ -1,8 +1,6 @@
 from ftl.models import dist_weights_to_model, dist_grads_to_model
 from ftl.optimization import SchedulingOptimization
 from ftl.client import Client
-
-import numpy as np
 import torch.nn as nn
 from typing import Dict, List
 from collections import defaultdict
@@ -14,7 +12,6 @@ class Aggregator:
     This class updates a global model with gradients aggregated from clients and
     keeps track of the model object and weights.
     """
-
     def __init__(self, agg_strategy: str,
                  model: nn.Module,
                  dual_opt_alg: str = "Adam",
@@ -44,9 +41,9 @@ class Aggregator:
             for param_group in self.optimizer.param_groups:
                 param_group['lr'] = current_lr
 
-    def update_model(self, clients: List[Client], current_lr: float = None) -> np.array:
+    def update_model(self, clients: List[Client], current_lr: float = 0.01) -> np.array:
         """
-        Update a model with aggregated gradients
+        Update server model with aggregated gradients
         :param current_lr:
         :param clients: A set of client compute nodes
         :return: The weights of the updated global model
@@ -61,7 +58,7 @@ class Aggregator:
         dist_weights_to_model(weights=self.w_current, parameters=self.model.parameters())
         return self.w_current
 
-    def __server_step(self, agg_grad, current_lr: float = 0.01):
+    def __server_step(self, agg_grad, current_lr: float):
         """
         Implements Server (Dual) Optimization with the option to use Adaptive Optimization
         D. Dimitriadis et al., "On a Federated Approach for Training Acoustic Models ", Interspeech 2021,

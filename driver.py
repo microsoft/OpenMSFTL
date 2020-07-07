@@ -51,7 +51,7 @@ def _parse_args():
                         help='num of image channels')
     # Opt Params
     parser.add_argument('--server_opt', type=str, default='Adam',
-                        help='Name of the federated optimizer: "None", "SGD" or "Adam"')
+                        help='Name of the federated optimizer: "SGD" or "Adam"')
     parser.add_argument('--server_lr0', type=float, default=0.002,
                         help='Pass the initial LR for the server optimizer')
     parser.add_argument('--opt', type=str, default='SGD',

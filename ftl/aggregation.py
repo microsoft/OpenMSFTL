@@ -15,7 +15,7 @@ class Aggregator:
 
     def __init__(self, agg_strategy: str,
                  model: nn.Module,
-                 dual_opt_alg: str = None,
+                 dual_opt_alg: str = "Adam",
                  opt_group: Dict = None,
                  max_grad_norm: float = None):
         """
@@ -31,13 +31,9 @@ class Aggregator:
         self.model = model
 
         # Instantiate the optimizer for an aggregator
-        if dual_opt_alg is None or dual_opt_alg == "None":
-            self.optimizer = None
-            self.lr_scheduler = None
-        else:  # dual optimizer
-            server_opt = SchedulingOptimization(model=model, opt_alg=dual_opt_alg, opt_group=opt_group)
-            self.optimizer = server_opt.optimizer
-            self.lr_scheduler = server_opt.lr_scheduler
+        server_opt = SchedulingOptimization(model=model, opt_alg=dual_opt_alg, opt_group=opt_group)
+        self.optimizer = server_opt.optimizer
+        self.lr_scheduler = server_opt.lr_scheduler
         self.max_grad_norm = max_grad_norm
         self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
 
@@ -55,15 +51,11 @@ class Aggregator:
         """
         if self.agg_strategy is 'fed_avg':
             self.__fed_avg(clients=clients, current_lr=current_lr)
-            # update the model params with these weights
             dist_weights_to_model(weights=self.w_current, parameters=self.model.parameters())
         else:
             raise NotImplementedError
         return self.w_current
 
-    # ------------------------------------------------- #
-    #             GAR Algorithms                        #
-    # ------------------------------------------------- #
     def __fed_avg(self, clients: List[Client], current_lr: float = 0.01):
         """
         This implements two flavors the Federated Averaging GAR:
@@ -79,24 +71,19 @@ class Aggregator:
         """
         # compute average grad
         agg_grad = weighted_average(clients=clients)
-        if self.optimizer is None:
-            # In case of no dual optimizer, do a manual GD update
-            self.w_current -= current_lr * agg_grad
-        else:
-            # perform Dual Optimization
-            self.set_lr(current_lr)
-            # Update the model with aggregated gradient
-            dist_grads_to_model(grads=agg_grad, parameters=self.model.parameters())
-            # apply gradient clipping
-            if self.max_grad_norm is not None:
-                grad_norm = nn.utils.clip_grad_norm_(self.model.parameters(),
-                                                     self.max_grad_norm)
-            # do optimizer step
-            self.optimizer.step()
-            self.optimizer.zero_grad()
+        self.set_lr(current_lr)
+        # Update the model with aggregated gradient
+        dist_grads_to_model(grads=agg_grad, parameters=self.model.parameters())
+        # apply gradient clipping
+        if self.max_grad_norm is not None:
+            grad_norm = nn.utils.clip_grad_norm_(self.model.parameters(),
+                                                 self.max_grad_norm)
+        # do optimizer step
+        self.optimizer.step()
+        self.optimizer.zero_grad()
 
-            # get the model weights
-            self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
+        # get the model weights
+        self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
 
     def __fed_median(self, clients: List[Client]):
         """

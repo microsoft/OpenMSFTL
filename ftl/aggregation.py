@@ -1,10 +1,12 @@
 from ftl.models import dist_weights_to_model, dist_grads_to_model
 from ftl.optimization import SchedulingOptimization
 from ftl.client import Client
-from ftl.agg_utils import weighted_average, get_krum_dist
+
 import numpy as np
 import torch.nn as nn
 from typing import Dict, List
+from collections import defaultdict
+import numpy as np
 
 
 class Aggregator:
@@ -50,10 +52,13 @@ class Aggregator:
         :return: The weights of the updated global model
         """
         if self.agg_strategy is 'fed_avg':
-            self.__fed_avg(clients=clients)
-            dist_weights_to_model(weights=self.w_current, parameters=self.model.parameters())
+            agg_grad = self.__fed_avg(clients=clients)
         else:
             raise NotImplementedError
+
+        # Now Run a step of Dual Optimizer (Server Step)
+        self.__server_step(agg_grad=agg_grad, current_lr=current_lr)
+        dist_weights_to_model(weights=self.w_current, parameters=self.model.parameters())
         return self.w_current
 
     def __server_step(self, agg_grad, current_lr: float = 0.01):
@@ -76,16 +81,34 @@ class Aggregator:
         # update the model weights
         self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
 
-    def __fed_avg(self, clients: List[Client], current_lr: float = 0.01):
+    # ------------------------------------------------- #
+    #               GAR Implementations                 #
+    # ------------------------------------------------- #
+
+    def __fed_avg(self, clients: List[Client]):
         """
         This implements classic FedAvg: McMahan et al., Communication-Efficient Learning of Deep
         Networks from Decentralized Data, NeuRips 2017
         :param clients: List of client nodes to aggregate over
         """
         # compute average grad
-        agg_grad = weighted_average(clients=clients)
-        # Call Server Optimization Step
-        self.__server_step(agg_grad=agg_grad, current_lr=current_lr)
+        agg_grad = self.weighted_average(clients=clients)
+        return agg_grad
+
+    @staticmethod
+    def weighted_average(clients, alphas=None):
+        """
+        Implements weighted average of client grads if no weights are supplied
+        then its equivalent to simple average / Fed Avg
+        """
+        if alphas is None:
+            alphas = [1] * len(clients)
+        agg_grad = np.zeros_like(clients[0].grad)
+        tot = np.sum(alphas)
+        for alpha, client in zip(alphas, clients):
+            agg_grad += (alpha / tot) * client.grad
+
+        return agg_grad
 
     def __fed_median(self, clients: List[Client]):
         """
@@ -102,13 +125,12 @@ class Aggregator:
         :return: List of clients that satisfies alpha-f byz resilience.
         """
         # compute mutual distance of each clients in terms of their grads
-        dist = get_krum_dist(clients=clients)
+        dist = self.get_krum_dist(clients=clients)
         # compute estimated 'benign' client count / or num of closest nodes to consider
         m = frac_m * len(clients)
         # initialize min error to something large and min client ix
         min_error = 1e10
         min_err_client_ix = -1
-
         for client_ix in dist.keys():
             errors = sorted(dist[client_ix].values())
             curr_error = sum(errors[:m])
@@ -117,5 +139,15 @@ class Aggregator:
                 min_err_client_ix = client_ix
 
         raise NotImplementedError
+
+    @staticmethod
+    def get_krum_dist(clients) -> defaultdict:
+        """ Computes distance between each pair of client based on grad value """
+        dist = defaultdict(dict)
+        for i in range(len(clients)):
+            for j in range(i):
+                dist[i][j] = dist[j][i] = np.linalg.norm(clients[i].grad - clients[j].grad)
+        return dist
+
 
 

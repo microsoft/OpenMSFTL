@@ -59,13 +59,12 @@ class Aggregator:
     def __fed_avg(self, clients: List[Client], current_lr: float = 0.01):
         """
         This implements two flavors the Federated Averaging GAR:
-            a.  Simple FedAvg aggregation as introduced in:
-                McMahan et al., "Communication-Efficient Learning of Deep Networks from Decentralized Data",
-                http://proceedings.mlr.press/v54/mcmahan17a/mcmahan17a.pdf
-            b.  FedAvg with dual optimization described in:
-                D. Dimitriadis et al., "On a Federated Approach for Training Acoustic Models ", Interspeech 2021,
-                S. J. Reddi et al., "Adaptive Federated Optimization", arXiv:2003.00295
-
+        a.  Simple FedAvg :
+            McMahan et al., "Communication-Efficient Learning of Deep Networks from Decentralized Data",
+            http://proceedings.mlr.press/v54/mcmahan17a/mcmahan17a.pdf
+        b.  Adaptive FedAvg :
+            D. Dimitriadis et al., "On a Federated Approach for Training Acoustic Models ", Interspeech 2021,
+            S. J. Reddi et al., "Adaptive Federated Optimization", arXiv:2003.00295
         :param clients: List of client nodes to aggregate over
         :param current_lr: supply the current lr for the Update step
         """

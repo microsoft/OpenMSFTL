@@ -91,6 +91,8 @@ class Server:
         # Now we will loop through these clients and do training steps
         # Compute number of local gradient steps per communication round
         epoch_loss = 0.0
+
+        # TODO : Parallel Calls (Defer)
         for client in sampled_clients:
             client.client_step(opt_alg=client_config['optimizer_scheme'],
                                opt_group={'lr': client_config['lr'],

@@ -33,14 +33,10 @@ class Aggregator:
         if dual_opt_alg is None or dual_opt_alg == "None":
             self.optimizer = None
             self.lr_scheduler = None
-        else:
-            # dual optimization
-            server_opt = SchedulingOptimization(model=model,
-                                                opt_alg=dual_opt_alg,
-                                                opt_group=opt_group)
+        else:  # dual optimizer
+            server_opt = SchedulingOptimization(model=model, opt_alg=dual_opt_alg, opt_group=opt_group)
             self.optimizer = server_opt.optimizer
             self.lr_scheduler = server_opt.lr_scheduler
-
         self.max_grad_norm = max_grad_norm
         self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
 

@@ -30,7 +30,7 @@ def geo_median(clients):
 
 
 def get_krum_dist(clients) -> defaultdict:
-    """ Computes a dist matrix between each pair of client based on grad value """
+    """ Computes distance between each pair of client based on grad value """
     dist = defaultdict(dict)
     for i in range(len(clients)):
         for j in range(i):

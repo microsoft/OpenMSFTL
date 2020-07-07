@@ -1,7 +1,7 @@
 from ftl.models import dist_weights_to_model, dist_grads_to_model
 from ftl.optimization import SchedulingOptimization
 from ftl.client import Client
-from ftl.agg_utils import weighted_average
+from ftl.agg_utils import weighted_average, get_krum_dist
 import numpy as np
 import torch.nn as nn
 from typing import Dict, List
@@ -91,11 +91,28 @@ class Aggregator:
         """
         raise NotImplementedError
 
-    def __m_krum(self) -> List[Client]:
+    def __m_krum(self, clients: List[Client], frac_m: float = 0.7) -> np.ndarray:
         """
         This is an implementation of m-krum
+        :param clients: List of all clients participating in training
+        :param m: m=n-f i.e. total-mal_nodes , since in practice server won't know this treat as hyper-param
         :return: List of clients that satisfies alpha-f byz resilience.
         """
+        # compute mutual distance of each clients in terms of their grads
+        dist = get_krum_dist(clients=clients)
+        # compute estimated 'benign' client count / or num of closest nodes to consider
+        m = frac_m * len(clients)
+        # initialize min error to something large and min client ix
+        min_error = 1e10
+        min_err_client_ix = -1
+
+        for client_ix in dist.keys():
+            errors = sorted(dist[client_ix].values())
+            curr_error = sum(errors[:m])
+            if curr_error < min_error:
+                min_error = curr_error
+                min_err_client_ix = client_ix
+
         raise NotImplementedError
 
 

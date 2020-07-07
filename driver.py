@@ -21,7 +21,7 @@ def _parse_args():
     # Network Params
     parser.add_argument('--num_clients', type=int, default=100)
     parser.add_argument('--frac_clients', type=float, default=0.5,
-                        help='For SGD pick frac of clients each round')
+                        help='randomly pick fraction of clients each round of training')
 
     # Attack Params
     parser.add_argument('--frac_adv', type=float, default=0,
@@ -30,10 +30,15 @@ def _parse_args():
                         help='Options: Byzantine, Backdoor')
     parser.add_argument('--attack_model', type=str, default='drift')
     parser.add_argument('--k_std', type=float, default=1.5)
+
     # Defense Params
     parser.add_argument('--agg', type=str, default='fed_avg',
                         help='Specify Aggregation/ Defence Rule. '
                              'Options: fed_avg, krum, trimmed_mean, bulyan')
+    parser.add_argument('--m_krum', type=float, default=0.7,
+                        help='Krum needs m=n-f so ideally we can calculate this'
+                             'accurately at each round: (num_clients - num_adv)/num_clients'
+                             'but for practical purposes we treat this as hyper-parameter')
     parser.add_argument('--compression_operator', type=str, default='full',
                         help='Specify Aggregation Rule,'
                              'Options: full, top, rand, svd, qsgd_biased, '

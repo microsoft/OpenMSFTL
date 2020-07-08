@@ -60,6 +60,7 @@ def run_exp(args):
     # **** Set up Server (Master Node)  ****
     # ---------------------------------------
     server = Server(aggregation_scheme=args.agg,
+                    krum_frac=args.m_krum,
                     optimizer_scheme=args.server_opt,
                     server_config={"lr0": args.server_lr0, "lr_restart": args.lr_restart},
                     clients=clients,

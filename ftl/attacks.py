@@ -17,7 +17,7 @@ class Attack:
         self.attack_model = attack_model
 
     def attack(self, byz_clients: List[Client]):
-        print(" {} Attack Enabled in {} clients ".format(self.attack_model, len(byz_clients)))
+        print("{} Attack Enabled in {} clients ".format(self.attack_model, len(byz_clients)))
         if len(byz_clients) == 0 or self.k == 0:
             return
         if self.attack_model is 'drift':

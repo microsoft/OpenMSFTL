@@ -3,7 +3,6 @@ from ftl.optimization import SchedulingOptimization
 from ftl.client import Client
 import torch.nn as nn
 from typing import Dict, List
-from collections import defaultdict
 import numpy as np
 
 
@@ -16,7 +15,8 @@ class Aggregator:
                  model: nn.Module,
                  dual_opt_alg: str = "Adam",
                  opt_group: Dict = None,
-                 max_grad_norm: float = None):
+                 max_grad_norm: float = None,
+                 m_krum: float = 0.7):
         """
         :param agg_strategy: aggregation strategy, default to "fed_avg"
         :param model: class:`nn.Module`, the global model
@@ -34,6 +34,7 @@ class Aggregator:
         self.optimizer = server_opt.optimizer
         self.lr_scheduler = server_opt.lr_scheduler
         self.max_grad_norm = max_grad_norm
+        self.krum_frac = m_krum
         self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
 
     def set_lr(self, current_lr):
@@ -51,7 +52,7 @@ class Aggregator:
         if self.agg_strategy == 'fed_avg':
             agg_grad = self.__fed_avg(clients=clients)
         elif self.agg_strategy == 'krum':
-            agg_grad = self.__m_krum(clients=clients)
+            agg_grad = self.__m_krum(clients=clients, frac_m=self.krum_frac)
         else:
             raise NotImplementedError
 
@@ -90,7 +91,6 @@ class Aggregator:
         Networks from Decentralized Data, NeuRips 2017
         :param clients: List of client nodes to aggregate over
         """
-        # compute average grad
         agg_grad = self.weighted_average(clients=clients)
         return agg_grad
 
@@ -108,21 +108,19 @@ class Aggregator:
         :param frac_m: m=n-f i.e. total-mal_nodes , since in practice server won't know this treat as hyper-param
         :return: List of clients that satisfies alpha-f byz resilience.
         """
-        # compute mutual distance of each clients in terms of their grads
         dist = self.get_krum_dist(clients=clients)
-        # compute estimated 'benign' client count / or num of closest nodes to consider
         m = int(frac_m * len(clients))
-        # initialize min error to something large and min client ix
-        min_error = 1e10
-        min_err_client_ix = -1
-        for client_ix in dist.keys():
-            errors = sorted(dist[client_ix].values())
-            curr_error = sum(errors[:m])
-            if curr_error < min_error:
-                min_error = curr_error
-                min_err_client_ix = client_ix
-
-        krum_grad = clients[min_err_client_ix].grad
+        min_score = 1e10
+        optimal_client_ix = -1
+        for ix in range(len(clients)):
+            curr_dist = dist[ix, :]
+            curr_dist = np.sort(curr_dist)
+            curr_score = sum(curr_dist[:m])
+            if curr_score < min_score:
+                min_score = curr_score
+                optimal_client_ix = ix
+        krum_grad = clients[optimal_client_ix].grad
+        print('Krum picked client {}'.format(clients[optimal_client_ix].client_id))
         return krum_grad
 
     @staticmethod
@@ -141,9 +139,10 @@ class Aggregator:
         return agg_grad
 
     @staticmethod
-    def get_krum_dist(clients) -> defaultdict:
+    def get_krum_dist(clients):
         """ Computes distance between each pair of client based on grad value """
-        dist = defaultdict(dict)
+        # dist = defaultdict(dict)
+        dist = np.zeros((len(clients), len(clients)))
         for i in range(len(clients)):
             for j in range(i):
                 dist[i][j] = dist[j][i] = np.linalg.norm(clients[i].grad - clients[j].grad)

@@ -12,6 +12,7 @@ class Server:
     def __init__(self,
                  model,
                  aggregation_scheme: str = 'fed_avg',
+                 krum_frac: float = 0.7,
                  optimizer_scheme: str = None,
                  server_config: Dict = None,
                  clients: List[Client] = None,
@@ -36,6 +37,7 @@ class Server:
 
         # Aggregator tracks the model and optimizer
         self.aggregator = Aggregator(agg_strategy=aggregation_scheme,
+                                     m_krum=krum_frac,
                                      model=model,
                                      dual_opt_alg=optimizer_scheme,
                                      opt_group={'lr': self.current_lr})
@@ -97,17 +99,16 @@ class Server:
             client.client_step(opt_alg=client_config['optimizer_scheme'],
                                opt_group={'lr': client_config['lr'],
                                           'weight_decay': client_config['weight_decay'],
-                                          'momentum': client_config['momentum']
-                                          },
-                               num_batches=client_config['num_batches']
-                               )
+                                          'momentum': client_config['momentum']},
+                               num_batches=client_config['num_batches'])
             # print('Client : {} loss = {}'.format(client.client_id, client.trainer.epoch_losses[-1]))
             epoch_loss += client.trainer.epoch_losses[-1]
 
         # Modify the gradients of malicious nodes if attack is defined
         if attacker:
             mal_nodes = [c for c in sampled_clients if c.attack_mode]
-            attacker.attack(byz_clients=mal_nodes)
+            if mal_nodes:
+                attacker.attack(byz_clients=mal_nodes)
 
         # now we can apply the compression operator before communicating to Server
         for client in sampled_clients:

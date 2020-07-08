@@ -50,6 +50,8 @@ class Aggregator:
         """
         if self.agg_strategy is 'fed_avg':
             agg_grad = self.__fed_avg(clients=clients)
+        elif self.agg_strategy is 'krum':
+            agg_grad = self.__m_krum(clients=clients)
         else:
             raise NotImplementedError
 
@@ -109,7 +111,7 @@ class Aggregator:
         # compute mutual distance of each clients in terms of their grads
         dist = self.get_krum_dist(clients=clients)
         # compute estimated 'benign' client count / or num of closest nodes to consider
-        m = frac_m * len(clients)
+        m = int(frac_m * len(clients))
         # initialize min error to something large and min client ix
         min_error = 1e10
         min_err_client_ix = -1

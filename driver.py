@@ -32,7 +32,7 @@ def _parse_args():
     parser.add_argument('--k_std', type=float, default=1.5)
 
     # Defense Params
-    parser.add_argument('--agg', type=str, default='fed_avg',
+    parser.add_argument('--agg', type=str, default='krum',
                         help='Specify Aggregation/ Defence Rule. '
                              'Options: fed_avg, krum, trimmed_mean, bulyan')
     parser.add_argument('--m_krum', type=float, default=0.7,
@@ -62,7 +62,7 @@ def _parse_args():
     parser.add_argument('--server_lr0', type=float, default=0.002,
                         help='Pass the initial LR for the server optimizer')
     parser.add_argument('--lr0', type=float, default=0.002,
-                        help='Pass the initial LR you want to use for client optimier')
+                        help='Pass the initial LR you want to use for client optimizer')
     parser.add_argument('--lrs', type=str, default='step',
                         help='Pass the LR Scheduler you want to use')
     parser.add_argument('--reg', type=float, default=0.05,

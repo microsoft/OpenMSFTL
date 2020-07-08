@@ -55,14 +55,14 @@ def _parse_args():
     parser.add_argument('--num_channels', type=int, default=1,
                         help='num of image channels')
     # Opt Params
+    parser.add_argument('--opt', type=str, default='SGD',
+                        help='Name of the client optimizer: "SGD" or "Adam"')
     parser.add_argument('--server_opt', type=str, default='Adam',
-                        help='Name of the federated optimizer: "SGD" or "Adam"')
+                        help='Name of the server (dual) optimizer: "SGD" or "Adam"')
     parser.add_argument('--server_lr0', type=float, default=0.002,
                         help='Pass the initial LR for the server optimizer')
-    parser.add_argument('--opt', type=str, default='SGD',
-                        help='Pass the Optimizer you want to use')
     parser.add_argument('--lr0', type=float, default=0.002,
-                        help='Pass the initial LR you want to use')
+                        help='Pass the initial LR you want to use for client optimier')
     parser.add_argument('--lrs', type=str, default='step',
                         help='Pass the LR Scheduler you want to use')
     parser.add_argument('--reg', type=float, default=0.05,

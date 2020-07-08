@@ -101,7 +101,7 @@ class Aggregator:
         """
         raise NotImplementedError
 
-    def __m_krum(self, clients: List[Client], frac_m: float = 0.7):
+    def __m_krum(self, clients: List[Client], frac_m: float = 0.7) ->np.ndarray:
         """
         This is an implementation of m-krum
         :param clients: List of all clients participating in training
@@ -139,9 +139,8 @@ class Aggregator:
         return agg_grad
 
     @staticmethod
-    def get_krum_dist(clients):
+    def get_krum_dist(clients) -> np.ndarray:
         """ Computes distance between each pair of client based on grad value """
-        # dist = defaultdict(dict)
         dist = np.zeros((len(clients), len(clients)))
         for i in range(len(clients)):
             for j in range(i):

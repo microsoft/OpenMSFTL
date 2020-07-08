@@ -92,21 +92,6 @@ class Aggregator:
         agg_grad = self.weighted_average(clients=clients)
         return agg_grad
 
-    @staticmethod
-    def weighted_average(clients, alphas=None):
-        """
-        Implements weighted average of client grads if no weights are supplied
-        then its equivalent to simple average / Fed Avg
-        """
-        if alphas is None:
-            alphas = [1] * len(clients)
-        agg_grad = np.zeros_like(clients[0].grad)
-        tot = np.sum(alphas)
-        for alpha, client in zip(alphas, clients):
-            agg_grad += (alpha / tot) * client.grad
-
-        return agg_grad
-
     def __fed_median(self, clients: List[Client]):
         """
         This is implementation of Geometric Median Aggregation proposed in :
@@ -136,6 +121,21 @@ class Aggregator:
                 min_err_client_ix = client_ix
 
         raise NotImplementedError
+
+    @staticmethod
+    def weighted_average(clients, alphas=None):
+        """
+        Implements weighted average of client grads if no weights are supplied
+        then its equivalent to simple average / Fed Avg
+        """
+        if alphas is None:
+            alphas = [1] * len(clients)
+        agg_grad = np.zeros_like(clients[0].grad)
+        tot = np.sum(alphas)
+        for alpha, client in zip(alphas, clients):
+            agg_grad += (alpha / tot) * client.grad
+
+        return agg_grad
 
     @staticmethod
     def get_krum_dist(clients) -> defaultdict:

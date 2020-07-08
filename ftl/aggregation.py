@@ -120,7 +120,8 @@ class Aggregator:
                 min_error = curr_error
                 min_err_client_ix = client_ix
 
-        raise NotImplementedError
+        krum_grad = clients[min_err_client_ix].grad
+        return krum_grad
 
     @staticmethod
     def weighted_average(clients, alphas=None):

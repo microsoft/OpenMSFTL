@@ -48,9 +48,9 @@ class Aggregator:
         :param clients: A set of client compute nodes
         :return: The weights of the updated global model
         """
-        if self.agg_strategy is 'fed_avg':
+        if self.agg_strategy == 'fed_avg':
             agg_grad = self.__fed_avg(clients=clients)
-        elif self.agg_strategy is 'krum':
+        elif self.agg_strategy == 'krum':
             agg_grad = self.__m_krum(clients=clients)
         else:
             raise NotImplementedError

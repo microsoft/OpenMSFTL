@@ -11,7 +11,7 @@ import random
 class Server:
     def __init__(self,
                  model,
-                 aggregation_scheme='fed_avg',
+                 aggregation_scheme: str = 'fed_avg',
                  optimizer_scheme: str = None,
                  server_config: Dict = None,
                  clients: List[Client] = None,

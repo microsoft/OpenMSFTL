@@ -20,12 +20,13 @@ class Server:
                  test_loader: DataLoader = None):
 
         if not server_config:
-            server_config = {"lr0": 1.0, "lr_restart": 100}
+            server_config = {"lr0": 1.0, "lr_restart": 100, "lr_decay": 10}
 
         # keep server parameters
         self.server_lr0 = server_config["lr0"]
         self.server_lr_restart = server_config["lr_restart"]
         self.lrs = server_config["lr_schedule"]
+        self.lr_decay = server_config["lr_decay"]
         self.num_rounds = 0
 
         # Server has access to Test and Dev Data Sets to evaluate Training Process
@@ -65,7 +66,7 @@ class Server:
 
     def _update_server_lr(self):
         if self.num_rounds % self.server_lr_restart == 0:
-            self.current_lr = self.server_lr0 / 10
+            self.current_lr = self.server_lr0 / self.lr_decay
             self.aggregator.set_lr(self.current_lr)
 
         # take a step in lr_scheduler

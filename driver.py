@@ -59,9 +59,9 @@ def _parse_args():
                         help='Name of the client optimizer: "SGD" or "Adam"')
     parser.add_argument('--server_opt', type=str, default='Adam',
                         help='Name of the server (dual) optimizer: "SGD" or "Adam"')
-    parser.add_argument('--server_lr0', type=float, default=0.02,
+    parser.add_argument('--server_lr0', type=float, default=0.01,
                         help='Pass the initial LR for the server optimizer')
-    parser.add_argument('--lr0', type=float, default=0.005,
+    parser.add_argument('--lr0', type=float, default=0.002,
                         help='Pass the initial LR you want to use for client optimizer')
     parser.add_argument('--lrs', type=str, default='StepLR',
                         help='Pass the LR Scheduler you want to use')
@@ -72,11 +72,12 @@ def _parse_args():
     parser.add_argument('--momentum', type=float, default=0.9,
                         help='Momentum')
     parser.add_argument('--lr_restart', type=int, default=100)
+    parser.add_argument('--lr_decay', type=int, default=5)
 
     # Training params
     parser.add_argument('--num_comm_round', type=int, default=1000,
                         help='Number of Server Client Communication Round')
-    parser.add_argument('--num_batches', type=int, default=1,
+    parser.add_argument('--num_batches', type=int, default=5,
                         help='Number of local client steps per comm round')
 
     # Results Related Params

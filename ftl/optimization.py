@@ -64,7 +64,7 @@ class SchedulingOptimization:
         if self.lrs == 'StepLR':
             return optim.lr_scheduler.StepLR(optimizer=self.optimizer,
                                              step_size=self.lrs_group.get('step_size', 1),
-                                             gamma=self.lrs_group.get('gamma', 0.9))
+                                             gamma=self.lrs_group.get('gamma', 0.99))
         elif self.lrs == 'MultiStepLR':
             return optim.lr_scheduler.MultiStepLR(optimizer=self.optimizer,
                                                   milestones=self.lrs_group.get('milestones', [100]),

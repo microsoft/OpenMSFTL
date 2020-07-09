@@ -34,7 +34,9 @@ if __name__ == '__main__':
                              '.agg_fed_avg.compression_full.bits_2.frac_cd_0.1.p_0.1.c_optSGD.s_optAdam'],
                  label='15% Byz', line_width=4)
 
-    plt.title('MNIST', fontsize=5)
-
+    plt.title('MNIST - Convergence Plot', fontsize=14)
+    plt.grid(axis='both')
+    plt.xlabel('communication round')
+    plt.ylabel('loss')
     plt.legend(fontsize=11)
     plt.show()

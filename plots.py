@@ -21,7 +21,7 @@ if __name__ == '__main__':
     # MNIST
     results_dir = '/mlp/'
     data = unpickle_dir(d='./results/' + data_set + results_dir)
-    plot_results(result=data['num_clients_100.frac_adv_0.attack_mode_byzantine.attack_model_drift.attack_power1'
+    plot_results(result=data['num_clients_100.frac_adv_0.0.attack_mode_byzantine.attack_model_drift.attack_power1'
                              '.agg_fed_avg.compression_full.bits_2.frac_cd_0.1.p_0.1.c_optSGD.s_optAdam'],
                  label='0% Byz', line_width=4)
     plot_results(result=data['num_clients_100.frac_adv_0.05.attack_mode_byzantine.attack_model_drift.attack_power1'

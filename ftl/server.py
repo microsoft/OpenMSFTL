@@ -65,7 +65,7 @@ class Server:
 
     def _update_server_lr(self):
         if self.num_rounds % self.server_lr_restart == 0:
-            self.current_lr = self.server_lr0 / 2
+            self.current_lr = self.server_lr0 / 10
             self.aggregator.set_lr(self.current_lr)
 
         # take a step in lr_scheduler

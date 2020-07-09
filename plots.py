@@ -33,6 +33,9 @@ if __name__ == '__main__':
     plot_results(result=data['num_clients_100.frac_adv_0.15.attack_mode_byzantine.attack_model_drift.attack_power1'
                              '.agg_fed_avg.compression_full.bits_2.frac_cd_0.1.p_0.1.c_optSGD.s_optAdam'],
                  label='15% Byz', line_width=4)
+    plot_results(result=data['num_clients_100.frac_adv_0.2.attack_mode_byzantine.attack_model_drift.attack_power1'
+                             '.agg_fed_avg.compression_full.bits_2.frac_cd_0.1.p_0.1.c_optSGD.s_optAdam'],
+                 label='20% Byz', line_width=4)
 
     plt.title('MNIST - Convergence Plot', fontsize=14)
     plt.grid(axis='both')

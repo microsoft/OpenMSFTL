@@ -29,10 +29,10 @@ def _parse_args():
     parser.add_argument('--attack_mode', type=str, default='byzantine',
                         help='Options: Byzantine, Backdoor')
     parser.add_argument('--attack_model', type=str, default='drift')
-    parser.add_argument('--k_std', type=float, default=1.5)
+    parser.add_argument('--k_std', type=float, default=1)
 
     # Defense Params
-    parser.add_argument('--agg', type=str, default='krum',
+    parser.add_argument('--agg', type=str, default='fed_avg',
                         help='Specify Aggregation/ Defence Rule. '
                              'Options: fed_avg, krum, trimmed_mean, bulyan')
     parser.add_argument('--m_krum', type=float, default=0.7,

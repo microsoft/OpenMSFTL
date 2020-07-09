@@ -52,7 +52,7 @@ class Aggregator:
         if self.agg_strategy == 'fed_avg':
             agg_grad = self.__fed_avg(clients=clients)
         elif self.agg_strategy == 'krum':
-            agg_grad = self.__m_krum(clients=clients, frac_m=self.krum_frac)
+            agg_grad, _ = self.__m_krum(clients=clients, frac_m=self.krum_frac)
         else:
             raise NotImplementedError
 

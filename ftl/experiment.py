@@ -71,6 +71,8 @@ def run_exp(args):
     # ------------------------------------------------- #
     #             FTL Training                          #
     # ------------------------------------------------- #
+    best_val_acc = 0.0
+    corr_test_acc = 0.0
 
     for epoch in range(1, args.num_comm_round + 1):
         print(' ------------------------------------------ ')
@@ -102,6 +104,14 @@ def run_exp(args):
         test_acc, _ = infer(test_loader=server.test_loader, model=server.get_global_model())
         server.test_acc.append(test_acc)
         print("Test Accuracy = {}".format(test_acc))
+
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            corr_test_acc = test_acc
+
+        print(' * Best Val Acc So Far *', best_val_acc)
+        print(' * Corresponding Test Acc *', corr_test_acc)
+        print(' ')
 
     if plot_flag:
         plt.title('MLP', fontsize=14)

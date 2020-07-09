@@ -24,7 +24,7 @@ def _parse_args():
                         help='randomly pick fraction of clients each round of training')
 
     # Attack Params
-    parser.add_argument('--frac_adv', type=float, default=0.1,
+    parser.add_argument('--frac_adv', type=float, default=0,
                         help='Specify Fraction of Adversarial Nodes')
     parser.add_argument('--attack_mode', type=str, default='byzantine',
                         help='Options: Byzantine, Backdoor')
@@ -74,7 +74,7 @@ def _parse_args():
     parser.add_argument('--lr_restart', type=int, default=100)
 
     # Training params
-    parser.add_argument('--num_comm_round', type=int, default=200,
+    parser.add_argument('--num_comm_round', type=int, default=1000,
                         help='Number of Server Client Communication Round')
     parser.add_argument('--num_batches', type=int, default=1,
                         help='Number of local client steps per comm round')

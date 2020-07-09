@@ -18,6 +18,7 @@ def dist_grads_to_model(grads, parameters):
     """ Given Gradients and a model architecture this method updates the model
         gradients (Corresponding to each param) with the supplied grads """
     offset = 0
+
     for param in parameters:
         new_size = functools.reduce(lambda x, y: x*y, param.shape)
         current_data = grads[offset:offset + new_size]

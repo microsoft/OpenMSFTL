@@ -71,8 +71,6 @@ def _parse_args():
                         help='Prob dropout model weights')
     parser.add_argument('--momentum', type=float, default=0.9,
                         help='Momentum')
-    parser.add_argument('--lr_decay_rate', type=int, default=10000,
-                        help='check optim _get_lr')
     parser.add_argument('--lr_restart', type=int, default=100)
     parser.add_argument('--num_batches', type=int, default=1)
 

@@ -1,5 +1,5 @@
 # Byte-compiled / optimized / DLL files
-results/*
+# results/*
 */data/*
 embedding/*
 glove.*/

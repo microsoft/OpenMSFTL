@@ -101,7 +101,7 @@ class Aggregator:
         """
         raise NotImplementedError
 
-    def __m_krum(self, clients: List[Client], frac_m: float = 0.7) ->np.ndarray:
+    def __m_krum(self, clients: List[Client], frac_m: float = 0.7) -> [np.ndarray, int]:
         """
         This is an implementation of m-krum
         :param clients: List of all clients participating in training
@@ -121,7 +121,11 @@ class Aggregator:
                 optimal_client_ix = ix
         krum_grad = clients[optimal_client_ix].grad
         print('Krum picked client {}'.format(clients[optimal_client_ix].client_id))
-        return krum_grad
+
+        return krum_grad, optimal_client_ix
+
+    def bulyan(self, clients: List[Client], frac_m: float = 0.7):
+        raise NotImplementedError
 
     @staticmethod
     def weighted_average(clients, alphas=None):

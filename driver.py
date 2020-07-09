@@ -115,17 +115,3 @@ if __name__ == '__main__':
     pickle_it(args, 'parameters.' + result_file, directory)
     pickle_it(results, result_file, directory)
     print('results saved in "{}"'.format(directory))
-
-
-
-
-
-
-
-
-
-
-
-
-
-

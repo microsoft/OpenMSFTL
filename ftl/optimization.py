@@ -8,7 +8,6 @@ class SchedulingOptimization:
                  model,
                  opt_alg: str = 'SGD',
                  opt_group: Dict = None,
-                 lrs: str = None,
                  lrs_group: Dict = None,
                  verbose=0):
         """
@@ -25,7 +24,7 @@ class SchedulingOptimization:
             opt_group = {}
         self.opt_alg = opt_alg
         self.opt_group = opt_group
-        self.lrs = lrs
+        self.lrs = self.opt_group.get('lrs')
         self.lrs_group = lrs_group
         self.params = model.parameters()
         self.optimizer = self._get_optimizer()
@@ -36,10 +35,10 @@ class SchedulingOptimization:
             print("Optimizer Info")
             print("Type: {}".format(self.opt_alg))
             print("Params: {}".format(json.dumps(self.opt_group, indent=4)))
-            if self.lrs is not None:
-                print("Scheduler Info")
-                print("Type: {}".format(self.lrs))
-                print("Params: {}".format(json.dumps(self.lrs_group, indent=4)))
+            # if self.lrs is not None:
+            #     print("Scheduler Info")
+            #     print("Type: {}".format(self.lrs))
+            #     print("Params: {}".format(json.dumps(self.lrs_group, indent=4)))
 
     def _get_optimizer(self):
         if self.opt_alg == 'SGD':

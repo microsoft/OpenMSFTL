@@ -59,11 +59,11 @@ def _parse_args():
                         help='Name of the client optimizer: "SGD" or "Adam"')
     parser.add_argument('--server_opt', type=str, default='Adam',
                         help='Name of the server (dual) optimizer: "SGD" or "Adam"')
-    parser.add_argument('--server_lr0', type=float, default=0.002,
+    parser.add_argument('--server_lr0', type=float, default=0.1,
                         help='Pass the initial LR for the server optimizer')
-    parser.add_argument('--lr0', type=float, default=0.002,
+    parser.add_argument('--lr0', type=float, default=0.005,
                         help='Pass the initial LR you want to use for client optimizer')
-    parser.add_argument('--lrs', type=str, default='step',
+    parser.add_argument('--lrs', type=str, default='StepLR',
                         help='Pass the LR Scheduler you want to use')
     parser.add_argument('--reg', type=float, default=0.05,
                         help='Pass regularization co-efficient')

@@ -25,6 +25,7 @@ class Server:
         # keep server parameters
         self.server_lr0 = server_config["lr0"]
         self.server_lr_restart = server_config["lr_restart"]
+        self.lrs = server_config["lr_schedule"]
         self.num_rounds = 0
 
         # Server has access to Test and Dev Data Sets to evaluate Training Process
@@ -40,7 +41,7 @@ class Server:
                                      m_krum=krum_frac,
                                      model=model,
                                      dual_opt_alg=optimizer_scheme,
-                                     opt_group={'lr': self.current_lr})
+                                     opt_group={'lr': self.current_lr, 'lrs': self.lrs})
 
         # Server only keeps track of the pointer to the updated weights at each round
         self.w_current = self.aggregator.w_current

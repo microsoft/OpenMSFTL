@@ -95,11 +95,11 @@ if __name__ == '__main__':
 
     result_file = 'num_clients_' + str(args.num_clients) + \
                   '.frac_adv_' + str(args.frac_adv) + '.attack_mode_' + args.attack_mode +\
-                  '.attack_model_' + args.attack_model + '.attack_power' + str(args.k_std) +\
+                  '.attack_model_' + args.attack_model + '.attack_power_' + str(args.k_std) +\
                   '.agg_' + args.agg + \
                   '.compression_' + args.compression_operator + '.bits_' + str(args.num_bits) +\
                   '.frac_cd_' + str(args.frac_coordinates) + '.p_' + str(args.dropout_p) + \
-                  '.c_opt' + args.opt + '.s_opt' + args.server_opt
+                  '.c_opt_' + args.opt + '.s_opt_' + args.server_opt
 
     if not args.o:
         directory = "results/" + args.data_set + "/" + args.m + "/"

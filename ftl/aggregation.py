@@ -51,6 +51,8 @@ class Aggregator:
         """
         if self.agg_strategy == 'fed_avg':
             agg_grad = self.__fed_avg(clients=clients)
+        if self.agg_strategy == 'fed_lr_avg':
+            agg_grad = self.__fed_lr_avg(clients=clients)
         elif self.agg_strategy == 'krum':
             agg_grad, _ = self.__m_krum(clients=clients, frac_m=self.krum_frac)
         else:
@@ -92,6 +94,16 @@ class Aggregator:
         :param clients: List of client nodes to aggregate over
         """
         agg_grad = self.weighted_average(clients=clients)
+        return agg_grad
+
+    def __fed_lr_avg(self, clients: List[Client]):
+        # stack all client grads
+        stacked_grad = np.zeros((len(clients), len(clients[0].grad)))
+        for ix, client in enumerate(clients):
+            stacked_grad[ix, :] = client.grad
+
+        # regular fed avg
+        agg_grad = np.mean(stacked_grad, axis=0)
         return agg_grad
 
     def __fed_median(self, clients: List[Client]):

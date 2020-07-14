@@ -34,7 +34,7 @@ if __name__ == '__main__':
     results_dir = '/mlp/'
     data = unpickle_dir(d='./results/' + data_set + results_dir)
 
-    # Default args
+    # Baseline args
     args = {"num_clients": 100,
             "frac_adv": 0.0,
             "attack_mode": 'byzantine',
@@ -49,26 +49,20 @@ if __name__ == '__main__':
             "server_opt": 'Adam'}
 
     # Baseline No Attack
-    plot_driver(data=data, params=args, label='0% Byz')
+    plot_driver(data=data, params=args, label='No Attack')
 
     # Other
+    args["k_std"] = 1.5
+    frac_advs = [0.05, 0.1, 0.15, 0.2]
+    labels = ["5% Byz", "10% Byz", "15% Byz", "20% Byz"]
+    for frac_adv, label in zip(frac_advs, labels):
+        args["frac_adv"] = frac_adv
+        plot_driver(data=data, params=args, label=label)
 
-    plot_results(result=data['num_clients_100.frac_adv_0.05.attack_mode_byzantine.attack_model_drift.attack_power_1.5'
-                             '.agg_fed_avg.compression_full.bits_2.frac_cd_0.1.p_0.1.c_opt_SGD.s_opt_Adam'],
-                 label='5% Byz', line_width=4)
-    plot_results(result=data['num_clients_100.frac_adv_0.1.attack_mode_byzantine.attack_model_drift.attack_power_1.5'
-                             '.agg_fed_avg.compression_full.bits_2.frac_cd_0.1.p_0.1.c_opt_SGD.s_opt_Adam'],
-                 label='10% Byz', line_width=4)
-    plot_results(result=data['num_clients_100.frac_adv_0.15.attack_mode_byzantine.attack_model_drift.attack_power_1.5'
-                             '.agg_fed_avg.compression_full.bits_2.frac_cd_0.1.p_0.1.c_opt_SGD.s_opt_Adam'],
-                 label='15% Byz', line_width=4)
-    plot_results(result=data['num_clients_100.frac_adv_0.2.attack_mode_byzantine.attack_model_drift.attack_power_1.5'
-                             '.agg_fed_avg.compression_full.bits_2.frac_cd_0.1.p_0.1.c_opt_SGD.s_opt_Adam'],
-                 label='20% Byz', line_width=4)
-
-    plt.title('MNIST - Convergence Plot', fontsize=14)
+    plt.title('Byz Attack with $\sigma = 1.5$', fontsize=14)
+    plt.xlabel('Communication Rounds', fontsize=14)
+    plt.ylabel('Training Loss', fontsize=14)
     plt.grid(axis='both')
-    plt.xlabel('communication round')
-    plt.ylabel('loss')
+    plt.tick_params(labelsize=12)
     plt.legend(fontsize=11)
     plt.show()

@@ -1,6 +1,7 @@
 from ftl.misc_utils import unpickle_dir
 import numpy as np
 import matplotlib.pyplot as plt
+from typing import Dict
 
 
 def plot_results(result, label,
@@ -13,6 +14,17 @@ def plot_results(result, label,
     plt.plot(x, loss_val_np, label=label, linewidth=line_width, linestyle=line_style, marker=marker)
 
 
+def plot_driver(params: Dict):
+    result_file = 'num_clients_' + str(params["num_clients"]) + \
+                  '.frac_adv_' + str(params["frac_adv"]) + '.attack_mode_' + params["attack_mode"] + \
+                  '.attack_model_' + params["attack_model"] + '.attack_power_' + str(params["k_std"]) + \
+                  '.agg_' + params["agg"] + \
+                  '.compression_' + params["compression_operator"] + '.bits_' + str(params["num_bits"]) + \
+                  '.frac_cd_' + str(params["frac_coordinates"]) + '.p_' + str(params["dropout_p"]) + \
+                  '.c_opt_' + params["c_opt"] + '.s_opt_' + params["server_opt"]
+    plot_results(result=result_file)
+
+
 if __name__ == '__main__':
     plt.figure()
     fig = plt.gcf()
@@ -22,13 +34,19 @@ if __name__ == '__main__':
     results_dir = '/mlp/'
     data = unpickle_dir(d='./results/' + data_set + results_dir)
 
-    # result_file = 'num_clients_' + str(args.num_clients) + \
-    #               '.frac_adv_' + str(args.frac_adv) + '.attack_mode_' + args.attack_mode + \
-    #               '.attack_model_' + args.attack_model + '.attack_power_' + str(args.k_std) + \
-    #               '.agg_' + args.agg + \
-    #               '.compression_' + args.compression_operator + '.bits_' + str(args.num_bits) + \
-    #               '.frac_cd_' + str(args.frac_coordinates) + '.p_' + str(args.dropout_p) + \
-    #               '.c_opt_' + args.opt + '.s_opt_' + args.server_opt
+    # Default args
+    args = {"num_clients": 100,
+            "frac_adv": 0,
+            "attack_mode": 'byzantine',
+            "attack_model": 'drift',
+            "k_std": 1,
+            "agg": 'fed_avg',
+            "compression_operator": 'fed_avg',
+            "num_bits": 2,
+            "frac_coordinates": 0.5,
+            "dropout_p": 0.5,
+            "c_opt": 'SGD',
+            "server_opt": 'Adam'}
 
     # Baseline No Attack
     plot_results(result=data['num_clients_100.frac_adv_0.0.attack_mode_byzantine.attack_model_drift.attack_power_1'

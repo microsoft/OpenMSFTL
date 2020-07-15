@@ -66,10 +66,10 @@ if __name__ == '__main__':
 
     # Plot LR Fed Avg
     # Baseline no SVD
-    plot_driver(data=data, params=args, label='Vanilla Fed Avg')
+    plot_driver(data=data, params=args, label='Vanilla')
     args["agg"] = 'fed_lr_avg'
-    ranks = [10]
-    labels = ['rank=10']
+    ranks = [5, 10, 15, 20]  # , 15, 20, 25]
+    labels = ['k=5', 'k=10', 'k=15', 'k=20']  # , 'k=15', 'k=20', 'k=25']
     for rank, label in zip(ranks, labels):
         args["rank"] = rank
         plot_driver(data=data, params=args, label=label)

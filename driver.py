@@ -35,7 +35,7 @@ def _parse_args():
     parser.add_argument('--agg', type=str, default='fed_lr_avg',
                         help='Specify Aggregation/ Defence Rule. '
                              'Options: fed_avg, krum, trimmed_mean, bulyan')
-    parser.add_argument('--rank', type=int, default=100,
+    parser.add_argument('--rank', type=int, default=10,
                         help='For LRMF de-noising specify low rank')
     parser.add_argument('--m_krum', type=float, default=0.7,
                         help='Krum needs m=n-f so ideally we can calculate this'
@@ -98,7 +98,7 @@ if __name__ == '__main__':
     result_file = 'num_clients_' + str(args.num_clients) + \
                   '.frac_adv_' + str(args.frac_adv) + '.attack_mode_' + args.attack_mode +\
                   '.attack_model_' + args.attack_model + '.attack_power_' + str(args.k_std) +\
-                  '.agg_' + args.agg + \
+                  '.agg_' + args.agg + '.rank_' + args.rank +\
                   '.compression_' + args.compression_operator + '.bits_' + str(args.num_bits) +\
                   '.frac_cd_' + str(args.frac_coordinates) + '.p_' + str(args.dropout_p) + \
                   '.c_opt_' + args.opt + '.s_opt_' + args.server_opt

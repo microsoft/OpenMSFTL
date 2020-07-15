@@ -100,7 +100,8 @@ class Aggregator:
         agg_grad = self.weighted_average(clients=clients)
         return agg_grad
 
-    def __fed_lr_avg(self, clients: List[Client], k: int) -> np.ndarray:
+    @staticmethod
+    def __fed_lr_avg(clients: List[Client], k: int) -> np.ndarray:
         """
         Faster Convergence of FL through MF: Acharya. A. (Under Review NeuRips 2020)
         :param clients: List of client nodes to aggregate over
@@ -112,15 +113,12 @@ class Aggregator:
         for ix, client in enumerate(clients):
             stacked_grad[ix, :] = client.grad
 
-        import time
-        t_0 = time.time()
         U, S, V = randomized_svd(M=stacked_grad,
                                  n_components=k,
                                  transpose=False)
-        print('Random SVD takes {} sec'.format(time.time() - t_0))
-        stacked_grad = np.dot(U*S, V)
-        # regular fed avg
-        agg_grad = np.mean(stacked_grad, axis=0)
+
+        # regular fed avg on the approximate agg_grad
+        agg_grad = np.mean(np.dot(U*S, V), axis=0)
         return agg_grad
 
     def __fed_median(self, clients: List[Client]):

@@ -4,6 +4,7 @@ from ftl.client import Client
 import torch.nn as nn
 from typing import Dict, List
 import numpy as np
+from sklearn.utils.extmath import randomized_svd
 
 
 class Aggregator:
@@ -13,6 +14,7 @@ class Aggregator:
     """
     def __init__(self, agg_strategy: str,
                  model: nn.Module,
+                 rank: int = 100,
                  dual_opt_alg: str = "Adam",
                  opt_group: Dict = None,
                  max_grad_norm: float = None,
@@ -28,6 +30,7 @@ class Aggregator:
             opt_group = {}
         self.agg_strategy = agg_strategy
         self.model = model
+        self.rank = rank
 
         # Instantiate the optimizer for an aggregator
         server_opt = SchedulingOptimization(model=model, opt_alg=dual_opt_alg, opt_group=opt_group)
@@ -52,7 +55,7 @@ class Aggregator:
         if self.agg_strategy == 'fed_avg':
             agg_grad = self.__fed_avg(clients=clients)
         elif self.agg_strategy == 'fed_lr_avg':
-            agg_grad = self.__fed_lr_avg(clients=clients)
+            agg_grad = self.__fed_lr_avg(clients=clients, k=self.rank)
         elif self.agg_strategy == 'krum':
             agg_grad, _ = self.__m_krum(clients=clients, frac_m=self.krum_frac)
         else:
@@ -109,8 +112,13 @@ class Aggregator:
         for ix, client in enumerate(clients):
             stacked_grad[ix, :] = client.grad
 
-        U, sigma, V = np.linalg.svd(stacked_grad)
-
+        import time
+        t_0 = time.time()
+        U, S, V = randomized_svd(M=stacked_grad,
+                                 n_components=k,
+                                 transpose=False)
+        print('Random SVD takes {} sec'.format(time.time() - t_0))
+        stacked_grad = np.dot(U*S, V)
         # regular fed avg
         agg_grad = np.mean(stacked_grad, axis=0)
         return agg_grad
@@ -171,6 +179,7 @@ class Aggregator:
             for j in range(i):
                 dist[i][j] = dist[j][i] = np.linalg.norm(clients[i].grad - clients[j].grad)
         return dist
+
 
 
 

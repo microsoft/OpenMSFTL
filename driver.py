@@ -32,9 +32,11 @@ def _parse_args():
     parser.add_argument('--k_std', type=float, default=1)
 
     # Defense Params
-    parser.add_argument('--agg', type=str, default='fed_avg',
+    parser.add_argument('--agg', type=str, default='fed_lr_avg',
                         help='Specify Aggregation/ Defence Rule. '
                              'Options: fed_avg, krum, trimmed_mean, bulyan')
+    parser.add_argument('--rank', type=int, default=100,
+                        help='For LRMF de-noising specify low rank')
     parser.add_argument('--m_krum', type=float, default=0.7,
                         help='Krum needs m=n-f so ideally we can calculate this'
                              'accurately at each round: (num_clients - num_adv)/num_clients'

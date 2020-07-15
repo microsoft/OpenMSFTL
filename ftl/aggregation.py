@@ -87,20 +87,29 @@ class Aggregator:
     #               GAR Implementations                 #
     # ------------------------------------------------- #
 
-    def __fed_avg(self, clients: List[Client]):
+    def __fed_avg(self, clients: List[Client]) -> np.ndarray:
         """
         This implements classic FedAvg: McMahan et al., Communication-Efficient Learning of Deep
-        Networks from Decentralized Data, NeuRips 2017
+        Networks from Decentralized Data, (NeuRips 2017)
         :param clients: List of client nodes to aggregate over
+        :return: aggregated gradient
         """
         agg_grad = self.weighted_average(clients=clients)
         return agg_grad
 
-    def __fed_lr_avg(self, clients: List[Client]):
+    def __fed_lr_avg(self, clients: List[Client], k: int) -> np.ndarray:
+        """
+        Faster Convergence of FL through MF: Acharya. A. (Under Review NeuRips 2020)
+        :param clients: List of client nodes to aggregate over
+        :param k: perform (k) rank svd
+        :return: aggregated gradient
+        """
         # stack all client grads
         stacked_grad = np.zeros((len(clients), len(clients[0].grad)), dtype=clients[0].grad.dtype)
         for ix, client in enumerate(clients):
             stacked_grad[ix, :] = client.grad
+
+        U, sigma, V = np.linalg.svd(stacked_grad)
 
         # regular fed avg
         agg_grad = np.mean(stacked_grad, axis=0)
@@ -118,7 +127,7 @@ class Aggregator:
         This is an implementation of m-krum
         :param clients: List of all clients participating in training
         :param frac_m: m=n-f i.e. total-mal_nodes , since in practice server won't know this treat as hyper-param
-        :return: List of clients that satisfies alpha-f byz resilience.
+        :return: aggregated gradient, ix of worker selected by alpha-f Byz resilience
         """
         dist = self.get_krum_dist(clients=clients)
         m = int(frac_m * len(clients))

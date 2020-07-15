@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     # Baseline args
     args = {"num_clients": 100,
-            "frac_adv": 0,
+            "frac_adv": 0.0,
             "attack_mode": 'byzantine',
             "attack_model": 'drift',
             "k_std": 1,

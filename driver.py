@@ -24,7 +24,7 @@ def _parse_args():
                         help='randomly pick fraction of clients each round of training')
 
     # Attack Params
-    parser.add_argument('--frac_adv', type=float, default=0,
+    parser.add_argument('--frac_adv', type=float, default=0.0,
                         help='Specify Fraction of Adversarial Nodes')
     parser.add_argument('--attack_mode', type=str, default='byzantine',
                         help='Options: Byzantine, Backdoor')

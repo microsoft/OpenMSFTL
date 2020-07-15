@@ -18,7 +18,7 @@ def plot_driver(data, params: Dict, label: str, line_width=4):
     result_file = 'num_clients_' + str(params["num_clients"]) + \
                   '.frac_adv_' + str(params["frac_adv"]) + '.attack_mode_' + params["attack_mode"] + \
                   '.attack_model_' + params["attack_model"] + '.attack_power_' + str(params["k_std"]) + \
-                  '.agg_' + params["agg"] + \
+                  '.agg_' + params["agg"] + '.rank_' + str(params["rank"]) +\
                   '.compression_' + params["compression_operator"] + '.bits_' + str(params["num_bits"]) + \
                   '.frac_cd_' + str(params["frac_coordinates"]) + '.p_' + str(params["dropout_p"]) + \
                   '.c_opt_' + params["c_opt"] + '.s_opt_' + params["server_opt"]
@@ -36,11 +36,12 @@ if __name__ == '__main__':
 
     # Baseline args
     args = {"num_clients": 100,
-            "frac_adv": 0.0,
+            "frac_adv": 0,
             "attack_mode": 'byzantine',
             "attack_model": 'drift',
             "k_std": 1,
             "agg": 'fed_avg',
+            "rank": 10,
             "compression_operator": 'full',
             "num_bits": 2,
             "frac_coordinates": 0.1,
@@ -48,20 +49,31 @@ if __name__ == '__main__':
             "c_opt": 'SGD',
             "server_opt": 'Adam'}
 
-    # Baseline No Attack
-    plot_driver(data=data, params=args, label='No Attack')
+    # Plot Attacks
+    # # Baseline No Attack
+    # plot_driver(data=data, params=args, label='No Attack')
+    # # Other
+    # args["k_std"] = 1.5
+    # frac_advs = [0.05, 0.1, 0.15, 0.2]
+    # labels = ["5% Byz", "10% Byz", "15% Byz", "20% Byz"]
+    # for frac_adv, label in zip(frac_advs, labels):
+    #     args["frac_adv"] = frac_adv
+    #     plot_driver(data=data, params=args, label=label)
+    #
+    # plt.title('Byz Attack with $\sigma = 1.5$', fontsize=14)
+    # plt.xlabel('Communication Rounds', fontsize=14)
+    # plt.ylabel('Training Loss', fontsize=14)
 
-    # Other
-    args["k_std"] = 1.5
-    frac_advs = [0.05, 0.1, 0.15, 0.2]
-    labels = ["5% Byz", "10% Byz", "15% Byz", "20% Byz"]
-    for frac_adv, label in zip(frac_advs, labels):
-        args["frac_adv"] = frac_adv
+    # Plot LR Fed Avg
+    # Baseline no SVD
+    plot_driver(data=data, params=args, label='Vanilla Fed Avg')
+    args["agg"] = 'fed_lr_avg'
+    ranks = [10]
+    labels = ['rank=10']
+    for rank, label in zip(ranks, labels):
+        args["rank"] = rank
         plot_driver(data=data, params=args, label=label)
 
-    plt.title('Byz Attack with $\sigma = 1.5$', fontsize=14)
-    plt.xlabel('Communication Rounds', fontsize=14)
-    plt.ylabel('Training Loss', fontsize=14)
     plt.grid(axis='both')
     plt.tick_params(labelsize=12)
     plt.legend(fontsize=11)

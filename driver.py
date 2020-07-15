@@ -77,7 +77,7 @@ def _parse_args():
     parser.add_argument('--lr_decay', type=int, default=5)
 
     # Training params
-    parser.add_argument('--num_comm_round', type=int, default=1000,
+    parser.add_argument('--num_comm_round', type=int, default=100,
                         help='Number of Server Client Communication Round')
     parser.add_argument('--num_batches', type=int, default=5,
                         help='Number of local client steps per comm round')
@@ -98,7 +98,7 @@ if __name__ == '__main__':
     result_file = 'num_clients_' + str(args.num_clients) + \
                   '.frac_adv_' + str(args.frac_adv) + '.attack_mode_' + args.attack_mode +\
                   '.attack_model_' + args.attack_model + '.attack_power_' + str(args.k_std) +\
-                  '.agg_' + args.agg + '.rank_' + args.rank +\
+                  '.agg_' + args.agg + '.rank_' + str(args.rank) +\
                   '.compression_' + args.compression_operator + '.bits_' + str(args.num_bits) +\
                   '.frac_cd_' + str(args.frac_coordinates) + '.p_' + str(args.dropout_p) + \
                   '.c_opt_' + args.opt + '.s_opt_' + args.server_opt

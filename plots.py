@@ -10,6 +10,8 @@ def plot_results(result, label,
                  marker=None):
     loss_val = result[0][0]
     loss_val_np = [loss_val_i.item() for loss_val_i in loss_val]
+    # optima = np.ones_like(loss_val_np) * 0.1599
+    # loss_val_np -= optima
     x = np.arange(len(loss_val_np))
     plt.plot(x, loss_val_np, label=label, linewidth=line_width, linestyle=line_style, marker=marker)
 
@@ -61,20 +63,21 @@ if __name__ == '__main__':
     #     plot_driver(data=data, params=args, label=label)
     #
     # plt.title('Byz Attack with $\sigma = 1.5$', fontsize=14)
-    # plt.xlabel('Communication Rounds', fontsize=14)
-    # plt.ylabel('Training Loss', fontsize=14)
 
     # Plot LR Fed Avg
     # Baseline no SVD
     plot_driver(data=data, params=args, label='Vanilla')
     args["agg"] = 'fed_lr_avg'
-    ranks = [5, 10, 15, 20]  # , 15, 20, 25]
-    labels = ['k=5', 'k=10', 'k=15', 'k=20']  # , 'k=15', 'k=20', 'k=25']
+    ranks = [5, 10, 15, 20, 25, 50]
+    labels = ['rank=5', 'rank=10', 'rank=15', 'rank=20', 'rank=25', 'rank=50']
     for rank, label in zip(ranks, labels):
         args["rank"] = rank
         plot_driver(data=data, params=args, label=label)
 
+    plt.title('Convergence with LR GAR', fontsize=14)
     plt.grid(axis='both')
     plt.tick_params(labelsize=12)
+    plt.xlabel('Communication Rounds', fontsize=14)
+    plt.ylabel('Training Loss', fontsize=14)
     plt.legend(fontsize=11)
     plt.show()

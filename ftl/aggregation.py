@@ -5,6 +5,7 @@ import torch.nn as nn
 from typing import Dict, List
 import numpy as np
 from sklearn.utils.extmath import randomized_svd
+from sklearn.decomposition import TruncatedSVD
 
 
 class Aggregator:
@@ -12,6 +13,7 @@ class Aggregator:
     This class updates a global model with gradients aggregated from clients and
     keeps track of the model object and weights.
     """
+
     def __init__(self, agg_strategy: str,
                  model: nn.Module,
                  rank: int = 100,
@@ -113,12 +115,16 @@ class Aggregator:
         for ix, client in enumerate(clients):
             stacked_grad[ix, :] = client.grad
 
-        U, S, V = randomized_svd(M=stacked_grad,
-                                 n_components=k,
-                                 transpose=False)
+        U, Sigma, VT = randomized_svd(M=stacked_grad,
+                                      n_components=k,
+                                      transpose=False)
 
         # regular fed avg on the approximate agg_grad
-        agg_grad = np.mean(np.dot(U*S, V), axis=0)
+        transformed_grad = U * Sigma
+        var_explained = np.var(transformed_grad, axis=0)
+        total_var = np.var(stacked_grad, axis=0)
+        var_explained_ratio = var_explained / total_var
+        agg_grad = np.mean(np.dot(transformed_grad, VT), axis=0)
         return agg_grad
 
     def __fed_median(self, clients: List[Client]):
@@ -177,7 +183,3 @@ class Aggregator:
             for j in range(i):
                 dist[i][j] = dist[j][i] = np.linalg.norm(clients[i].grad - clients[j].grad)
         return dist
-
-
-
-

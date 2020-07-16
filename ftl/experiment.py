@@ -12,12 +12,6 @@ import numpy as np
 
 def run_exp(args):
     np.random.seed(args.seed)
-    # try:
-    #     import matplotlib.pyplot as plt
-    #     plot_flag = True
-    # except ImportError:
-    #     print('Disabling MatPlot Option')
-    #     plot_flag = False
 
     # ------------------------------------------------- #
     #               Initialize Network                  #
@@ -60,6 +54,7 @@ def run_exp(args):
     # **** Set up Server (Master Node)  ****
     # ---------------------------------------
     server = Server(aggregation_scheme=args.agg,
+                    rank=args.rank,
                     krum_frac=args.m_krum,
                     optimizer_scheme=args.server_opt,
                     server_config={"lr0": args.server_lr0,
@@ -115,11 +110,5 @@ def run_exp(args):
         print(' * Best Val Acc So Far *', best_val_acc)
         print(' * Corresponding Test Acc *', corr_test_acc)
         print(' ')
-    #
-    # if plot_flag:
-    #     plt.title('MLP', fontsize=14)
-    #     plt.legend(fontsize=11)
-    #     plt.plot(server.train_loss)
-    #     plt.show()
 
     return server.train_loss, server.test_acc

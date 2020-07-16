@@ -68,8 +68,8 @@ if __name__ == '__main__':
     # Baseline no SVD
     plot_driver(data=data, params=args, label='Vanilla')
     args["agg"] = 'fed_lr_avg'
-    ranks = [5, 10, 15, 20, 25, 50]
-    labels = ['rank=5', 'rank=10', 'rank=15', 'rank=20', 'rank=25', 'rank=50']
+    ranks = [1, 2, 3, 5, 10, 15, 20, 25, 50]
+    labels = ['rank=1', 'rank=2', 'rank=3', 'rank=5', 'rank=10', 'rank=15', 'rank=20', 'rank=25', 'rank=50']
     for rank, label in zip(ranks, labels):
         args["rank"] = rank
         plot_driver(data=data, params=args, label=label)

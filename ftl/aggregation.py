@@ -5,7 +5,7 @@ import torch.nn as nn
 from typing import Dict, List
 import numpy as np
 from sklearn.utils.extmath import randomized_svd
-from sklearn.decomposition import TruncatedSVD
+from sklearn.decomposition import TruncatedSVD, PCA
 
 
 class Aggregator:
@@ -16,7 +16,7 @@ class Aggregator:
 
     def __init__(self, agg_strategy: str,
                  model: nn.Module,
-                 rank: int = 100,
+                 rank: int = None,
                  dual_opt_alg: str = "Adam",
                  opt_group: Dict = None,
                  max_grad_norm: float = None,
@@ -115,16 +115,28 @@ class Aggregator:
         for ix, client in enumerate(clients):
             stacked_grad[ix, :] = client.grad
 
-        U, Sigma, VT = randomized_svd(M=stacked_grad,
-                                      n_components=k,
-                                      transpose=False)
+        if not k:
+            k = min(stacked_grad.shape[0], stacked_grad.shape[1])
 
-        # regular fed avg on the approximate agg_grad
-        transformed_grad = U * Sigma
-        var_explained = np.var(transformed_grad, axis=0)
-        total_var = np.var(stacked_grad, axis=0)
-        var_explained_ratio = var_explained / total_var
-        agg_grad = np.mean(np.dot(transformed_grad, VT), axis=0)
+        pca = PCA(n_components=k, svd_solver='randomized')
+        U, Sigma, V = pca.fit(X=stacked_grad)
+        var_explained = pca.explained_variance_
+        var_explained_ratio = pca.explained_variance_ratio_
+        # svd = TruncatedSVD(n_components=k, n_iter='auto')
+        # transformed_grad = svd.fit_transform(X=stacked_grad)
+        # VT = svd.components_
+        # U, Sigma, VT = randomized_svd(M=stacked_grad,
+        #                               n_components=k,
+        #                               transpose=False)
+        #
+        # # regular fed avg on the approximate agg_grad
+        # transformed_grad = U * Sigma
+        # import matplotlib.pyplot as plt
+        # plt.plot(Sigma)
+        # var_explained = np.var(transformed_grad, axis=0)
+        # total_var = np.var(stacked_grad, axis=0).sum()
+        # var_explained_ratio = var_explained / total_var
+        # agg_grad = np.mean(np.dot(transformed_grad, VT), axis=0)
         return agg_grad
 
     def __fed_median(self, clients: List[Client]):

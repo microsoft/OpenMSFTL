@@ -12,6 +12,7 @@ class Server:
     def __init__(self,
                  model,
                  aggregation_scheme: str = 'fed_avg',
+                 rank: int = 10,
                  krum_frac: float = 0.7,
                  optimizer_scheme: str = None,
                  server_config: Dict = None,
@@ -39,6 +40,7 @@ class Server:
 
         # Aggregator tracks the model and optimizer
         self.aggregator = Aggregator(agg_strategy=aggregation_scheme,
+                                     rank=rank,
                                      m_krum=krum_frac,
                                      model=model,
                                      dual_opt_alg=optimizer_scheme,

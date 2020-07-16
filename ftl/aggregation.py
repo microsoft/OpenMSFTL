@@ -102,10 +102,10 @@ class Aggregator:
         agg_grad = self.weighted_average(clients=clients)
         return agg_grad
 
-    @staticmethod
-    def __fed_lr_avg(clients: List[Client], k: int) -> np.ndarray:
+    def __fed_lr_avg(self, clients: List[Client], k: int) -> np.ndarray:
         """
-        Faster Convergence of FL through MF: Acharya. A. (Under Review NeuRips 2020)
+        Implements proposed Faster Convergence of FL through MF: Acharya. A. (Under Review NeuRips 2020)
+
         :param clients: List of client nodes to aggregate over
         :param k: perform (k) rank svd
         :return: aggregated gradient
@@ -114,21 +114,10 @@ class Aggregator:
         stacked_grad = np.zeros((len(clients), len(clients[0].grad)), dtype=clients[0].grad.dtype)
         for ix, client in enumerate(clients):
             stacked_grad[ix, :] = client.grad
-
-        if not k:
+        if k is None:
             k = min(stacked_grad.shape[0], stacked_grad.shape[1])
 
-        # Force the solver to be randomized Full SVD is extremely slow
-        pca = PCA(n_components=k, svd_solver='randomized', iterated_power=7)
-        U, Sigma, V = pca._fit(X=stacked_grad)
-        var_explained = pca.explained_variance_
-        var_explained_ratio = pca.explained_variance_ratio_
-
-        # Choose Adaptive k based on this
-        # Compute Low rank representation
-        lr_stacked_grad = U * Sigma
-        transformed_grad = np.dot(lr_stacked_grad, V)
-        agg_grad = np.mean(transformed_grad, axis=0)
+        agg_grad = self.fast_lr_decomposition(stacked_grad=stacked_grad, rank=k)
 
         return agg_grad
 
@@ -188,3 +177,19 @@ class Aggregator:
             for j in range(i):
                 dist[i][j] = dist[j][i] = np.linalg.norm(clients[i].grad - clients[j].grad)
         return dist
+
+    @staticmethod
+    def fast_lr_decomposition(stacked_grad:np.ndarray, rank: int) -> np.ndarray:
+        # Force the solver to be randomized Full SVD is extremely slow
+        pca = PCA(n_components=rank, svd_solver='randomized', iterated_power=7)
+        U, Sigma, V = pca._fit(X=stacked_grad)
+        var_explained = pca.explained_variance_
+        var_explained_ratio = pca.explained_variance_ratio_
+
+        # Choose Adaptive k based on this
+        # Compute Low rank representation
+        lr_stacked_grad = U * Sigma
+        transformed_grad = np.dot(lr_stacked_grad, V)
+        agg_grad = np.mean(transformed_grad, axis=0)
+
+        return agg_grad

@@ -118,25 +118,18 @@ class Aggregator:
         if not k:
             k = min(stacked_grad.shape[0], stacked_grad.shape[1])
 
-        pca = PCA(n_components=k, svd_solver='randomized')
-        U, Sigma, V = pca.fit(X=stacked_grad)
+        # Force the solver to be randomized Full SVD is extremely slow
+        pca = PCA(n_components=k, svd_solver='randomized', iterated_power=7)
+        U, Sigma, V = pca._fit(X=stacked_grad)
         var_explained = pca.explained_variance_
         var_explained_ratio = pca.explained_variance_ratio_
-        # svd = TruncatedSVD(n_components=k, n_iter='auto')
-        # transformed_grad = svd.fit_transform(X=stacked_grad)
-        # VT = svd.components_
-        # U, Sigma, VT = randomized_svd(M=stacked_grad,
-        #                               n_components=k,
-        #                               transpose=False)
-        #
-        # # regular fed avg on the approximate agg_grad
-        # transformed_grad = U * Sigma
-        # import matplotlib.pyplot as plt
-        # plt.plot(Sigma)
-        # var_explained = np.var(transformed_grad, axis=0)
-        # total_var = np.var(stacked_grad, axis=0).sum()
-        # var_explained_ratio = var_explained / total_var
-        # agg_grad = np.mean(np.dot(transformed_grad, VT), axis=0)
+
+        # Choose Adaptive k based on this
+        # Compute Low rank representation
+        lr_stacked_grad = U * Sigma
+        transformed_grad = np.dot(lr_stacked_grad, V)
+        agg_grad = np.mean(transformed_grad, axis=0)
+
         return agg_grad
 
     def __fed_median(self, clients: List[Client]):

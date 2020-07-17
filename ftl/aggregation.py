@@ -1,11 +1,10 @@
 from ftl.models import dist_weights_to_model, dist_grads_to_model
 from ftl.optimization import SchedulingOptimization
 from ftl.client import Client
+from ftl.fast_lr_decomp import FastLRDecomposition
 import torch.nn as nn
 from typing import Dict, List
 import numpy as np
-from sklearn.utils.extmath import randomized_svd
-from sklearn.decomposition import TruncatedSVD, PCA
 
 
 class Aggregator:
@@ -117,7 +116,9 @@ class Aggregator:
         if k is None:
             k = min(stacked_grad.shape[0], stacked_grad.shape[1])
 
-        agg_grad = self.fast_lr_decomposition(stacked_grad=stacked_grad, rank=k)
+        lr_factorization = FastLRDecomposition(n_components=k, X=stacked_grad)
+
+        # agg_grad = self.fast_lr_decomposition(stacked_grad=stacked_grad, rank=k)
 
         return agg_grad
 
@@ -178,18 +179,18 @@ class Aggregator:
                 dist[i][j] = dist[j][i] = np.linalg.norm(clients[i].grad - clients[j].grad)
         return dist
 
-    @staticmethod
-    def fast_lr_decomposition(stacked_grad:np.ndarray, rank: int) -> np.ndarray:
-        # Force the solver to be randomized Full SVD is extremely slow
-        pca = PCA(n_components=rank, svd_solver='randomized', iterated_power=7)
-        U, Sigma, V = pca._fit(X=stacked_grad)
-        var_explained = pca.explained_variance_
-        var_explained_ratio = pca.explained_variance_ratio_
-
-        # Choose Adaptive k based on this
-        # Compute Low rank representation
-        lr_stacked_grad = U * Sigma
-        transformed_grad = np.dot(lr_stacked_grad, V)
-        agg_grad = np.mean(transformed_grad, axis=0)
-
-        return agg_grad
+    # @staticmethod
+    # def fast_lr_decomposition(stacked_grad: np.ndarray, rank: int) -> np.ndarray:
+    #     # Force the solver to be randomized Full SVD is extremely slow
+    #     pca = PCA(n_components=rank, svd_solver='randomized', iterated_power=7)
+    #     U, Sigma, V = pca._fit(X=stacked_grad)
+    #     var_explained = pca.explained_variance_
+    #     var_explained_ratio = pca.explained_variance_ratio_
+    #
+    #     # Choose Adaptive k based on this
+    #     # Compute Low rank representation
+    #     lr_stacked_grad = U * Sigma
+    #     transformed_grad = np.dot(lr_stacked_grad, V)
+    #     agg_grad = np.mean(transformed_grad, axis=0)
+    #
+    #     return agg_grad

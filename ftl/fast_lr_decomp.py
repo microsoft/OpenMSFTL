@@ -20,7 +20,7 @@ class FastLRDecomposition:
         self.noise_variance_ = 0
         self.agg_grad = None
 
-        if X:
+        if X is not None:
             self.decompose(X=X)
 
     def decompose(self, X):
@@ -44,6 +44,8 @@ class FastLRDecomposition:
             self.noise_variance_ /= min(n_features, n_samples) - self.n_components
         else:
             pass
+
+        self.agg_grad = np.mean(np.dot(self.U * self.Sigma, self.V), axis=0)
 
 
 

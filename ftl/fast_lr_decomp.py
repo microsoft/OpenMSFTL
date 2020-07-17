@@ -23,7 +23,6 @@ class FastLRDecomposition:
         if X:
             self.decompose(X=X)
 
-
     def decompose(self, X):
         n_samples, n_features = X.shape
         # sign flipping is done inside

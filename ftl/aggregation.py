@@ -115,7 +115,7 @@ class Aggregator:
             stacked_grad[ix, :] = client.grad
         if k is None:
             k = min(stacked_grad.shape[0], stacked_grad.shape[1])
-
+        # th = 0.7
         lr_factorization = FastLRDecomposition(n_components=k, X=stacked_grad)
 
         # agg_grad = self.fast_lr_decomposition(stacked_grad=stacked_grad, rank=k)

@@ -75,7 +75,7 @@ class Aggregator:
         """
         self.set_lr(current_lr)
         # Update the model with aggregated gradient
-        dist_grads_to_model(grads=agg_grad, parameters=self.model.parameters())
+        dist_grads_to_model(grads=agg_grad, parameters=self.model.to('cpu').parameters())
         # apply gradient clipping
         if self.max_grad_norm is not None:
             grad_norm = nn.utils.clip_grad_norm_(self.model.parameters(),

@@ -64,7 +64,7 @@ class Aggregator:
 
         # Now Run a step of Dual Optimizer (Server Step)
         self.__server_step(agg_grad=agg_grad, current_lr=current_lr)
-        dist_weights_to_model(weights=self.w_current, parameters=self.model.parameters())
+        dist_weights_to_model(weights=self.w_current, parameters=self.model.to('cpu').parameters())
         return self.w_current
 
     def __server_step(self, agg_grad, current_lr: float):

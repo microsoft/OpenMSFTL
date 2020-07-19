@@ -52,6 +52,8 @@ def _parse_args():
     # Model Params
     parser.add_argument('--m', type=str, default='mlp',
                         help='specify the network architecture you want to use')
+    parser.add_argument('--pre_trained', default=True,
+                        help='Some architectures like resnet support loading pre-trained weights if this is set')
     parser.add_argument('--dim_in', type=int, default=28*28,
                         help='in dim needed only for mlp')
     parser.add_argument('--num_channels', type=int, default=1,

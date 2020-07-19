@@ -31,16 +31,14 @@ class FastLRDecomposition:
                                  flip_sign=True)
         self.explained_variance_ = (S ** 2) / (n_samples - 1)
         total_var = np.var(X, ddof=1, axis=0)
-        self.explained_variance_ratio_ = \
-            self.explained_variance_ / total_var.sum()
+        self.explained_variance_ratio_ = self.explained_variance_ / total_var.sum()
 
         self.U = U
         self.Sigma = S
         self.V = V
 
         if self.n_components < min(n_features, n_samples):
-            self.noise_variance_ = (total_var.sum() -
-                                    self.explained_variance_.sum())
+            self.noise_variance_ = (total_var.sum() - self.explained_variance_.sum())
             self.noise_variance_ /= min(n_features, n_samples) - self.n_components
         else:
             pass

@@ -1,6 +1,7 @@
 from torch import nn
 import torch
 import functools
+import torchvision.models as models
 
 
 def dist_weights_to_model(weights, parameters):
@@ -28,6 +29,9 @@ def dist_grads_to_model(grads, parameters):
 
 def get_model(args, dim_out: int):
     if args.m == 'mlp':
+        if args.data_set not in ['mnist']:
+            print('MLP not supported for {}'.format(args.data_set))
+            raise NotImplementedError
         model = MLP(dim_in=args.dim_in, dim_out=dim_out, p=args.drop_p)
         print('Training Model: ')
         print('----------------------------')

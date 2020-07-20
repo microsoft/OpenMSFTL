@@ -91,8 +91,10 @@ class DataReader:
         Wrapper to Download (if flag = True) and pre-process CIFAR10 data set
         :returns Train, Validation and Test DataLoaders
         """
-        trans = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.4914, 0.4822, 0.4465),
-                                                                                (0.2023, 0.1994, 0.2010))])
+        trans = transforms.Compose([transforms.ToTensor(),
+                                    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+                                    transforms.RandomCrop(32, padding=4),
+                                    transforms.RandomHorizontalFlip()])
         self.no_of_labels = 10
         cifar_train = datasets.CIFAR10(root=root, download=self.download, train=True, transform=trans)
         cifar_test = datasets.CIFAR10(root=root, download=self.download, train=False, transform=trans)

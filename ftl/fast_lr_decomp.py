@@ -29,6 +29,10 @@ class FastLRDecomposition:
         U, S, V = randomized_svd(X, n_components=self.n_components,
                                  n_iter=self.iterated_power,
                                  flip_sign=True)
+
+        import matplotlib.pyplot as plt
+        plt.plot(S)
+
         self.explained_variance_ = (S ** 2) / (n_samples - 1)
         total_var = np.var(X, ddof=1, axis=0)
         self.explained_variance_ratio_ = self.explained_variance_ / total_var.sum()

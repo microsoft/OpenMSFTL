@@ -18,6 +18,16 @@ def _parse_args():
                         help='Training mini Batch Size')
     parser.add_argument('--do_sort', type=bool, default=False)
 
+    # Model Params
+    parser.add_argument('--m', type=str, default='resnet18',
+                        help='specify the network architecture you want to use')
+    parser.add_argument('--pre_trained', default=True,
+                        help='Some architectures like resnet support loading pre-trained weights if this is set')
+    parser.add_argument('--dim_in', type=int, default=28*28,
+                        help='in dim needed only for mlp')
+    parser.add_argument('--num_channels', type=int, default=1,
+                        help='num of image channels')
+
     # Network Params
     parser.add_argument('--num_clients', type=int, default=100)
     parser.add_argument('--frac_clients', type=float, default=0.5,
@@ -49,15 +59,6 @@ def _parse_args():
     parser.add_argument('--frac_coordinates', type=float, default=0.1)
     parser.add_argument('--dropout_p', type=float, default=0.1)
 
-    # Model Params
-    parser.add_argument('--m', type=str, default='mlp',
-                        help='specify the network architecture you want to use')
-    parser.add_argument('--pre_trained', default=True,
-                        help='Some architectures like resnet support loading pre-trained weights if this is set')
-    parser.add_argument('--dim_in', type=int, default=28*28,
-                        help='in dim needed only for mlp')
-    parser.add_argument('--num_channels', type=int, default=1,
-                        help='num of image channels')
     # Opt Params
     parser.add_argument('--opt', type=str, default='SGD',
                         help='Name of the client optimizer: "SGD" or "Adam"')

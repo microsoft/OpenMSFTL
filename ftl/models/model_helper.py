@@ -1,7 +1,7 @@
-from torch import nn
+from .mlp import MLP
+from .resnet import resnet18
 import torch
 import functools
-import torchvision.models as models
 
 
 def dist_weights_to_model(weights, parameters):
@@ -28,42 +28,30 @@ def dist_grads_to_model(grads, parameters):
 
 
 def get_model(args, dim_out: int):
+    # Load MLP
     if args.m == 'mlp':
         if args.data_set not in ['mnist']:
-            print('MLP not supported for {}'.format(args.data_set))
+            print('MLP not yet supported for {}'.format(args.data_set))
             raise NotImplementedError
         model = MLP(dim_in=args.dim_in, dim_out=dim_out, p=args.drop_p)
-        print('Training Model: ')
-        print('----------------------------')
-        print(model)
-        return model
+
+    # Load ResNet 18
+    elif args.m == 'resnet18':
+        if args.data_set not in ['cifar10']:
+            print('Resnet is not yet supported for {}'.format(args.data_set))
+            raise NotImplementedError
+        model = resnet18()
+
+    # If Not implemented yet throw error
     else:
         raise NotImplementedError
 
+    print('Training Model: ')
+    print('----------------------------')
+    print(model)
+    return model
 
-class MLP(nn.Module):
-    def __init__(self, dim_in, dim_out, dim_hidden1=300, dim_hidden2=100, p=0.5):
-        super(MLP, self).__init__()
-        self.fc_in = nn.Linear(dim_in, dim_hidden1)
-        nn.init.xavier_uniform_(self.fc_in.weight)
-        self.fc_hidden = nn.Linear(dim_hidden1, dim_hidden2)
-        nn.init.xavier_uniform_(self.fc_hidden.weight)
-        self.relu = nn.ReLU()
-        self.dropout = nn.Dropout(p=p)
-        self.fc_out = nn.Linear(dim_hidden2, dim_out)
-        self.softmax = nn.Softmax(dim=1)
 
-    def forward(self, x):
-        x = x.reshape(x.shape[0], x.shape[1] * x.shape[2])
-        x = self.fc_in(x)
-        x = self.dropout(x)
-        x = self.relu(x)
-        x = self.fc_hidden(x)
-        x = self.relu(x)
-        x = self.dropout(x)
-        x = self.fc_out(x)
-        z = self.softmax(x)
 
-        return z
 
 

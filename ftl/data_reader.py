@@ -70,42 +70,58 @@ class DataReader:
         Wrapper to Download (if flag = True) and pre-process MNIST data set
         :returns Train, Validation and Test DataLoaders
         """
-        trans = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
+        trans = transforms.Compose([transforms.ToTensor(),
+                                    transforms.Normalize((0.1307,),
+                                                         (0.3081,))])
         self.no_of_labels = 10
+
+        # Handle Train and Dev
+        # --------------------------------------
         mnist_train = datasets.MNIST(root=root, download=self.download, train=True, transform=trans)
-        mnist_test = datasets.MNIST(root=root, download=self.download, train=False, transform=trans)
-
-        x_test = mnist_test.data
-        y_test = mnist_test.targets
-        self.test_loader = DataLoader(TensorDataset(x_test, y_test), batch_size=self.batch_size)
-
         # compute number of data points
         self.num_dev = int(self.split * mnist_train.data.shape[0])
         self.num_train = mnist_train.data.shape[0] - self.num_dev
-        self.num_test = mnist_test.data.shape[0]
-
         self._distribute_data(data_set=mnist_train)
+
+        # Handle Test
+        # --------------------------------------
+        mnist_test = datasets.MNIST(root=root, download=self.download, train=False, transform=trans)
+        x_test = mnist_test.data
+        y_test = mnist_test.targets
+        self.test_loader = DataLoader(TensorDataset(x_test, y_test), batch_size=self.batch_size)
+        self.num_test = mnist_test.data.shape[0]
 
     def _get_cifar10(self):
         """
         Wrapper to Download (if flag = True) and pre-process CIFAR10 data set
         :returns Train, Validation and Test DataLoaders
         """
-        trans = transforms.Compose([transforms.ToTensor(),
-                                    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-                                    transforms.RandomCrop(32, padding=4),
-                                    transforms.RandomHorizontalFlip()])
         self.no_of_labels = 10
-        cifar_train = datasets.CIFAR10(root=root, download=self.download, train=True, transform=trans)
-        cifar_test = datasets.CIFAR10(root=root, download=self.download, train=False, transform=trans)
-
-        self.test_loader = DataLoader(cifar_test, batch_size=self.batch_size)  # We don't need to partition this
-
+        # Handle Train and Dev
+        # --------------------------------------
+        train_trans = transforms.Compose([transforms.ToTensor(),
+                                          transforms.Normalize((0.4914, 0.4822, 0.4465),
+                                                               (0.2023, 0.1994, 0.2010)),
+                                          transforms.RandomCrop(32, padding=4),
+                                          transforms.RandomHorizontalFlip()])
+        cifar_train = datasets.CIFAR10(root=root, download=self.download, train=True, transform=train_trans)
         self.num_dev = int(self.split * cifar_train.data.shape[0])
         self.num_train = cifar_train.data.shape[0] - self.num_dev
-        self.num_test = cifar_test.data.shape[0]
-
         self._distribute_data(data_set=cifar_train)
+
+        # Handle Test
+        # --------------------------------------
+        test_trans = transforms.Compose([transforms.ToTensor(),
+                                         transforms.Normalize((0.4914, 0.4822, 0.4465),
+                                                              (0.2023, 0.1994, 0.2010))])
+        cifar_test = datasets.CIFAR10(root=root, download=self.download, train=False, transform=test_trans)
+        self.num_test = cifar_test.data.shape[0]
+        x_test = cifar_test.data
+        y_test = cifar_test.targets
+        # swap axis
+        x_test = np.moveaxis(x_test, -1, 1)
+        self.test_loader = DataLoader(TensorDataset(x_test, y_test),
+                                      batch_size=self.batch_size)  # We don't need to partition this
 
     def _distribute_data(self, data_set):
         """
@@ -137,7 +153,7 @@ class DataReader:
 
         # if tensor of dim > 3 i.e. num channels > 1 handle channel
         if len(x_val.shape) > 3:
-            print('Swapping axis , Torch convolutions expects channel first')
+            print('Swapping axis, Torch convolutions expects channel first')
             x_val = np.moveaxis(x_val, -1, 1)
 
         self.val_loader = DataLoader(TensorDataset(torch.from_numpy(x_val),
@@ -174,4 +190,3 @@ class DataReader:
         client_data_map[self.clients[-1].client_id] = all_indexes[num_samples_per_machine * (num_clients - 1):]
 
         return client_data_map
-

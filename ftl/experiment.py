@@ -1,4 +1,4 @@
-from ftl.data_reader import DataReader
+from ftl.data_reader.data_reader import DataReader
 from ftl.client import Client
 from ftl.server import Server
 from ftl.models.model_helper import get_model

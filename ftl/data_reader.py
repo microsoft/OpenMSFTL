@@ -132,9 +132,16 @@ class DataReader:
             y_train = y_train[y_sorted_ix]
 
         # Validation data goes into Aggregator only so need not distribute
-        x_val = torch.from_numpy(x[self.num_train:, :, :])
-        y_val = torch.from_numpy(y[self.num_train:])
-        self.val_loader = DataLoader(TensorDataset(x_val, y_val), batch_size=self.batch_size)
+        x_val = x[self.num_train:, :, :]
+        y_val = y[self.num_train:]
+
+        # if tensor of dim > 3 i.e. num channels > 1 handle channel
+        if len(x_val.shape) > 3:
+            print('Swapping axis , Torch expects channel first')
+            np.moveaxis(x_val, 1, -1)
+
+        self.val_loader = DataLoader(TensorDataset(torch.from_numpy(x_val),
+                                                   torch.from_numpy(y_val)), batch_size=self.batch_size)
 
         # Now lets distribute the training data among clients
         self.data_distribution_map = self._get_data_partition_indices()  # populates the ix map
@@ -144,10 +151,13 @@ class DataReader:
             x_local = x_train[local_indices, :, :]
             y_local = y_train[local_indices]
 
-            x_local = torch.from_numpy(x_local)
-            y_local = torch.from_numpy(y_local)
+            # if tensor of dim > 3 i.e. num channels > 1 handle channel
+            if len(x_local.shape) > 3:
+                print('Swapping axis , Torch expects channel first')
+                np.moveaxis(x_local, 1, -1)
 
-            client.local_train_data = DataLoader(TensorDataset(x_local, y_local), batch_size=self.batch_size)
+            client.local_train_data = DataLoader(TensorDataset(torch.from_numpy(x_local),
+                                                               torch.from_numpy(y_local)), batch_size=self.batch_size)
 
     def _get_data_partition_indices(self) -> Dict[Client, List[int]]:
         num_clients = len(self.clients)

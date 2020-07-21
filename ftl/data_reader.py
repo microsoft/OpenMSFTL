@@ -137,8 +137,8 @@ class DataReader:
 
         # if tensor of dim > 3 i.e. num channels > 1 handle channel
         if len(x_val.shape) > 3:
-            print('Swapping axis , Torch expects channel first')
-            np.moveaxis(x_val, 1, -1)
+            print('Swapping axis , Torch convolutions expects channel first')
+            x_val = np.moveaxis(x_val, -1, 1)
 
         self.val_loader = DataLoader(TensorDataset(torch.from_numpy(x_val),
                                                    torch.from_numpy(y_val)), batch_size=self.batch_size)
@@ -153,8 +153,7 @@ class DataReader:
 
             # if tensor of dim > 3 i.e. num channels > 1 handle channel
             if len(x_local.shape) > 3:
-                print('Swapping axis , Torch expects channel first')
-                np.moveaxis(x_local, 1, -1)
+                x_local = np.moveaxis(x_local, -1, 1)
 
             client.local_train_data = DataLoader(TensorDataset(torch.from_numpy(x_local),
                                                                torch.from_numpy(y_local)), batch_size=self.batch_size)

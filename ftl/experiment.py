@@ -13,14 +13,13 @@ import numpy as np
 def run_exp(args):
     np.random.seed(args.seed)
 
-    # ------------------------------------------------- #
-    #               Initialize Network                  #
-    # ------------------------------------------------- #
+    print('# ------------------------------------------------- #')
+    print('#               Initialize Network                  #')
+    print('# ------------------------------------------------- #')
 
     # *** Set up Client Nodes ****
     # -----------------------------
-
-    print(' Setting Up the FTL Network and distributing data ')
+    print('Setting Up the FTL Network and distributing data .... ')
     num_client_nodes = args.num_clients
     clients = [Client(client_id=client_id) for client_id in range(num_client_nodes)]
 
@@ -66,9 +65,9 @@ def run_exp(args):
                     val_loader=data_reader.val_loader,
                     test_loader=data_reader.test_loader)
 
-    # ------------------------------------------------- #
-    #             FTL Training                          #
-    # ------------------------------------------------- #
+    print('# ------------------------------------------------- #')
+    print('#            FTL Training                          #')
+    print('# ------------------------------------------------- #')
     best_val_acc = 0.0
     corr_test_acc = 0.0
 
@@ -107,8 +106,8 @@ def run_exp(args):
             best_val_acc = val_acc
             corr_test_acc = test_acc
 
-        print(' * Best Val Acc So Far *', best_val_acc)
-        print(' * Corresponding Test Acc *', corr_test_acc)
+        print('* Best Val Acc So Far {}'.format(best_val_acc))
+        print('* Corresponding Test Acc {}'.format(corr_test_acc))
         print(' ')
 
     return server.train_loss, server.test_acc

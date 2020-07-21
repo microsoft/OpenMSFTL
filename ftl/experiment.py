@@ -4,7 +4,7 @@ from ftl.server import Server
 from ftl.models.model_helper import get_model
 from ftl.trainer import infer, cycle
 from ftl.compression import Compression
-from ftl.attacks import Attack
+from ftl.attacks.attacks import Attack
 import copy
 import random
 import numpy as np

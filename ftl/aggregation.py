@@ -1,6 +1,6 @@
 from ftl.models.model_helper import dist_weights_to_model, dist_grads_to_model
 from ftl.optimization import SchedulingOptimization
-from ftl.client import Client
+from ftl.agents.client import Client
 from ftl.fast_lr_decomp import FastLRDecomposition
 import torch.nn as nn
 from typing import Dict, List

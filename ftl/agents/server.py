@@ -1,4 +1,4 @@
-from ftl.client import Client
+from .client import Client
 from ftl.optimization import get_lr
 from ftl.models.model_helper import dist_weights_to_model
 from ftl.aggregation import Aggregator

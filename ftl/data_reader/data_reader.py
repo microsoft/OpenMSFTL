@@ -2,7 +2,7 @@ import torchvision.datasets as datasets
 from torchvision import transforms
 from torch.utils.data import DataLoader, TensorDataset
 from typing import List, Dict
-from ftl.client import Client
+from ftl.agents.client import Client
 import torch
 import os
 import numpy as np

@@ -1,4 +1,4 @@
-from ftl.client import Client
+from ftl.agents.client import Client
 import numpy as np
 from typing import List
 

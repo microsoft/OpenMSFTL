@@ -1,6 +1,6 @@
 # Byte-compiled / optimized / DLL files
 # results/*
-*/data/*
+ftl/data_reader/data/*
 embedding/*
 glove.*/
 glove.*.zip*

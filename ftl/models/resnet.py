@@ -127,9 +127,7 @@ class ResNet(nn.Module):
         self.groups = groups
         self.base_width = width_per_group
 
-        ## CIFAR10: kernel_size 7 -> 3, stride 2 -> 1, padding 3->1
         self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False)
-        ## END
 
         self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
@@ -216,6 +214,7 @@ def resnet18(pretrained=False, progress=True, device='cpu', **kwargs):
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
+        :param device:
     """
     return _resnet('resnet18', BasicBlock, [2, 2, 2, 2], pretrained, progress, device,
                    **kwargs)
@@ -239,6 +238,8 @@ def resnet50(pretrained=False, progress=True, device='cpu', **kwargs):
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
+        :param progress:
+        :param pretrained:
         :param device:
     """
     return _resnet('resnet50', Bottleneck, [3, 4, 6, 3], pretrained, progress, device,
@@ -250,6 +251,8 @@ def resnet101(pretrained=False, progress=True, device='cpu', **kwargs):
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
+        :param progress:
+        :param pretrained:
         :param device:
     """
     return _resnet('resnet101', Bottleneck, [3, 4, 23, 3], pretrained, progress, device,
@@ -261,6 +264,8 @@ def resnet152(pretrained=False, progress=True, device='cpu', **kwargs):
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
+        :param progress:
+        :param pretrained:
         :param device:
     """
     return _resnet('resnet152', Bottleneck, [3, 8, 36, 3], pretrained, progress, device,
@@ -272,6 +277,8 @@ def resnext50_32x4d(pretrained=False, progress=True, device='cpu', **kwargs):
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
+        :param progress:
+        :param pretrained:
         :param device:
     """
     kwargs['groups'] = 32
@@ -285,6 +292,7 @@ def resnext101_32x8d(pretrained=False, progress=True, device='cpu', **kwargs):
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
+        :param device:
     """
     kwargs['groups'] = 32
     kwargs['width_per_group'] = 8

@@ -120,7 +120,8 @@ class DataReader:
         y_test = cifar_test.targets
         # swap axis
         x_test = np.moveaxis(x_test, -1, 1)
-        self.test_loader = DataLoader(TensorDataset(x_test, y_test),
+        self.test_loader = DataLoader(TensorDataset(torch.from_numpy(x_test),
+                                                    torch.from_numpy(np.array(y_test))),
                                       batch_size=self.batch_size)  # We don't need to partition this
 
     def _distribute_data(self, data_set):

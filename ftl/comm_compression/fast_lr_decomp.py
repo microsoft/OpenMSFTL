@@ -14,9 +14,9 @@ class FastLRDecomposition:
 
         self.Sigma = []
 
-        self.explained_variance_ = []
-        self.explained_variance_ratio_ = []
-        self.noise_variance_ = []
+        self.explained_variance_ = None
+        self.explained_variance_ratio_ = None
+        self.noise_variance_ = None
         self.agg_grad = None
 
         if X is not None:
@@ -41,10 +41,10 @@ class FastLRDecomposition:
             self.noise_variance_.append('nan')
             pass
 
-        self.explained_variance_.append(explained_variance_)
-        self.explained_variance_ratio_.append(explained_variance_ratio_)
+        self.explained_variance_ = explained_variance_
+        self.explained_variance_ratio_ = explained_variance_ratio_
 
-        self.Sigma.append(S)
+        self.Sigma = S
         self.agg_grad = np.mean(np.dot(U * S, V), axis=0)
 
 

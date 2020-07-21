@@ -3,7 +3,7 @@ from ftl.training_utils.optimization import SchedulingOptimization
 from ftl.agents.client import Client
 from ftl.comm_compression.fast_lr_decomp import FastLRDecomposition
 import torch.nn as nn
-from typing import Dict, List
+from typing import Dict, List, Tuple
 import numpy as np
 
 
@@ -41,6 +41,9 @@ class Aggregator:
         self.krum_frac = m_krum
         self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
 
+        # Bad Handling Fix with Base Class
+        self.Sigma = []
+
     def set_lr(self, current_lr):
         if self.optimizer is not None:
             for param_group in self.optimizer.param_groups:
@@ -55,10 +58,14 @@ class Aggregator:
         """
         if self.agg_strategy == 'fed_avg':
             agg_grad = self.__fed_avg(clients=clients)
+
         elif self.agg_strategy == 'fed_lr_avg':
-            agg_grad = self.__fed_lr_avg(clients=clients, k=self.rank)
+            agg_grad, Sigma = self.__fed_lr_avg(clients=clients, k=self.rank)
+            self.Sigma.append(Sigma)
+
         elif self.agg_strategy == 'krum':
             agg_grad, _ = self.__m_krum(clients=clients, frac_m=self.krum_frac)
+
         else:
             raise NotImplementedError
 
@@ -101,9 +108,9 @@ class Aggregator:
         agg_grad = self.weighted_average(clients=clients)
         return agg_grad
 
-    def __fed_lr_avg(self, clients: List[Client], k: int) -> np.ndarray:
+    def __fed_lr_avg(self, clients: List[Client], k: int) -> Tuple[np.ndarray, List[float]]:
         """
-        Implements proposed Faster Convergence of FL through MF: Acharya. A. (Under Review NeuRips 2020)
+        Implements proposed Faster Convergence of FL through MF: Acharya. A.
 
         :param clients: List of client nodes to aggregate over
         :param k: perform (k) rank svd
@@ -117,7 +124,7 @@ class Aggregator:
             k = min(stacked_grad.shape[0], stacked_grad.shape[1])
         lr_factorization = FastLRDecomposition(n_components=k, X=stacked_grad)
 
-        return lr_factorization.agg_grad
+        return lr_factorization.agg_grad, lr_factorization.Sigma
 
     def __fed_median(self, clients: List[Client]):
         """

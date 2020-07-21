@@ -110,4 +110,4 @@ def run_exp(args):
         print('* Corresponding Test Acc {}'.format(corr_test_acc))
         print(' ')
 
-    return server.train_loss, server.test_acc
+    return server.train_loss, server.test_acc, server.aggregator.Sigma

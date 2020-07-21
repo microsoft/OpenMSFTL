@@ -1,6 +1,6 @@
-from ftl.trainer import Trainer
-from ftl.optimization import SchedulingOptimization
-from ftl.compression import Compression
+from ftl.training_utils.trainer import Trainer
+from ftl.training_utils.optimization import SchedulingOptimization
+from ftl.comm_compression.compression import Compression
 import numpy as np
 
 

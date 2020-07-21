@@ -2,8 +2,8 @@ from ftl.data_reader.data_reader import DataReader
 from ftl.agents.client import Client
 from ftl.agents.server import Server
 from ftl.models.model_helper import get_model
-from ftl.trainer import infer, cycle
-from ftl.compression import Compression
+from ftl.training_utils.trainer import infer, cycle
+from ftl.comm_compression.compression import Compression
 from ftl.attacks.attacks import Attack
 import copy
 import random

@@ -1,4 +1,4 @@
-from ftl.misc_utils import unpickle_dir
+from ftl.training_utils.misc_utils import unpickle_dir
 import numpy as np
 import matplotlib.pyplot as plt
 from typing import Dict

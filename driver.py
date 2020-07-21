@@ -25,8 +25,6 @@ def _parse_args():
                         help='Some architectures like resnet support loading pre-trained weights if this is set')
     parser.add_argument('--dim_in', type=int, default=28*28,
                         help='in dim needed only for mlp')
-    parser.add_argument('--num_channels', type=int, default=1,
-                        help='num of image channels')
 
     # Network Params
     parser.add_argument('--num_clients', type=int, default=100)

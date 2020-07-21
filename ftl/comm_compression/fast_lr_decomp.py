@@ -36,9 +36,8 @@ class FastLRDecomposition:
         if self.n_components < min(n_features, n_samples):
             noise_variance_ = (total_var.sum() - explained_variance_.sum())
             noise_variance_ /= min(n_features, n_samples) - self.n_components
-            self.noise_variance_.append(noise_variance_)
+            self.noise_variance_ = noise_variance_
         else:
-            self.noise_variance_.append('nan')
             pass
 
         self.explained_variance_ = explained_variance_

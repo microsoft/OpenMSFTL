@@ -101,9 +101,8 @@ class DataReader:
         # --------------------------------------
         train_trans = transforms.Compose([transforms.ToTensor(),
                                           transforms.Normalize((0.4914, 0.4822, 0.4465),
-                                                               (0.2023, 0.1994, 0.2010)),
-                                          transforms.RandomCrop(32, padding=4),
-                                          transforms.RandomHorizontalFlip()])
+                                                               (0.2023, 0.1994, 0.2010))])
+        # ,transforms.RandomCrop(32, padding=4),transforms.RandomHorizontalFlip()])
         cifar_train = datasets.CIFAR10(root=root, download=self.download, train=True, transform=train_trans)
         self.num_dev = int(self.split * cifar_train.data.shape[0])
         self.num_train = cifar_train.data.shape[0] - self.num_dev

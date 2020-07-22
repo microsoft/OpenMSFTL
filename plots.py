@@ -30,6 +30,9 @@ def plot_driver(data, params: Dict, label: str, line_width=4, plot_type: str = '
 
 
 if __name__ == '__main__':
+    # -------------------------------
+    # ** Usually No Need to Modify **
+    # -------------------------------
     plt.figure()
     fig = plt.gcf()
     data_set = 'mnist'
@@ -53,7 +56,12 @@ if __name__ == '__main__':
             "c_opt": 'SGD',
             "server_opt": 'Adam'}
 
-    # Example Usage :::   Plot Attacks
+    # -----------------------------------------------
+
+    # Example Usage :::
+    # --------------------------------------
+    # Plot Attacks
+    # ---------------------------------------
     # # Baseline No Attack
     # Specify Plot Type
     # plot_type = 'loss'
@@ -67,9 +75,13 @@ if __name__ == '__main__':
     #     plot_driver(data=data, params=args, label=label, plot_type=plot_type)
     #
     # plt.title('Byz Attack with $\sigma = 1.5$', fontsize=14)
+    #
+    # ----------------------------------------------------------------------------------
 
-    # Plot LR Fed Avg
-    # Baseline no SVD
+    # Example Usage :::
+    # --------------------------------------
+    # Plot SV Distribution
+    # ---------------------------------------
     # Specify Plot Type
     plot_type = 'spectral'
     plt.title('Singular Value Distribution', fontsize=14)
@@ -81,8 +93,12 @@ if __name__ == '__main__':
     for ix in [1, 20, 50, 75, 100, 150, 200]:
         label = 'Comm Round = ' + str(ix)
         plot_driver(data=data, params=args, label=label, plot_type=plot_type, ix=ix-1)
+    #
+    # ----------------------------------------------------------------------------------
 
-    # Usually No Need to Modify
+    # -------------------------------
+    # ** Usually No Need to Modify **
+    # -------------------------------
     plt.grid(axis='both')
     plt.tick_params(labelsize=12)
 

@@ -2,9 +2,12 @@ from ftl.training_utils.misc_utils import unpickle_dir
 import numpy as np
 import matplotlib.pyplot as plt
 from typing import Dict
+from matplotlib.ticker import MaxNLocator
+import matplotlib.ticker as ticker
 
 
-def plot_driver(data, params: Dict, label: str, line_width=4, plot_type: str = 'loss', ix: int = 0):
+def plot_driver(data, params: Dict, label: str, line_width=4,
+                plot_type: str = 'loss', ix: int = 0, marker=None, line_style=None):
     result_file = 'num_clients_' + str(params["num_clients"]) + \
                   '.frac_adv_' + str(params["frac_adv"]) + '.attack_mode_' + params["attack_mode"] + \
                   '.attack_model_' + params["attack_model"] + '.attack_power_' + str(params["k_std"]) + \
@@ -21,23 +24,25 @@ def plot_driver(data, params: Dict, label: str, line_width=4, plot_type: str = '
     elif plot_type is 'spectral':
         res = result[0][2]
         res = res[ix]
-
-
+        # Normalize singular values
+        res = res / res[0]
     else:
         raise NotImplementedError
-    x = np.arange(len(res))
-    plt.plot(x, res, label=label, linewidth=line_width)
+    x = np.arange(len(res)) + np.ones(len(res))
+    plt.plot(x, res, label=label, linewidth=line_width, marker=marker, linestyle=line_style)
 
 
 if __name__ == '__main__':
     # -------------------------------
     # ** Usually No Need to Modify **
     # -------------------------------
-    plt.figure()
-    fig = plt.gcf()
-    data_set = 'mnist'
+    # plt.figure()
+    # fig = plt.gcf()
+    ax = plt.figure().gca()
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
     # MNIST
+    data_set = 'mnist'
     results_dir = '/mlp/'
     data = unpickle_dir(d='./results/' + data_set + results_dir)
 
@@ -87,12 +92,13 @@ if __name__ == '__main__':
     plt.title('Singular Value Distribution', fontsize=14)
 
     args["agg"] = 'fed_lr_avg'
-    args["rank"] = 5
+    args["rank"] = 50
     # plot_driver(data=data, params=args, label='Client: SGD, Server: Adam', plot_type=plot_type)
     # args["c_opt"] = 'Adam'
     for ix in [1, 20, 50, 75, 100, 150, 200]:
         label = 'Comm Round = ' + str(ix)
-        plot_driver(data=data, params=args, label=label, plot_type=plot_type, ix=ix-1)
+        plot_driver(data=data, params=args, label=label, plot_type=plot_type, ix=ix-1,
+                    marker='*', line_width=2, line_style='--')
     #
     # ----------------------------------------------------------------------------------
 
@@ -101,9 +107,10 @@ if __name__ == '__main__':
     # -------------------------------
     plt.grid(axis='both')
     plt.tick_params(labelsize=12)
-
+    plt.xlim(-1, 51)
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
     if plot_type is 'spectral':
-        plt.xlabel('Singular Value', fontsize=14)
+        plt.xlabel('Singular Value ix', fontsize=14)
     else:
         plt.xlabel('Communication Rounds', fontsize=14)
 
@@ -111,7 +118,11 @@ if __name__ == '__main__':
         plt.ylabel('Training Loss', fontsize=14)
     elif plot_type is 'acc':
         plt.ylabel('Test Accuracy', fontsize=14)
-    elif plot_type is 'Spectral':
-        plt.ylabel('Magnitude', fontsize=14)
+    elif plot_type is 'spectral':
+        plt.ylabel('Normalized Singular Value', fontsize=14)
+    else:
+        raise NotImplementedError
+
     plt.legend(fontsize=11)
+
     plt.show()

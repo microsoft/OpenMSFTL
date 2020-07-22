@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from typing import Dict
 
 
-def plot_driver(data, params: Dict, label: str, line_width=4, plot_type='loss'):
+def plot_driver(data, params: Dict, label: str, line_width=4, plot_type: str = 'loss', ix: int = 0):
     result_file = 'num_clients_' + str(params["num_clients"]) + \
                   '.frac_adv_' + str(params["frac_adv"]) + '.attack_mode_' + params["attack_mode"] + \
                   '.attack_model_' + params["attack_model"] + '.attack_power_' + str(params["k_std"]) + \
@@ -20,6 +20,9 @@ def plot_driver(data, params: Dict, label: str, line_width=4, plot_type='loss'):
         res = result[0][1]
     elif plot_type is 'spectral':
         res = result[0][2]
+        res = res[ix]
+
+
     else:
         raise NotImplementedError
     x = np.arange(len(res))
@@ -68,19 +71,23 @@ if __name__ == '__main__':
     # Plot LR Fed Avg
     # Baseline no SVD
     # Specify Plot Type
-    plot_type = 'acc'
-    plt.title('Convergence with LR GAR', fontsize=14)
+    plot_type = 'spectral'
+    plt.title('Singular Value Distribution', fontsize=14)
 
-    plot_driver(data=data, params=args, label='Client: SGD, Server: Adam', plot_type=plot_type)
-    args["c_opt"] = 'Adam'
-    plot_driver(data=data, params=args, label='Client: Adam, Server: Adam', plot_type=plot_type)
+    args["agg"] = 'fed_lr_avg'
+    args["rank"] = 5
+    # plot_driver(data=data, params=args, label='Client: SGD, Server: Adam', plot_type=plot_type)
+    # args["c_opt"] = 'Adam'
+    for ix in [1, 20, 50, 75, 100, 150, 200]:
+        label = 'Comm Round = ' + str(ix)
+        plot_driver(data=data, params=args, label=label, plot_type=plot_type, ix=ix-1)
 
     # Usually No Need to Modify
     plt.grid(axis='both')
     plt.tick_params(labelsize=12)
 
     if plot_type is 'spectral':
-        plt.xlabel('Principal Component', fontsize=14)
+        plt.xlabel('Singular Value', fontsize=14)
     else:
         plt.xlabel('Communication Rounds', fontsize=14)
 

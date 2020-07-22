@@ -25,7 +25,8 @@ def plot_driver(data, params: Dict, label: str, line_width=4,
         res = result[0][2]
         res = res[ix]
         # Normalize singular values
-        res = res / res[0]
+        # res = res / res[0]
+        # res = res / sum(res)
     else:
         raise NotImplementedError
     x = np.arange(len(res)) + np.ones(len(res))
@@ -63,9 +64,9 @@ if __name__ == '__main__':
 
     # -----------------------------------------------
 
-    # Example Usage :::
+    # Example Usage 1 :::
     # --------------------------------------
-    # Plot Attacks
+    # Plot Impact of Attacks
     # ---------------------------------------
     # # Baseline No Attack
     # Specify Plot Type
@@ -80,6 +81,23 @@ if __name__ == '__main__':
     #     plot_driver(data=data, params=args, label=label, plot_type=plot_type)
     #
     # plt.title('Byz Attack with $\sigma = 1.5$', fontsize=14)
+    #
+    # ----------------------------------------------------------------------------------
+
+    # Example Usage :::
+    # --------------------------------------
+    # Plot Convergence (loss/ acc)
+    # ---------------------------------------
+    # # Specify Plot Type
+    # plot_type = 'acc'
+    # # plot BaseLine
+    # plot_driver(data=data, params=args, label='Fed Avg', plot_type=plot_type,
+    #             line_width=3)
+    # args["agg"] = 'fed_lr_avg'
+    # for rank in [5, 10, 15, 20, 25, 30, 35, 50]:
+    #     args["rank"] = rank
+    #     plot_driver(data=data, params=args, label='LR GAR(' + str(rank) + ')', plot_type=plot_type,
+    #                 line_width=3)
     #
     # ----------------------------------------------------------------------------------
 
@@ -107,10 +125,11 @@ if __name__ == '__main__':
     # -------------------------------
     plt.grid(axis='both')
     plt.tick_params(labelsize=12)
-    plt.xlim(-1, 51)
-    ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
+
     if plot_type is 'spectral':
         plt.xlabel('Singular Value ix', fontsize=14)
+        plt.xlim(-1, 51)
+        ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
     else:
         plt.xlabel('Communication Rounds', fontsize=14)
 
@@ -119,7 +138,7 @@ if __name__ == '__main__':
     elif plot_type is 'acc':
         plt.ylabel('Test Accuracy', fontsize=14)
     elif plot_type is 'spectral':
-        plt.ylabel('Normalized Singular Value', fontsize=14)
+        plt.ylabel('Singular Value', fontsize=14)
     else:
         raise NotImplementedError
 

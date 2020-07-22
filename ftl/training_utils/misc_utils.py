@@ -1,13 +1,11 @@
 import os
 import pickle
 import glob
-# import torch
 
 
 def pickle_it(var, name, directory):
     with open(os.path.join(directory, "{}.pickle".format(name)), 'wb') as f:
-        pickle.dump(var.cpu(), f)
-        # torch.save(var, f)
+        pickle.dump(var, f)
 
 
 def unpickle_dir(d):

@@ -119,7 +119,8 @@ class Server:
             client.grad = client.C.compress(grad=client.grad)
 
         # Update Metrics
-        self.train_loss.append(epoch_loss / len(sampled_clients))
+        train_loss = epoch_loss / len(sampled_clients)
+        self.train_loss.append(train_loss.item())
 
         # update the learning rate: self.current_lr
         self.num_rounds += 1

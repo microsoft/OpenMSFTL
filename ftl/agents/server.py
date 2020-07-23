@@ -110,6 +110,7 @@ class Server:
 
         # Modify the gradients of malicious nodes if attack is defined
         if attacker:
+            # Co-ordinated Attack
             mal_nodes = [c for c in sampled_clients if c.attack_mode]
             if mal_nodes:
                 attacker.attack(byz_clients=mal_nodes)

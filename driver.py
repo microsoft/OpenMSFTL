@@ -9,7 +9,7 @@ def _parse_args():
     parser = argparse.ArgumentParser(description='driver.py')
 
     # Data IO Related Params
-    parser.add_argument('--data_set', type=str, default='cifar10',
+    parser.add_argument('--data_set', type=str, default='mnist',
                         help='Pass data-set')
     parser.add_argument('--dev_split', type=float, default=0.1,
                         help='Provide train test split | '
@@ -19,7 +19,7 @@ def _parse_args():
     parser.add_argument('--do_sort', type=bool, default=False)
 
     # Model Params
-    parser.add_argument('--m', type=str, default='resnet18',
+    parser.add_argument('--m', type=str, default='mlp',
                         help='specify the network architecture you want to use')
     parser.add_argument('--pre_trained', default=True,
                         help='Some architectures like resnet support loading pre-trained weights if this is set')
@@ -37,7 +37,8 @@ def _parse_args():
     parser.add_argument('--attack_mode', type=str, default='byzantine',
                         help='Options: Byzantine, Backdoor')
     parser.add_argument('--attack_model', type=str, default='drift')
-    parser.add_argument('--k_std', type=float, default=1)
+    parser.add_argument('--k_std', type=float, default=1,
+                        help='For Drift Attack / Gaussian Attacks specify standard dev of attack (distribution)')
 
     # Defense Params
     parser.add_argument('--agg', type=str, default='fed_lr_avg',

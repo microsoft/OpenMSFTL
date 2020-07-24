@@ -18,7 +18,7 @@ class Client:
         self.trainer = Trainer()
         self.learner = learner
 
-        self.attack_mode = attack_mode  # which attack model to use || None, byzantine, poison
+        self.mal = False  # is it a malicious node ?
         self.attack_model = attack_model  # Ex. Type of Byzantine / poisoning attack
         self.stochastic_attack = stochastic_attack  # will this node be consistently byzantine ?
         self.attack_prob = stochastic_attack_prob

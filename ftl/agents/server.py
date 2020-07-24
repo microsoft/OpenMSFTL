@@ -78,10 +78,10 @@ class Server:
 
         print('current lr = {}'.format(self.current_lr))
 
-    def train_client_models(self, k: int, client_config: Dict = None, attacker=None):
+    def train_client_models(self, k: int, client_config: Dict = None, attack_mode: str = 'coordinated'):
         """
         Update each client model
-        :param attacker: Attack Object
+        :param attack_mode: coordinated or uncoordinated attack
         :param k: number of clients to be selected
         :param client_config: specifying parameters for client trainer
         """
@@ -109,10 +109,13 @@ class Server:
             epoch_loss += client.trainer.epoch_losses[-1]
 
         # Modify the gradients of malicious nodes if attack is defined
-        if attacker:
+        if attack_mode is 'coordinated':
             # Co-ordinated Attack
-            mal_nodes = [c for c in sampled_clients if c.attack_mode]
+            mal_nodes = [c for c in sampled_clients if c.mal]
             if mal_nodes:
+                attacker = mal_nodes[0].attack_model
+                print('Co-ordinated {} attack applied to {} clients'.format(mal_nodes[0].attack_model.attack_algorithm,
+                                                                            len(mal_nodes)))
                 attacker.attack(byz_clients=mal_nodes)
 
         # now we can apply the compression operator before communicating to Server

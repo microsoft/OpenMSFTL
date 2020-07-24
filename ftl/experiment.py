@@ -4,7 +4,7 @@ from ftl.agents.server import Server
 from ftl.models.model_helper import get_model
 from ftl.training_utils.trainer import infer, cycle
 from ftl.comm_compression.compression import Compression
-from ftl.attacks.attacks import Attack
+from ftl.attacks.attacks import get_attack
 import copy
 import random
 import numpy as np
@@ -40,8 +40,8 @@ def run_exp(args):
     # Here we have the same attack model for each client but you can choose to have separate attack
     # objects of different attack for different clients
     for client in sampled_adv_clients:
-        client.attack_mode = args.attack_mode
-        client.attack_model = args.attack_model
+        client.mal = True
+        client.attack_model = get_attack(args=args)
 
     # Copy model architecture to clients
     # Also pass instances of compression operator
@@ -80,10 +80,6 @@ def run_exp(args):
         print(' -------------------------------------------')
 
         server.init_client_models()
-        if args.attack_mode == 'byzantine':
-            attacker = Attack(k=args.k_std, attack_model=args.attack_model)
-        else:
-            attacker = None
         server.train_client_models(k=int(args.frac_clients * num_client_nodes),
                                    client_config={'optimizer_scheme': args.opt,
                                                   'lr': args.lr0 / 2 if epoch % args.lr_restart == 0 else args.lr0,
@@ -91,7 +87,7 @@ def run_exp(args):
                                                   'momentum': args.momentum,
                                                   'num_batches': args.num_batches
                                                   },
-                                   attacker=attacker)
+                                   attack_mode=args.attack_mode)
 
         print('Metrics :')
         print('--------------------------------')

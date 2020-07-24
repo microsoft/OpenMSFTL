@@ -1,11 +1,14 @@
 from ftl.agents.client import Client
-from .attack import ByzAttackCoordinated
+from .attack_definition import ByzAttackCoordinated
 import numpy as np
 from typing import List
 
 
 def get_attack(args):
-    pass
+    if args.attack_model == 'drift':
+        return DriftAttack(std=args.attack_std)
+    else:
+        return None
 # class Attack:
 #     """
 #     This class implements several algorithms to modify the gradients of
@@ -48,6 +51,10 @@ def get_attack(args):
 
 
 class DriftAttack(ByzAttackCoordinated):
+    def __init__(self, std):
+        ByzAttackCoordinated.__init__(self, std=std)
+        self.attack_algorithm = 'drift'
+
     def attack(self, byz_clients: List[Client]):
         """
         Implementation of the powerful drift attack algorithm proposed in:

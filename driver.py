@@ -34,11 +34,12 @@ def _parse_args():
     # Attack Params
     parser.add_argument('--frac_adv', type=float, default=0.0,
                         help='Specify Fraction of Adversarial Nodes')
-    parser.add_argument('--attack_mode', type=str, default='byzantine',
-                        help='Options: Byzantine, Backdoor')
-    parser.add_argument('--attack_model', type=str, default='drift')
-    parser.add_argument('--k_std', type=float, default=1,
-                        help='For Drift Attack / Gaussian Attacks specify standard dev of attack (distribution)')
+    parser.add_argument('--attack_mode', type=str, default='coordinated',
+                        help='Options: coordinated, un_coordinated ')
+    parser.add_argument('--attack_model', type=str, default='drift',
+                        help='Options: drift (Co-ordinated), ')
+    parser.add_argument('--attack_std', type=float, default=1,
+                        help='For Gaussian Dist Based Attacks specify standard dev of attack')
 
     # Defense Params
     parser.add_argument('--agg', type=str, default='fed_lr_avg',
@@ -99,7 +100,7 @@ if __name__ == '__main__':
 
     result_file = 'num_clients_' + str(args.num_clients) + \
                   '.frac_adv_' + str(args.frac_adv) + '.attack_mode_' + args.attack_mode +\
-                  '.attack_model_' + args.attack_model + '.attack_power_' + str(args.k_std) +\
+                  '.attack_model_' + args.attack_model + '.attack_power_' + str(args.attack_std) +\
                   '.agg_' + args.agg + '.rank_' + str(args.rank) +\
                   '.compression_' + args.compression_operator + '.bits_' + str(args.num_bits) +\
                   '.frac_cd_' + str(args.frac_coordinates) + '.p_' + str(args.dropout_p) + \

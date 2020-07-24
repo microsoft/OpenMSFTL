@@ -25,7 +25,7 @@ class DriftAttack(ByzAttack):
 
     def attack(self, byz_clients: List[Client]):
         if len(byz_clients) <= 1 or self.n_std == 0:
-            print('Drift Attack is strictly co-ordinated,'
+            print('Drift Attack is implemented as a co-ordinated only attack,'
                   'In the un-coordinated mode we are leaving the grads unchanged')
             return
         clients_grad = []
@@ -54,9 +54,21 @@ class AdditiveGaussian(ByzAttack):
     def __init__(self, attack_config: Dict):
         ByzAttack.__init__(self, attack_config=attack_config)
         self.attack_algorithm = 'additive gaussian'
+        self.noise_scale = attack_config["noise_scale"]
 
     def attack(self, byz_clients: List[Client]):
-        pass
+        clients_grad = []
+        for client in byz_clients:
+            clients_grad.append(client.grad)
+        grad_mean = np.mean(clients_grad, axis=0)
+
+        # apply gaussian noise (scaled appropriately)
+        noise = np.random.normal(loc=0.0, scale=1.0, size=grad_mean.shape).astype(dtype=grad_mean.dtype)
+        noise *= self.noise_scale * grad_mean
+        byz_grad = grad_mean[:] + noise
+
+        for client in byz_clients:
+            client.grad = byz_grad
 
 
 class RandomGaussian(ByzAttack):

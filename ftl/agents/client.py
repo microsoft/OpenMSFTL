@@ -8,7 +8,6 @@ class Client:
     def __init__(self,
                  client_id,
                  learner=None,
-                 attack_mode=None,
                  attack_model=None,
                  stochastic_attack=False,
                  stochastic_attack_prob=0.8,

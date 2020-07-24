@@ -37,8 +37,6 @@ def run_exp(args):
     # Make some client nodes adversarial
     sampled_adv_clients = random.sample(population=clients, k=int(args.frac_adv * num_client_nodes))
 
-    # Here we have the same attack model for each client but you can choose to have separate attack
-    # objects of different attack for different clients
     for client in sampled_adv_clients:
         client.mal = True
         client.attack_model = get_attack(args=args)

@@ -109,14 +109,22 @@ class Server:
             epoch_loss += client.trainer.epoch_losses[-1]
 
         # Modify the gradients of malicious nodes if attack is defined
-        if attack_mode is 'coordinated':
-            # Co-ordinated Attack
-            mal_nodes = [c for c in sampled_clients if c.mal]
-            if mal_nodes:
+        mal_nodes = [c for c in sampled_clients if c.mal]
+        if mal_nodes:
+            if attack_mode is 'coordinated':
+                # Co-ordinated Attack
                 attacker = mal_nodes[0].attack_model
                 print('Co-ordinated {} attack applied to {} clients'.format(mal_nodes[0].attack_model.attack_algorithm,
                                                                             len(mal_nodes)))
                 attacker.attack(byz_clients=mal_nodes)
+
+            elif attack_mode is 'un_coordinated':
+                # un_coordinated stand alone attack per client
+                attacker = mal_nodes[0].attack_model
+                print('Un Co-ordinated {} attack applied to {} clients'.
+                      format(mal_nodes[0].attack_model.attack_algorithm, len(mal_nodes)))
+                for mal_client in mal_nodes:
+                    attacker.attack(byz_clients=[mal_client])
 
         # now we can apply the compression operator before communicating to Server
         for client in sampled_clients:

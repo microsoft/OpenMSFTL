@@ -1,5 +1,4 @@
 from ftl.agents.client import Client
-from .attack_definition import ByzAttackCoordinated
 import numpy as np
 from typing import List
 
@@ -11,14 +10,23 @@ def get_attack(args):
         return None
 
 
-class DriftAttack(ByzAttackCoordinated):
+class ByzAttack:
+    """ This is the Base Class for Byzantine attack. """
+    def __init__(self, std: float = 1.5):
+        self.std = std
+
+    def attack(self, byz_clients: List[Client]):
+        pass
+
+
+class DriftAttack(ByzAttack):
     """
     Implementation of the powerful drift attack algorithm proposed in:
     Gilad Baruch et.al. "A Little Is Enough: Circumventing Defenses For Distributed Learning" (NeurIPS 2019)
     Ref: https://github.com/moranant/attacking_distributed_learning
     """
     def __init__(self, std):
-        ByzAttackCoordinated.__init__(self, std=std)
+        ByzAttack.__init__(self, std=std)
         self.attack_algorithm = 'drift'
 
     def attack(self, byz_clients: List[Client]):
@@ -35,3 +43,12 @@ class DriftAttack(ByzAttackCoordinated):
         byz_grad = grad_mean[:] - self.std * grad_std[:]
         for client in byz_clients:
             client.grad = byz_grad
+
+
+class AdditiveGaussian(ByzAttack):
+    def __init__(self, std):
+        ByzAttack.__init__(self, std=std)
+        self.attack_algorithm = 'additive gaussian'
+
+    def attack(self, byz_clients: List[Client]):
+        pass

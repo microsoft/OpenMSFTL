@@ -1,10 +1,14 @@
-from .attack_models import DriftAttack
+from .attack_models import DriftAttack, AdditiveGaussian, RandomGaussian
 from typing import Dict
 
 
 def get_attack(attack_config: Dict):
     if attack_config["attack_model"] == 'drift':
-        return DriftAttack(attack_config= attack_config)
+        return DriftAttack(attack_config=attack_config)
+    elif attack_config["attack_model"] == 'additive_gaussian':
+        return AdditiveGaussian(attack_config=attack_config)
+    elif attack_config["attack_model"] == 'random_gaussian':
+        return RandomGaussian(attack_config=attack_config)
     else:
         return None
 

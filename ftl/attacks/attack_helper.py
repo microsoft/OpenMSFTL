@@ -3,7 +3,7 @@ from .attack_models import DriftAttack
 
 def get_attack(args):
     if args.attack_model == 'drift':
-        return DriftAttack(std=args.attack_std)
+        return DriftAttack(n_std=args.attack_n_std)
     else:
         return None
 

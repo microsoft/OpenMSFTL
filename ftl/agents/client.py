@@ -11,13 +11,14 @@ class Client:
                  attack_model=None,
                  stochastic_attack=False,
                  stochastic_attack_prob=0.8,
-                 C: Compression = None):
+                 C: Compression = None,
+                 mal: bool = False):
 
         self.client_id = client_id
         self.trainer = Trainer()
         self.learner = learner
 
-        self.mal = False  # is it a malicious node ?
+        self.mal = mal  # is it a malicious node ?
         self.attack_model = attack_model  # Ex. Type of Byzantine / poisoning attack
         self.stochastic_attack = stochastic_attack  # will this node be consistently byzantine ?
         self.attack_prob = stochastic_attack_prob

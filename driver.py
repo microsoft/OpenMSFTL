@@ -39,8 +39,8 @@ def _parse_args():
                         help='Options: coordinated, un_coordinated ')
     parser.add_argument('--attack_model', type=str, default='drift',
                         help='Options: drift (Co-ordinated), ')
-    parser.add_argument('--attack_std', type=float, default=1,
-                        help='For Gaussian Dist Based Attacks specify standard dev of attack')
+    parser.add_argument('--attack_n_std', type=float, default=1,
+                        help='For drift attack specify how many std away to drift the grad')
 
     # Defense Params
     parser.add_argument('--agg', type=str, default='fed_lr_avg',

@@ -95,7 +95,7 @@ def _parse_args():
     return args
 
 
-def group_params(args) -> Dict[Dict]:
+def group_params(args):
     # Group params into dicts
     pass
 

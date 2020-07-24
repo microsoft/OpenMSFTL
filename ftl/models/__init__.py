@@ -15,6 +15,8 @@ from .shufflenet import *
 from .shufflenetv2 import *
 from .vgg import *
 
+from .model_helper import *
+
 """
 Citations: 
 * https://github.com/pytorch/vision/blob/master/torchvision/models/

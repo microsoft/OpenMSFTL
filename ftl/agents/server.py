@@ -2,6 +2,7 @@ from .client import Client
 from ftl.training_utils.optimization import get_lr
 from ftl.models.model_helper import dist_weights_to_model
 from ftl.gradient_aggregation.aggregation import Aggregator
+from ftl.attacks import launch_attack
 from typing import List
 from typing import Dict
 from torch.utils.data import DataLoader
@@ -111,20 +112,7 @@ class Server:
         # Modify the gradients of malicious nodes if attack is defined
         mal_nodes = [c for c in sampled_clients if c.mal]
         if mal_nodes:
-            if attack_mode is 'coordinated':
-                # Co-ordinated Attack
-                attacker = mal_nodes[0].attack_model
-                print('Co-ordinated {} attack applied to {} clients'.format(mal_nodes[0].attack_model.attack_algorithm,
-                                                                            len(mal_nodes)))
-                attacker.attack(byz_clients=mal_nodes)
-
-            elif attack_mode is 'un_coordinated':
-                # un_coordinated stand alone attack per client
-                attacker = mal_nodes[0].attack_model
-                print('Un Co-ordinated {} attack applied to {} clients'.
-                      format(mal_nodes[0].attack_model.attack_algorithm, len(mal_nodes)))
-                for mal_client in mal_nodes:
-                    attacker.attack(byz_clients=[mal_client])
+            launch_attack(attack_mode=attack_mode, mal_nodes=mal_nodes)
 
         # now we can apply the compression operator before communicating to Server
         for client in sampled_clients:

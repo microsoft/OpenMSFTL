@@ -3,13 +3,6 @@ import numpy as np
 from typing import List
 
 
-def get_attack(args):
-    if args.attack_model == 'drift':
-        return DriftAttack(std=args.attack_std)
-    else:
-        return None
-
-
 class ByzAttack:
     """ This is the Base Class for Byzantine attack. """
     def __init__(self, std: float = 1.5):

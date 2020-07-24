@@ -113,7 +113,6 @@ class Server:
         # Modify the gradients of malicious nodes if attack is defined
         mal_nodes = [c for c in sampled_clients if c.mal]
         if mal_nodes:
-            print('---- Byz Attack Launch ---')
             launch_attack(attack_mode=attack_config["attack_mode"], mal_nodes=mal_nodes)
 
         # now we can apply the compression operator before communicating to Server

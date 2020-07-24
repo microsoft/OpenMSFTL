@@ -38,7 +38,8 @@ def _parse_args():
     parser.add_argument('--attack_mode', type=str, default='coordinated',
                         help='Options: coordinated, un_coordinated ')
     parser.add_argument('--attack_model', type=str, default='drift',
-                        help='Options: drift (Co-ordinated), ')
+                        help='Options: drift (Co-ordinated), random_gaussian(both),'
+                             'additive_gaussian(both)')
     parser.add_argument('--attack_n_std', type=float, default=1,
                         help='For drift attack specify how many std away to drift the grad')
     parser.add_argument('--noise_scale', type=float, default=1,

@@ -41,6 +41,8 @@ def _parse_args():
                         help='Options: drift (Co-ordinated), ')
     parser.add_argument('--attack_n_std', type=float, default=1,
                         help='For drift attack specify how many std away to drift the grad')
+    parser.add_argument('--noise_scale', type=float, default=1,
+                        help='scale of the gaussian noise w.r.t original value')
 
     # Defense Params
     parser.add_argument('--agg', type=str, default='fed_lr_avg',

@@ -39,11 +39,14 @@ def run_exp(args):
     attack_config = {"frac_adv": args.frac_adv,
                      "attack_mode": args.attack_mode,
                      "attack_model": args.attack_model,
-                     "attack_n_std": args.attack_n_std}
+                     "attack_n_std": args.attack_n_std,
+                     "noise_scale": args.noise_scale}
+
     server_config = {"lr0": args.server_lr0,
                      "lr_restart": args.lr_restart,
                      "lr_schedule": args.lrs,
                      "lr_decay": args.lr_decay}
+
     client_config = {'optimizer_scheme': args.opt,
                      'lr': args.lr0,
                      'weight_decay': args.reg,

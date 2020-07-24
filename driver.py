@@ -106,7 +106,7 @@ def run_main():
 
     result_file = 'num_clients_' + str(args.num_clients) + \
                   '.frac_adv_' + str(args.frac_adv) + '.attack_mode_' + args.attack_mode +\
-                  '.attack_model_' + args.attack_model + '.attack_power_' + str(args.attack_std) +\
+                  '.attack_model_' + args.attack_model + '.attack_power_' + str(args.attack_n_std) +\
                   '.agg_' + args.agg + '.rank_' + str(args.rank) +\
                   '.compression_' + args.compression_operator + '.bits_' + str(args.num_bits) +\
                   '.frac_cd_' + str(args.frac_coordinates) + '.p_' + str(args.dropout_p) + \

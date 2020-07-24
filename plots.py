@@ -8,13 +8,14 @@ import matplotlib.ticker as ticker
 
 def plot_driver(data, params: Dict, label: str, line_width=4,
                 plot_type: str = 'loss', ix: int = 0, marker=None, line_style=None):
-    result_file = 'num_clients_' + str(params["num_clients"]) + \
-                  '.frac_adv_' + str(params["frac_adv"]) + '.attack_mode_' + params["attack_mode"] + \
-                  '.attack_model_' + params["attack_model"] + '.attack_power_' + str(params["k_std"]) + \
-                  '.agg_' + params["agg"] + '.rank_' + str(params["rank"]) +\
-                  '.compression_' + params["compression_operator"] + '.bits_' + str(params["num_bits"]) + \
-                  '.frac_cd_' + str(params["frac_coordinates"]) + '.p_' + str(params["dropout_p"]) + \
-                  '.c_opt_' + params["c_opt"] + '.s_opt_' + params["server_opt"]
+    result_file = 'num_clients_' + str(args["num_clients"]) + \
+                  '.frac_adv_' + str(args["frac_adv"]) + '.attack_mode_' + args["attack_mode"] +\
+                  '.attack_model_' + args["attack_model"] + '.attack_n_std_' + str(args["attack_n_std"]) + \
+                  '.attack_std_' + str(args["attack_std"]) + '.noise_scale' + str(args["noise_scale"]) +\
+                  '.agg_' + args["agg"] + '.rank_' + str(args["rank"]) +\
+                  '.compression_' + args["compression_operator"] + '.bits_' + str(args["num_bits"]) +\
+                  '.frac_cd_' + str(args["frac_coordinates"]) + '.p_' + str(args["dropout_p"]) + \
+                  '.c_opt_' + args["opt"] + '.s_opt_' + args["server_opt"]
 
     result = data[result_file]
     if plot_type is 'loss':
@@ -50,9 +51,11 @@ if __name__ == '__main__':
     # Baseline args
     args = {"num_clients": 100,
             "frac_adv": 0.0,
-            "attack_mode": 'byzantine',
-            "attack_model": 'drift',
-            "k_std": 1,
+            "attack_mode": 'un_coordinated',
+            "attack_model": 'random_gaussian',
+            "attack_std": 1,
+            "noise_scale": 1,
+            "attack_n_std": 1,
             "agg": 'fed_avg',
             "rank": 20,
             "compression_operator": 'full',
@@ -70,7 +73,7 @@ if __name__ == '__main__':
     # ---------------------------------------
     # # Baseline No Attack
     # Specify Plot Type
-    # plot_type = 'loss'
+    plot_type = 'loss'
     # plot_driver(data=data, params=args, label='No Attack', plot_type=plot_type)
     # # Other
     # args["k_std"] = 1.5
@@ -106,17 +109,17 @@ if __name__ == '__main__':
     # Plot SV Distribution
     # ---------------------------------------
     # Specify Plot Type
-    plot_type = 'spectral'
-    plt.title('Singular Value Distribution', fontsize=14)
-
-    args["agg"] = 'fed_lr_avg'
-    args["rank"] = 50
-    # plot_driver(data=data, params=args, label='Client: SGD, Server: Adam', plot_type=plot_type)
-    # args["c_opt"] = 'Adam'
-    for ix in [1, 20, 50, 75, 100, 150, 200]:
-        label = 'Comm Round = ' + str(ix)
-        plot_driver(data=data, params=args, label=label, plot_type=plot_type, ix=ix-1,
-                    marker='*', line_width=2, line_style='--')
+    # plot_type = 'spectral'
+    # plt.title('Singular Value Distribution', fontsize=14)
+    #
+    # args["agg"] = 'fed_lr_avg'
+    # args["rank"] = 50
+    # # plot_driver(data=data, params=args, label='Client: SGD, Server: Adam', plot_type=plot_type)
+    # # args["c_opt"] = 'Adam'
+    # for ix in [1, 20, 50, 75, 100, 150, 200]:
+    #     label = 'Comm Round = ' + str(ix)
+    #     plot_driver(data=data, params=args, label=label, plot_type=plot_type, ix=ix-1,
+    #                 marker='*', line_width=2, line_style='--')
     #
     # ----------------------------------------------------------------------------------
 

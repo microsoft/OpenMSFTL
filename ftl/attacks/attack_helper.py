@@ -1,9 +1,10 @@
 from .attack_models import DriftAttack
+from typing import Dict
 
 
-def get_attack(args):
-    if args.attack_model == 'drift':
-        return DriftAttack(n_std=args.attack_n_std)
+def get_attack(attack_config: Dict):
+    if attack_config["attack_model"] == 'drift':
+        return DriftAttack(attack_config= attack_config)
     else:
         return None
 

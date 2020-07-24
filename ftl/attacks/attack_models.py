@@ -1,12 +1,12 @@
 from ftl.agents.client import Client
 import numpy as np
-from typing import List
+from typing import List, Dict
 
 
 class ByzAttack:
     """ This is the Base Class for Byzantine attack. """
-    def __init__(self):
-        pass
+    def __init__(self, attack_config: Dict):
+        self.attack_config = attack_config
 
     def attack(self, byz_clients: List[Client]):
         pass
@@ -18,13 +18,12 @@ class DriftAttack(ByzAttack):
     Gilad Baruch et.al. "A Little Is Enough: Circumventing Defenses For Distributed Learning" (NeurIPS 2019)
     Ref: https://github.com/moranant/attacking_distributed_learning
     """
-    def __init__(self, n_std: float = 1.5):
-        ByzAttack.__init__(self)
+    def __init__(self, attack_config: Dict):
+        ByzAttack.__init__(self, attack_config=attack_config)
         self.attack_algorithm = 'drift'
-        self.n_std = n_std
+        self.n_std = attack_config["attack_n_std"]
 
     def attack(self, byz_clients: List[Client]):
-
         if len(byz_clients) == 0 or self.n_std == 0:
             return
         clients_grad = []
@@ -40,8 +39,8 @@ class DriftAttack(ByzAttack):
 
 
 class AdditiveGaussian(ByzAttack):
-    def __init__(self, std):
-        ByzAttack.__init__(self)
+    def __init__(self, attack_config: Dict):
+        ByzAttack.__init__(self, attack_config=attack_config)
         self.attack_algorithm = 'additive gaussian'
 
     def attack(self, byz_clients: List[Client]):
@@ -49,6 +48,6 @@ class AdditiveGaussian(ByzAttack):
 
 
 class RandomGaussian(ByzAttack):
-    def __init__(self, std):
-        ByzAttack.__init__(self)
+    def __init__(self, attack_config: Dict):
+        ByzAttack.__init__(self, attack_config=attack_config)
         self.attack_algorithm = 'random gaussian'

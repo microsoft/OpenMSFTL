@@ -36,9 +36,23 @@ def run_exp(args):
     # Make some client nodes adversarial
     sampled_adv_clients = random.sample(population=clients, k=int(args.frac_adv * num_client_nodes))
 
+    attack_config = {"frac_adv": args.frac_adv,
+                     "attack_mode": args.attack_mode,
+                     "attack_model": args.attack_model,
+                     "attack_n_std": args.attack_n_std}
+    server_config = {"lr0": args.server_lr0,
+                     "lr_restart": args.lr_restart,
+                     "lr_schedule": args.lrs,
+                     "lr_decay": args.lr_decay}
+    client_config = {'optimizer_scheme': args.opt,
+                     'lr': args.lr0,
+                     'weight_decay': args.reg,
+                     'momentum': args.momentum,
+                     'num_batches': args.num_batches}
+
     for client in sampled_adv_clients:
         client.mal = True
-        client.attack_model = get_attack(args=args)
+        client.attack_model = get_attack(attack_config=attack_config)
 
     # Copy model architecture to clients
     # Also pass instances of compression operator
@@ -56,10 +70,7 @@ def run_exp(args):
                     rank=args.rank,
                     krum_frac=args.m_krum,
                     optimizer_scheme=args.server_opt,
-                    server_config={"lr0": args.server_lr0,
-                                   "lr_restart": args.lr_restart,
-                                   "lr_schedule": args.lrs,
-                                   "lr_decay": args.lr_decay},
+                    server_config=server_config,
                     clients=clients,
                     model=copy.deepcopy(model_net),
                     val_loader=data_reader.val_loader,
@@ -78,12 +89,7 @@ def run_exp(args):
 
         server.init_client_models()
         server.train_client_models(k=int(args.frac_clients * num_client_nodes),
-                                   client_config={'optimizer_scheme': args.opt,
-                                                  'lr': args.lr0 / 2 if epoch % args.lr_restart == 0 else args.lr0,
-                                                  'weight_decay': args.reg,
-                                                  'momentum': args.momentum,
-                                                  'num_batches': args.num_batches
-                                                  },
+                                   client_config=client_config,
                                    attack_mode=args.attack_mode)
 
         print('Metrics :')

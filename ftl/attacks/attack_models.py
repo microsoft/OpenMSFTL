@@ -56,6 +56,7 @@ class AdditiveGaussian(ByzAttack):
     def __init__(self, attack_config: Dict):
         ByzAttack.__init__(self, attack_config=attack_config)
         self.attack_algorithm = 'additive gaussian'
+        self.attack_std = attack_config["attack_std"]
         self.noise_scale = attack_config["noise_scale"]
 
     def attack(self, byz_clients: List[Client]):
@@ -66,7 +67,8 @@ class AdditiveGaussian(ByzAttack):
             clients_grad.append(client.grad)
         grad_mean = np.mean(clients_grad, axis=0)
         # apply gaussian noise (scaled appropriately)
-        noise = np.random.normal(loc=0.0, scale=1.0, size=grad_mean.shape).astype(dtype=grad_mean.dtype)
+        noise = np.random.normal(loc=0.0, scale=self.attack_std,
+                                 size=grad_mean.shape).astype(dtype=grad_mean.dtype)
         noise *= self.noise_scale * grad_mean
         byz_grad = grad_mean[:] + noise
         for client in byz_clients:
@@ -86,12 +88,18 @@ class RandomGaussian(ByzAttack):
         ByzAttack.__init__(self, attack_config=attack_config)
         self.attack_algorithm = 'random gaussian'
         self.attack_std = attack_config["attack_std"]
+        self.noise_scale = attack_config["noise_scale"]
 
     def attack(self, byz_clients: List[Client]):
         if len(byz_clients) == 0:
             return
-
-        byz_grad = np.random.normal(loc=0, scale=self.attack_std,
-                                    size=byz_clients[0].grad.shape).astype(byz_clients[0].grad.dtype)
+        clients_grad = []
         for client in byz_clients:
-            client.grad = byz_grad
+            clients_grad.append(client.grad)
+        grad_mean = np.mean(clients_grad, axis=0)
+        # apply gaussian noise (scaled appropriately)
+        noise = np.random.normal(loc=0.0, scale=self.attack_std,
+                                 size=grad_mean.shape).astype(dtype=grad_mean.dtype)
+        noise *= self.noise_scale * grad_mean
+        for client in byz_clients:
+            client.grad = noise

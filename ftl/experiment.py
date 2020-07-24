@@ -94,7 +94,7 @@ def run_exp(args):
         server.init_client_models()
         server.train_client_models(k=int(args.frac_clients * num_client_nodes),
                                    client_config=client_config,
-                                   attack_mode=args.attack_mode)
+                                   attack_config=attack_config)
 
         print('Metrics :')
         print('--------------------------------')

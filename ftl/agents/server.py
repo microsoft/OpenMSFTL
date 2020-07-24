@@ -79,10 +79,11 @@ class Server:
 
         print('current lr = {}'.format(self.current_lr))
 
-    def train_client_models(self, k: int, client_config: Dict = None, attack_mode: str = 'coordinated'):
+    def train_client_models(self, k: int, client_config: Dict = None,
+                            attack_config: Dict = None):
         """
         Update each client model
-        :param attack_mode: coordinated or uncoordinated attack
+        :param attack_config:
         :param k: number of clients to be selected
         :param client_config: specifying parameters for client trainer
         """
@@ -112,7 +113,8 @@ class Server:
         # Modify the gradients of malicious nodes if attack is defined
         mal_nodes = [c for c in sampled_clients if c.mal]
         if mal_nodes:
-            launch_attack(attack_mode=attack_mode, mal_nodes=mal_nodes)
+            print('---- Byz Attack Launch ---')
+            launch_attack(attack_mode=attack_config["attack_mode"], mal_nodes=mal_nodes)
 
         # now we can apply the compression operator before communicating to Server
         for client in sampled_clients:

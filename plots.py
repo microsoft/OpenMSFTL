@@ -15,7 +15,7 @@ def plot_driver(data, params: Dict, label: str, line_width=4,
                   '.agg_' + args["agg"] + '.rank_' + str(args["rank"]) +\
                   '.compression_' + args["compression_operator"] + '.bits_' + str(args["num_bits"]) +\
                   '.frac_cd_' + str(args["frac_coordinates"]) + '.p_' + str(args["dropout_p"]) + \
-                  '.c_opt_' + args["opt"] + '.s_opt_' + args["server_opt"]
+                  '.c_opt_' + args["c_opt"] + '.s_opt_' + args["server_opt"]
 
     result = data[result_file]
     if plot_type is 'loss':
@@ -53,9 +53,9 @@ if __name__ == '__main__':
             "frac_adv": 0.0,
             "attack_mode": 'un_coordinated',
             "attack_model": 'random_gaussian',
-            "attack_std": 1,
-            "noise_scale": 1,
-            "attack_n_std": 1,
+            "attack_std": 1.0,
+            "noise_scale": 1.0,
+            "attack_n_std": 1.0,
             "agg": 'fed_avg',
             "rank": 20,
             "compression_operator": 'full',
@@ -76,15 +76,13 @@ if __name__ == '__main__':
     plot_type = 'loss'
     # plot_driver(data=data, params=args, label='No Attack', plot_type=plot_type)
     # # Other
-    # args["k_std"] = 1.5
-    # frac_advs = [0.05, 0.1, 0.15, 0.2]
-    # labels = ["5% Byz", "10% Byz", "15% Byz", "20% Byz"]
-    # for frac_adv, label in zip(frac_advs, labels):
-    #     args["frac_adv"] = frac_adv
-    #     plot_driver(data=data, params=args, label=label, plot_type=plot_type)
-    #
-    # plt.title('Byz Attack with $\sigma = 1.5$', fontsize=14)
-    #
+    args["frac_adv"] = 0.05
+    noise_scales = [1.0, 1.5, 2.0, 2.5, 3.0]
+    labels = ["\sigma = 100%", "\sigma = 150%", "\sigma = 200%", "\sigma = 250%", "\sigma = 300%"]
+    for noise_scale, label in zip(noise_scales, labels):
+         args["noise_scale"] = noise_scale
+         plot_driver(data=data, params=args, label=label, plot_type=plot_type)
+    plt.title('Convergence with 5% Uncoordinated Random Gaussian Byz Noise$', fontsize=14)
     # ----------------------------------------------------------------------------------
 
     # Example Usage :::

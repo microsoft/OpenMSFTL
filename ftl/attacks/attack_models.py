@@ -45,14 +45,12 @@ class DriftAttack(ByzAttack):
 class AdditiveGaussian(ByzAttack):
     """
     Additive Gaussian Noise, scaled w.r.t the original values.
-    Implementation of the attack mentioned in:
+    Implementation of the attack mentioned (in un-coordinated setting only) in:
     Ref: Fu et.al. Attack-Resistant Federated Learning with Residual-based Reweighting
     https://arxiv.org/abs/1912.11464.
-    This paper presents this attack in un-coordinated sense only.
 
     [Our Proposal] In Co-ordinated Mode: We take the mean of all clients and generate noise based on the
     mean vector and make all the clients grad = mean(grad_i) + noise.
-    In the un-coordinated mode
     """
 
     def __init__(self, attack_config: Dict):

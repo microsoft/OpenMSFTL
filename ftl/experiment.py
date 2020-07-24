@@ -40,7 +40,8 @@ def run_exp(args):
                      "attack_mode": args.attack_mode,
                      "attack_model": args.attack_model,
                      "attack_n_std": args.attack_n_std,
-                     "noise_scale": args.noise_scale}
+                     "noise_scale": args.noise_scale,
+                     "attack_std": args.attack_std}
 
     server_config = {"lr0": args.server_lr0,
                      "lr_restart": args.lr_restart,

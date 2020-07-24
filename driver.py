@@ -3,6 +3,7 @@ from ftl.training_utils.misc_utils import pickle_it
 import argparse
 import os
 import numpy as np
+from typing import Dict
 
 
 def _parse_args():
@@ -94,7 +95,12 @@ def _parse_args():
     return args
 
 
-if __name__ == '__main__':
+def group_params(args) -> Dict[Dict]:
+    # Group params into dicts
+    pass
+
+
+def run_main():
     args = _parse_args()
     print(args)
 
@@ -122,3 +128,7 @@ if __name__ == '__main__':
     pickle_it(args, 'parameters.' + result_file, directory)
     pickle_it(results, result_file, directory)
     print('results saved in "{}"'.format(directory))
+
+
+if __name__ == '__main__':
+    run_main()

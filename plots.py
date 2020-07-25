@@ -74,7 +74,7 @@ if __name__ == '__main__':
     # # Baseline No Attack
     # Specify Plot Type
     plot_type = 'loss'
-    # plot_driver(data=data, params=args, label='No Attack', plot_type=plot_type)
+    plot_driver(data=data, params=args, label='No Attack', plot_type=plot_type)
     # # Other
     args["frac_adv"] = 0.05
     noise_scales = [1.0, 1.5, 2.0, 2.5, 3.0]

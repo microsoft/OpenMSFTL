@@ -6,7 +6,7 @@ from matplotlib.ticker import MaxNLocator
 import matplotlib.ticker as ticker
 
 
-def plot_driver(data, params: Dict, label: str, line_width=4,
+def plot_driver(data, params: Dict, label: str, line_width=2,
                 plot_type: str = 'loss', ix: int = 0, marker=None, line_style=None):
     result_file = 'num_clients_' + str(args["num_clients"]) + \
                   '.frac_adv_' + str(args["frac_adv"]) + '.attack_mode_' + args["attack_mode"] +\
@@ -77,12 +77,14 @@ if __name__ == '__main__':
     plot_driver(data=data, params=args, label='No Attack', plot_type=plot_type)
     # # Other
     args["frac_adv"] = 0.05
+    args["attack_model"] = 'additive_gaussian'
+    args["attack_mode"] = 'coordinated'
     noise_scales = [1.0, 1.5, 2.0, 2.5, 3.0]
-    labels = ["\sigma = 100%", "\sigma = 150%", "\sigma = 200%", "\sigma = 250%", "\sigma = 300%"]
+    labels = ["scale = 1", "scale = 1.5", "scale = 2", "scale = 2.5", "scale = 3"]
     for noise_scale, label in zip(noise_scales, labels):
          args["noise_scale"] = noise_scale
          plot_driver(data=data, params=args, label=label, plot_type=plot_type)
-    plt.title('Convergence with 5% Uncoordinated Random Gaussian Byz Noise$', fontsize=14)
+    plt.title('5% Coordinated Additive Gaussian Byz Noise', fontsize=14)
     # ----------------------------------------------------------------------------------
 
     # Example Usage :::

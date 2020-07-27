@@ -55,6 +55,6 @@ class Client:
           2. Sum of gradients (N x mean)
           3. Sum of graident variance (N x var.)
         """
-        weight = np.exp(-sum(self.trainer.epoch_losses).detach().numpy()/self.T)
+        weight = np.exp(-sum(self.trainer.epoch_losses).detach().cpu().numpy()/self.T)
         vN = self.trainer.sum_grad2 - self.trainer.sum_grad * self.trainer.sum_grad / self.trainer.counter
-        return (weight, self.trainer.sum_grad, vN)
+        return weight, self.trainer.sum_grad, vN

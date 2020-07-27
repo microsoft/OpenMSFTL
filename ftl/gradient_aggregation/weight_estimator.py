@@ -44,8 +44,8 @@ class RLWeightEstimator(WeightEstimatorBase):
         self.verbose = rl_config.get('verbose_level', 1)
 
     def _post_process_weights(self, rl_weights):
-        if rl_weights.ndim>1:
-            rl_weights = rl_weights[-1,:]
+        if rl_weights.ndim > 1:
+            rl_weights = rl_weights[-1, :]
 
         rl_weights = np.exp(rl_weights)
 
@@ -62,10 +62,12 @@ class RLWeightEstimator(WeightEstimatorBase):
         """
         Compute a weight for client's gradient
 
+        :type input_feature: object
         :param input_feature: input feature vector
         :return: weight vector
         """
-        assert self.RL.network_params[0] == len(input_feature), "Invalid network input size in {}!={}".format(self.RL.network_params[0], len(input_feature))
+        assert self.RL.network_params[0] == len(input_feature), \
+            "Invalid network input size in {}!={}".format(self.RL.network_params[0], len(input_feature))
 
         ####  Reinforcement Learning for estimating weights
         rl_weights = self.RL.forward(input_feature).cpu().detach().numpy()
@@ -101,7 +103,8 @@ class RLWeightEstimator(WeightEstimatorBase):
             reward = -1.0
 
         # Taking the policy from a game-based RL
-        # The reward is 0.1 for each bird’s move without dying when it is not passing through a pipe, 1 if the bird successfully pass through a pipe and -1 if the bird crashes.
+        # The reward is 0.1 for each bird’s move without dying when it is not passing through a pipe, 1 if the bird
+        # successfully pass through a pipe and -1 if the bird crashes.
         batch=((input_feature), (self.weights), [reward])
         self.RL.train(batch)
         self.RL.save(self.steps, reward, rl_error_rate, self.RL.runningLoss)

@@ -154,8 +154,8 @@ class Server:
 
     def _update_global_model(self, sampled_clients, input_feature):
         if self.weight_estimator is None:
-            # Gradient aggregation without weights
-            self.w_current = self.aggregator.update_model(clients=sampled_clients, current_lr=self.current_lr)
+            self.w_current = self.aggregator.update_model(clients=sampled_clients,
+                                                          current_lr=self.current_lr)
         else:
             if self.weight_estimator.estimator_type == 'RL':
                 org_aggregator_state = self.aggregator.state_dict()

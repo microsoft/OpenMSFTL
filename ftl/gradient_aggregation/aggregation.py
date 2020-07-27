@@ -77,37 +77,6 @@ class Aggregator:
         dist_weights_to_model(weights=self.w_current, parameters=self.model.to('cpu').parameters())
         return self.w_current
 
-    def state_dict(self):
-        """Returns the state of the aggregator as a :class:`dict`.
-
-        It contains four entries:
-        * model_state_dict - a dict with the model state.
-        * w_current - a dict holding the model weights.
-        * optimizer_state_dict - a dict containing the optimizer state.
-        * lr_scheduler_state_dict - a dict keeping the LR scheduler state.
-        """
-        return {
-            'model_state_dict': self.model.state_dict(),
-            'w_current': copy.deepcopy(self.w_current),
-            'optimizer_state_dict': self.optimizer.state_dict() if self.optimizer is not None else None,
-            'lr_scheduler_state_dict': self.lr_scheduler.state_dict() if self.lr_scheduler is not None else None
-        }
-
-    def load_state_dict(self, state_dict):
-        """Loads the aggregator state.
-
-        param state_dict: aggregator state. Should be an object returned from a call to :meth:`state_dict`.
-        """
-        self.model.load_state_dict(state_dict['model_state_dict'])
-        self.w_current = state_dict['w_current']
-        dist_weights_to_model(weights=self.w_current, parameters=self.model.to('cpu').parameters())
-
-        if state_dict['optimizer_state_dict'] is not None:
-            self.optimizer.load_state_dict(state_dict['optimizer_state_dict'])
-
-        if state_dict['lr_scheduler_state_dict'] is not None:
-            self.lr_scheduler.load_state_dict(state_dict['lr_scheduler_state_dict'])
-
     def __server_step(self, agg_grad, current_lr: float):
         """
         Implements Server (Dual) Optimization with the option to use Adaptive Optimization
@@ -216,3 +185,35 @@ class Aggregator:
             for j in range(i):
                 dist[i][j] = dist[j][i] = np.linalg.norm(clients[i].grad - clients[j].grad)
         return dist
+
+#####################
+    def state_dict(self):
+        """Returns the state of the aggregator as a :class:`dict`.
+
+        It contains four entries:
+        * model_state_dict - a dict with the model state.
+        * w_current - a dict holding the model weights.
+        * optimizer_state_dict - a dict containing the optimizer state.
+        * lr_scheduler_state_dict - a dict keeping the LR scheduler state.
+        """
+        return {
+            'model_state_dict': self.model.state_dict(),
+            'w_current': copy.deepcopy(self.w_current),
+            'optimizer_state_dict': self.optimizer.state_dict() if self.optimizer is not None else None,
+            'lr_scheduler_state_dict': self.lr_scheduler.state_dict() if self.lr_scheduler is not None else None
+        }
+
+    def load_state_dict(self, state_dict):
+        """Loads the aggregator state.
+
+        param state_dict: aggregator state. Should be an object returned from a call to :meth:`state_dict`.
+        """
+        self.model.load_state_dict(state_dict['model_state_dict'])
+        self.w_current = state_dict['w_current']
+        dist_weights_to_model(weights=self.w_current, parameters=self.model.to('cpu').parameters())
+
+        if state_dict['optimizer_state_dict'] is not None:
+            self.optimizer.load_state_dict(state_dict['optimizer_state_dict'])
+
+        if state_dict['lr_scheduler_state_dict'] is not None:
+            self.lr_scheduler.load_state_dict(state_dict['lr_scheduler_state_dict'])

@@ -12,31 +12,6 @@ import numpy as np
 
 def run_exp(args):
     np.random.seed(args.seed)
-
-    print('# ------------------------------------------------- #')
-    print('#               Initialize Network                  #')
-    print('# ------------------------------------------------- #')
-
-    # *** Set up Client Nodes ****
-    # -----------------------------
-    print('Setting Up the FTL Network and distributing data .... ')
-    num_client_nodes = args.num_clients
-    clients = [Client(client_id=client_id) for client_id in range(num_client_nodes)]
-
-    # Get Data and Distribute among clients
-    data_reader = DataReader(batch_size=args.batch_size,
-                             data_set=args.data_set,
-                             clients=clients,
-                             download=True,
-                             split=args.dev_split,
-                             do_sorting=args.do_sort)
-
-    # Set up model architecture (learner)
-    model_net = get_model(args=args, dim_out=data_reader.no_of_labels)
-
-    # Make some client nodes adversarial
-    sampled_adv_clients = random.sample(population=clients, k=int(args.frac_adv * num_client_nodes))
-
     attack_config = {"frac_adv": args.frac_adv,
                      "attack_mode": args.attack_mode,
                      "attack_model": args.attack_model,
@@ -49,22 +24,44 @@ def run_exp(args):
                      "lr_schedule": args.lrs,
                      "lr_decay": args.lr_decay}
 
-    num_sampled_clients = int(args.frac_clients * num_client_nodes)
-    if args.dga_json is not None:
-        with open(args.dga_json) as jfp:
-            server_config["dga_config"] = json.load(jfp)
-            assert server_config["dga_config"]["network_params"][-1] == num_sampled_clients, \
-                "Invalid network output size in {}".format(args.dga_json)
-
     client_config = {'optimizer_scheme': args.opt,
                      'lr': args.lr0,
                      'weight_decay': args.reg,
                      'momentum': args.momentum,
                      'num_batches': args.num_batches}
 
+    print('# ------------------------------------------------- #')
+    print('#               Initialize Network                  #')
+    print('# ------------------------------------------------- #')
+
+    # *** Set up Client Nodes ****
+    # -----------------------------
+    print('Setting Up the FTL Network and distributing data .... ')
+    num_client_nodes = args.num_clients
+    clients = [Client(client_id=client_id) for client_id in range(num_client_nodes)]
+    # Make some client nodes adversarial
+    sampled_adv_clients = random.sample(population=clients, k=int(args.frac_adv * num_client_nodes))
     for client in sampled_adv_clients:
         client.mal = True
         client.attack_model = get_attack(attack_config=attack_config)
+
+    # Get Data and Distribute among clients
+    data_reader = DataReader(batch_size=args.batch_size,
+                             data_set=args.data_set,
+                             clients=clients,
+                             download=True,
+                             split=args.dev_split,
+                             do_sorting=args.do_sort)
+
+    # Set up model architecture (learner)
+    model_net = get_model(args=args)
+
+    num_sampled_clients = int(args.frac_clients * num_client_nodes)
+    if args.dga_json is not None:
+        with open(args.dga_json) as jfp:
+            server_config["dga_config"] = json.load(jfp)
+            assert server_config["dga_config"]["network_params"][-1] == num_sampled_clients, \
+                "Invalid network output size in {}".format(args.dga_json)
 
     # Copy model architecture to clients
     # Also pass instances of compression operator

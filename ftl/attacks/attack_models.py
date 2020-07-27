@@ -103,3 +103,59 @@ class RandomGaussian(ByzAttack):
         noise *= self.noise_scale * grad_mean
         for client in byz_clients:
             client.grad = noise
+
+
+class BitFlipAttack(ByzAttack):
+    """
+    The bits that control the sign of the floating numbers are flipped, e.g.,
+    due to some hardware failure. A faulty worker pushes the negative gradient instead
+    of the true gradient to the servers.
+    In Co-ordinated mode: one of the faulty gradients is copied to and overwrites the other faulty gradients,
+    which means that all the faulty gradients have the same value = - mean(g_i) ; i in byz clients
+
+    Ref: Cong et.al. Zeno: Distributed Stochastic Gradient Descent with Suspicion-based Fault-tolerance (ICML'19).
+    """
+
+    def __init__(self, attack_config: Dict):
+        ByzAttack.__init__(self, attack_config=attack_config)
+        self.attack_algorithm = 'bit flip attack'
+
+    def attack(self, byz_clients: List[Client]):
+        if len(byz_clients) == 0:
+            return
+        clients_grad = []
+        for client in byz_clients:
+            clients_grad.append(client.grad)
+        grad_mean = np.mean(clients_grad, axis=0)
+        for client in byz_clients:
+            client.grad = - grad_mean
+
+
+class RandomSignFlipAttack(ByzAttack):
+    """
+    A faulty worker randomly (binomial) flips the sign of its each gradient co-ordinates
+    In Co-ordinate Mode: We do the same to the mean of all the byz workers and all workers are
+    assigned the same faulty gradient.
+    Ref: Bernstein et.al. SIGNSGD WITH MAJORITY VOTE IS COMMUNICATION EFFICIENT AND FAULT TOLERANT ; (ICLR '19)
+    """
+
+    def __init__(self, attack_config: Dict):
+        ByzAttack.__init__(self, attack_config=attack_config)
+        self.attack_algorithm = 'bit flip attack'
+
+    def attack(self, byz_clients: List[Client]):
+        if len(byz_clients) == 0:
+            return
+        clients_grad = []
+        for client in byz_clients:
+            clients_grad.append(client.grad)
+        grad_mean = np.mean(clients_grad, axis=0)
+        faulty_grad = np.zeros_like(grad_mean)
+        for i in range(0, len(grad_mean)):
+            faulty_grad[i] = [grad_mean[i] if np.random.random() < 0.5 else -grad_mean[i]]
+        for client in byz_clients:
+            client.grad = faulty_grad
+
+
+
+

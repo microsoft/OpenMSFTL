@@ -6,6 +6,7 @@ class Trainer:
     def __init__(self):
         self.epoch_losses = []
         self.train_iter = None
+        self.reset_gradient_power()
 
     def train(self, model, optimizer):
         model = model.to(device)
@@ -18,8 +19,30 @@ class Trainer:
         optimizer.zero_grad()
         loss = torch.nn.functional.cross_entropy(y_hat, y)
         loss.backward()
+        self.__accumulate_gradient_power(model)
         self.epoch_losses.append(loss)
         optimizer.step()
+
+    def reset_gradient_power(self):
+        """
+        Reset the gradient stats
+        """
+        self.sum_grad = 0.0  # mean of gradient
+        self.sum_grad2 = 0.0  # power of gradient
+        self.counter = 0  # no. samples
+
+    def __accumulate_gradient_power(self, model):
+        """
+        Accumulate gradient stats for 1st and 2nd statistics
+        """
+        for p in model.parameters():
+            if p.grad is None:
+                continue
+            p1 = torch.sum(p.grad)
+            p2 = torch.sum(p.grad ** 2)
+            self.sum_grad += p1
+            self.sum_grad2 += p2
+            self.counter += len(p.grad)
 
 
 def infer(test_loader, model):

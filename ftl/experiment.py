@@ -6,6 +6,7 @@ from ftl.comm_compression import Compression
 from ftl.attacks import get_attack
 import copy
 import random
+import json
 import numpy as np
 
 
@@ -48,6 +49,12 @@ def run_exp(args):
                      "lr_schedule": args.lrs,
                      "lr_decay": args.lr_decay}
 
+    num_sampled_clients = int(args.frac_clients * num_client_nodes)
+    if args.dga_json is not None:
+        with open(args.dga_json) as jfp:
+            server_config["dga_config"] = json.load(jfp)
+            assert server_config["dga_config"]["network_params"][-1] == num_sampled_clients, "Invalid network output size in {}".format(args.dga_json)
+
     client_config = {'optimizer_scheme': args.opt,
                      'lr': args.lr0,
                      'weight_decay': args.reg,
@@ -70,6 +77,9 @@ def run_exp(args):
 
     # **** Set up Server (Master Node)  ****
     # ---------------------------------------
+    print("Attack config:\n{}\n".format(json.dumps(attack_config, indent=4)))
+    print("Server config:\n{}\n".format(json.dumps(server_config, indent=4)))
+    print("Client config:\n{}\n".format(json.dumps(client_config, indent=4)))
     server = Server(aggregation_scheme=args.agg,
                     rank=args.rank,
                     krum_frac=args.m_krum,
@@ -92,7 +102,7 @@ def run_exp(args):
         print(' -------------------------------------------')
 
         server.init_client_models()
-        server.train_client_models(k=int(args.frac_clients * num_client_nodes),
+        server.train_client_models(k=num_sampled_clients,
                                    client_config=client_config,
                                    attack_config=attack_config)
 
@@ -100,11 +110,11 @@ def run_exp(args):
         print('--------------------------------')
         print('Average Epoch Loss = {}'.format(server.train_loss[-1]))
 
-        val_acc, _ = infer(test_loader=server.val_loader, model=server.get_global_model())
+        val_acc = server.run_validation()
         print("Validation Accuracy = {}".format(val_acc))
         server.val_acc.append(val_acc)
 
-        test_acc, _ = infer(test_loader=server.test_loader, model=server.get_global_model())
+        test_acc = server.run_test()
         server.test_acc.append(test_acc)
         print("Test Accuracy = {}".format(test_acc))
 

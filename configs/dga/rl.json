@@ -1,0 +1,26 @@
+{
+    "type": "RL",
+    "marginal_update_RL": true,
+    "num_warmup_steps": 15,
+    "delta_threshold": 0.001,
+    "verbose_level": 1,
+    "RL_path": "dga/new.rl",
+    "network_params": [150,128,128,128,256,48,64,50],
+    "model_descriptor_RL": "Default",
+    "initial_epsilon": 0.5,
+    "final_epsilon": 0.0001,
+    "epsilon_gamma": 0.90,
+    "max_replay_memory_size": 1000,
+    "minibatch_size": 16,
+    "optimizer_config":{
+	"optimizer_scheme": "Adam",
+	"lrs": "StepLR",
+	"lr": 0.001,
+	"amsgrad": true
+    },
+    "annealing_config":{
+	"step_interval": "epoch",
+	"step_size": 1,
+	"gamma": 0.95
+    }
+}

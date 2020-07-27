@@ -12,7 +12,8 @@ class Client:
                  stochastic_attack=False,
                  stochastic_attack_prob=0.8,
                  C: Compression = None,
-                 mal: bool = False):
+                 mal: bool = False,
+                 T: float=1.0):
 
         self.client_id = client_id
         self.trainer = Trainer()
@@ -28,6 +29,7 @@ class Client:
         self.local_train_data = None
 
         self.grad = None
+        self.T = T
 
     def client_step(self, opt_alg, opt_group, num_batches=1):
         opt = SchedulingOptimization(model=self.learner,
@@ -38,6 +40,7 @@ class Client:
         src_model_weights = np.concatenate([w.data.cpu().numpy().flatten() for w in self.learner.parameters()])
         # Reset gradient just in case
         self.learner.zero_grad()
+        self.trainer.reset_gradient_power()
         for bi in range(num_batches):
             self.trainer.train(model=self.learner,
                                optimizer=opt)
@@ -45,5 +48,13 @@ class Client:
         dst_model_weights = np.concatenate([w.data.cpu().numpy().flatten() for w in self.learner.parameters()])
         self.grad = src_model_weights - dst_model_weights
 
-
-
+    def get_stats(self):
+        """
+        Return (non-privacy) stats for aggregation:
+          1. Sum of training losses
+          2. Sum of gradients (N x mean)
+          3. Sum of graident variance (N x var.)
+        """
+        weight = np.exp(-sum(self.trainer.epoch_losses).detach().numpy()/self.T)
+        vN = self.trainer.sum_grad2 - self.trainer.sum_grad * self.trainer.sum_grad / self.trainer.counter
+        return (weight, self.trainer.sum_grad, vN)

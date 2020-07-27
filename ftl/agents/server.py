@@ -1,12 +1,15 @@
 from .client import Client
 from ftl.training_utils.optimization import get_lr
+from ftl.training_utils import infer
 from ftl.models.model_helper import dist_weights_to_model
+from ftl.gradient_aggregation.weight_estimator import RLWeightEstimator
 from ftl.gradient_aggregation.aggregation import Aggregator
 from ftl.attacks import launch_attack
 from typing import List
 from typing import Dict
 from torch.utils.data import DataLoader
 import random
+import numpy as np
 
 
 class Server:
@@ -46,6 +49,16 @@ class Server:
                                      model=model,
                                      dual_opt_alg=optimizer_scheme,
                                      opt_group={'lr': self.current_lr, 'lrs': self.lrs})
+
+        # set a weight estimator for each client gradient
+        self.weight_estimator = None
+        dga_config = server_config.get('dga_config', None)
+        if dga_config is not None:
+            dga_type = dga_config.get('type', None)
+            if dga_type == 'RL':
+                self.weight_estimator = RLWeightEstimator(dga_config)
+            else:
+                raise KeyError("Invalid gradient estimator type {}".format(dga_type))
 
         # Server only keeps track of the pointer to the updated weights at each round
         self.w_current = self.aggregator.w_current
@@ -101,22 +114,27 @@ class Server:
         epoch_loss = 0.0
 
         # TODO : Parallel Calls (Defer)
-        for client in sampled_clients:
+        input_feature = np.zeros(3 * k, np.float)  # non-private stats used for weight aggregation
+        for ix, client in enumerate(sampled_clients):
             client.client_step(opt_alg=client_config['optimizer_scheme'],
                                opt_group={'lr': client_config['lr'],
                                           'weight_decay': client_config['weight_decay'],
                                           'momentum': client_config['momentum']},
                                num_batches=client_config['num_batches'])
             # print('Client : {} loss = {}'.format(client.client_id, client.trainer.epoch_losses[-1]))
+            # collect client's stats (normalized loss, mean of grad, var of grad)
+            for sx, stat_val in enumerate(client.get_stats()):
+                input_feature[ix + sx * k] = stat_val
+
             epoch_loss += client.trainer.epoch_losses[-1]
 
         # Modify the gradients of malicious nodes if attack is defined
-        mal_nodes = [c for c in sampled_clients if c.mal]
+        mal_nodes = [c for c in sampled_clients if c.mal] # TODO : Stop passing sampled_clients multiple times for paralleization
         if mal_nodes:
             launch_attack(attack_mode=attack_config["attack_mode"], mal_nodes=mal_nodes)
 
         # now we can apply the compression operator before communicating to Server
-        for client in sampled_clients:
+        for client in sampled_clients:  # TODO : Stop passing sampled_clients multiple times for paralleization
             client.grad = client.C.compress(grad=client.grad)
 
         # Update Metrics
@@ -128,4 +146,44 @@ class Server:
         self._update_server_lr()
 
         # aggregate client updates
-        self.w_current = self.aggregator.update_model(clients=sampled_clients, current_lr=self.current_lr)
+        # TODO : Stop passing sampled_clients. Compute running average of gradient if possible. This won't scale up for a larger model
+        self._update_global_model(sampled_clients, input_feature)
+
+    def _update_global_model(self, sampled_clients, input_feature):
+        if self.weight_estimator is None:
+            # Gradient aggregation without weights
+            self.w_current = self.aggregator.update_model(clients=sampled_clients, current_lr=self.current_lr)
+        else:
+            if self.weight_estimator.estimator_type == 'RL':
+                org_aggregator_state = self.aggregator.state_dict()
+                # run RL-based weight estimator and update a model with weighted aggregation
+                weights = self.weight_estimator.compute_weights(input_feature)
+                self.aggregator.update_model(clients=sampled_clients, current_lr=self.current_lr, alphas=weights)
+                rl_aggregator_state = self.aggregator.state_dict()
+                val_wi_rl = self.run_validation()
+                # aggregate without the weight
+                self.aggregator.load_state_dict(org_aggregator_state)  # revert to the original state
+                #alphas = input_feature[0:len(sampled_clients)] / np.sum(input_feature[0:len(sampled_clients)])
+                self.w_current = self.aggregator.update_model(clients=sampled_clients, current_lr=self.current_lr, alphas=None)
+                val_wo_rl = self.run_validation()
+                # update the RL model
+                should_use_rl_model = self.weight_estimator.update_model(input_feature, 1 - val_wi_rl / 100.0, 1 - val_wo_rl / 100.0)
+                if should_use_rl_model is True:  # keep the model updated with RL-based weighted aggregation
+                    self.aggregator.load_state_dict(rl_aggregator_state)
+                    self.w_current = self.aggregator.w_current
+            else:
+                raise NotImplementedError("Unsupported weight estimator type {}".format(self.weight_estimator.estimator_type))
+
+    def run_validation(self):
+        """
+        Run validation with the current model
+        """
+        val_acc, _ = infer(test_loader=self.val_loader, model=self.get_global_model())
+        return val_acc
+
+    def run_test(self):
+        """
+        Run test with the current model
+        """
+        test_acc, _ = infer(test_loader=self.test_loader, model=self.get_global_model())
+        return test_acc

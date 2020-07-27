@@ -5,7 +5,7 @@ from ftl.comm_compression.fast_lr_decomp import FastLRDecomposition
 import torch.nn as nn
 from typing import Dict, List, Tuple
 import numpy as np
-
+import copy
 
 class Aggregator:
     """
@@ -29,6 +29,7 @@ class Aggregator:
         """
         if opt_group is None:
             opt_group = {}
+
         self.agg_strategy = agg_strategy
         self.model = model
         self.rank = rank
@@ -49,15 +50,16 @@ class Aggregator:
             for param_group in self.optimizer.param_groups:
                 param_group['lr'] = current_lr
 
-    def update_model(self, clients: List[Client], current_lr: float = 0.01) -> np.array:
+    def update_model(self, clients: List[Client], current_lr: float = 0.01, alphas: np.ndarray = None) -> np.array:
         """
         Update server model with aggregated gradients
         :param current_lr:
         :param clients: A set of client compute nodes
+        :param alphas: Weight for each gradient
         :return: The weights of the updated global model
         """
         if self.agg_strategy == 'fed_avg':
-            agg_grad = self.__fed_avg(clients=clients)
+            agg_grad = self.__fed_avg(clients=clients, alphas=alphas)
 
         elif self.agg_strategy == 'fed_lr_avg':
             agg_grad, Sigma = self.__fed_lr_avg(clients=clients, k=self.rank)
@@ -73,6 +75,37 @@ class Aggregator:
         self.__server_step(agg_grad=agg_grad, current_lr=current_lr)
         dist_weights_to_model(weights=self.w_current, parameters=self.model.to('cpu').parameters())
         return self.w_current
+
+    def state_dict(self):
+        """Returns the state of the aggregator as a :class:`dict`.
+
+        It contains four entries:
+        * model_state_dict - a dict with the model state.
+        * w_current - a dict holding the model weights.
+        * optimizer_state_dict - a dict containing the optimizer state.
+        * lr_scheduler_state_dict - a dict keeping the LR scheduler state.
+        """
+        return {
+            'model_state_dict' : self.model.state_dict(),
+            'w_current' : copy.deepcopy(self.w_current),
+            'optimizer_state_dict' : self.optimizer.state_dict() if self.optimizer is not None else None,
+            'lr_scheduler_state_dict' : self.lr_scheduler.state_dict() if self.lr_scheduler is not None else None
+        }
+
+    def load_state_dict(self, state_dict):
+        """Loads the aggregator state.
+
+        param state_dict: aggregator state. Should be an object returned from a call to :meth:`state_dict`.
+        """
+        self.model.load_state_dict(state_dict['model_state_dict'])
+        self.w_current = state_dict['w_current']
+        dist_weights_to_model(weights=self.w_current, parameters=self.model.to('cpu').parameters())
+
+        if state_dict['optimizer_state_dict'] is not None:
+           self.optimizer.load_state_dict(state_dict['optimizer_state_dict'])
+
+        if state_dict['lr_scheduler_state_dict'] is not None:
+            self.lr_scheduler.load_state_dict(state_dict['lr_scheduler_state_dict'])
 
     def __server_step(self, agg_grad, current_lr: float):
         """
@@ -98,14 +131,15 @@ class Aggregator:
     #               GAR Implementations                 #
     # ------------------------------------------------- #
 
-    def __fed_avg(self, clients: List[Client]) -> np.ndarray:
+    def __fed_avg(self, clients: List[Client], alphas: np.ndarray = None) -> np.ndarray:
         """
         This implements classic FedAvg: McMahan et al., Communication-Efficient Learning of Deep
         Networks from Decentralized Data, (NeuRips 2017)
         :param clients: List of client nodes to aggregate over
         :return: aggregated gradient
         """
-        agg_grad = self.weighted_average(clients=clients)
+        agg_grad = self.weighted_average(clients=clients, alphas=alphas)
+
         return agg_grad
 
     def __fed_lr_avg(self, clients: List[Client], k: int) -> Tuple[np.ndarray, List[float]]:
@@ -166,11 +200,10 @@ class Aggregator:
         then its equivalent to simple average / Fed Avg
         """
         if alphas is None:
-            alphas = [1] * len(clients)
+            alphas = [1.0 / len(clients)] * len(clients)
         agg_grad = np.zeros_like(clients[0].grad)
-        tot = np.sum(alphas)
         for alpha, client in zip(alphas, clients):
-            agg_grad += (alpha / tot) * client.grad
+            agg_grad += alpha * client.grad
 
         return agg_grad
 

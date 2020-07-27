@@ -7,6 +7,7 @@ from typing import Dict, List, Tuple
 import numpy as np
 import copy
 
+
 class Aggregator:
     """
     This class updates a global model with gradients aggregated from clients and
@@ -86,10 +87,10 @@ class Aggregator:
         * lr_scheduler_state_dict - a dict keeping the LR scheduler state.
         """
         return {
-            'model_state_dict' : self.model.state_dict(),
-            'w_current' : copy.deepcopy(self.w_current),
-            'optimizer_state_dict' : self.optimizer.state_dict() if self.optimizer is not None else None,
-            'lr_scheduler_state_dict' : self.lr_scheduler.state_dict() if self.lr_scheduler is not None else None
+            'model_state_dict': self.model.state_dict(),
+            'w_current': copy.deepcopy(self.w_current),
+            'optimizer_state_dict': self.optimizer.state_dict() if self.optimizer is not None else None,
+            'lr_scheduler_state_dict': self.lr_scheduler.state_dict() if self.lr_scheduler is not None else None
         }
 
     def load_state_dict(self, state_dict):
@@ -102,7 +103,7 @@ class Aggregator:
         dist_weights_to_model(weights=self.w_current, parameters=self.model.to('cpu').parameters())
 
         if state_dict['optimizer_state_dict'] is not None:
-           self.optimizer.load_state_dict(state_dict['optimizer_state_dict'])
+            self.optimizer.load_state_dict(state_dict['optimizer_state_dict'])
 
         if state_dict['lr_scheduler_state_dict'] is not None:
             self.lr_scheduler.load_state_dict(state_dict['lr_scheduler_state_dict'])
@@ -215,4 +216,3 @@ class Aggregator:
             for j in range(i):
                 dist[i][j] = dist[j][i] = np.linalg.norm(clients[i].grad - clients[j].grad)
         return dist
-

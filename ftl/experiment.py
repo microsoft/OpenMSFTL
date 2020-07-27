@@ -1,7 +1,7 @@
 from ftl.data_reader import DataReader
 from ftl.agents import Client, Server
 from ftl.models import get_model
-from ftl.training_utils import infer, cycle
+from ftl.training_utils import cycle
 from ftl.comm_compression import Compression
 from ftl.attacks import get_attack
 import copy
@@ -53,7 +53,8 @@ def run_exp(args):
     if args.dga_json is not None:
         with open(args.dga_json) as jfp:
             server_config["dga_config"] = json.load(jfp)
-            assert server_config["dga_config"]["network_params"][-1] == num_sampled_clients, "Invalid network output size in {}".format(args.dga_json)
+            assert server_config["dga_config"]["network_params"][-1] == num_sampled_clients, \
+                "Invalid network output size in {}".format(args.dga_json)
 
     client_config = {'optimizer_scheme': args.opt,
                      'lr': args.lr0,

@@ -129,12 +129,14 @@ class Server:
             epoch_loss += client.trainer.epoch_losses[-1]
 
         # Modify the gradients of malicious nodes if attack is defined
-        mal_nodes = [c for c in sampled_clients if c.mal] # TODO : Stop passing sampled_clients multiple times for paralleization
+        mal_nodes = [c for c in sampled_clients if c.mal]
+        # TODO : Stop passing sampled_clients multiple times for parallelization
         if mal_nodes:
             launch_attack(attack_mode=attack_config["attack_mode"], mal_nodes=mal_nodes)
 
         # now we can apply the compression operator before communicating to Server
-        for client in sampled_clients:  # TODO : Stop passing sampled_clients multiple times for paralleization
+        for client in sampled_clients:
+            # TODO : Stop passing sampled_clients multiple times for parallelization
             client.grad = client.C.compress(grad=client.grad)
 
         # Update Metrics
@@ -146,7 +148,8 @@ class Server:
         self._update_server_lr()
 
         # aggregate client updates
-        # TODO : Stop passing sampled_clients. Compute running average of gradient if possible. This won't scale up for a larger model
+        # TODO : Stop passing sampled_clients. Compute running average of gradient if possible.
+        #  This won't scale up for a larger model
         self._update_global_model(sampled_clients, input_feature)
 
     def _update_global_model(self, sampled_clients, input_feature):
@@ -163,16 +166,19 @@ class Server:
                 val_wi_rl = self.run_validation()
                 # aggregate without the weight
                 self.aggregator.load_state_dict(org_aggregator_state)  # revert to the original state
-                #alphas = input_feature[0:len(sampled_clients)] / np.sum(input_feature[0:len(sampled_clients)])
-                self.w_current = self.aggregator.update_model(clients=sampled_clients, current_lr=self.current_lr, alphas=None)
+                # alphas = input_feature[0:len(sampled_clients)] / np.sum(input_feature[0:len(sampled_clients)])
+                self.w_current = self.aggregator.update_model(clients=sampled_clients,
+                                                              current_lr=self.current_lr, alphas=None)
                 val_wo_rl = self.run_validation()
                 # update the RL model
-                should_use_rl_model = self.weight_estimator.update_model(input_feature, 1 - val_wi_rl / 100.0, 1 - val_wo_rl / 100.0)
+                should_use_rl_model = self.weight_estimator.update_model(input_feature, 1 - val_wi_rl / 100.0,
+                                                                         1 - val_wo_rl / 100.0)
                 if should_use_rl_model is True:  # keep the model updated with RL-based weighted aggregation
                     self.aggregator.load_state_dict(rl_aggregator_state)
                     self.w_current = self.aggregator.w_current
             else:
-                raise NotImplementedError("Unsupported weight estimator type {}".format(self.weight_estimator.estimator_type))
+                raise NotImplementedError("Unsupported weight estimator type {}".
+                                          format(self.weight_estimator.estimator_type))
 
     def run_validation(self):
         """

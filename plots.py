@@ -73,18 +73,18 @@ if __name__ == '__main__':
     # ---------------------------------------
     # # Baseline No Attack
     # Specify Plot Type
-    plot_type = 'loss'
+    plot_type = 'acc'
     plot_driver(data=data, params=args, label='No Attack', plot_type=plot_type)
     # # Other
-    args["frac_adv"] = 0.05
-    args["attack_model"] = 'additive_gaussian'
+    args["frac_adv"] = 0.2
+    args["attack_model"] = 'random_gaussian'
     args["attack_mode"] = 'coordinated'
     noise_scales = [1.0, 1.5, 2.0, 2.5, 3.0]
     labels = ["scale = 1", "scale = 1.5", "scale = 2", "scale = 2.5", "scale = 3"]
     for noise_scale, label in zip(noise_scales, labels):
          args["noise_scale"] = noise_scale
          plot_driver(data=data, params=args, label=label, plot_type=plot_type)
-    plt.title('5% Coordinated Additive Gaussian Byz Noise', fontsize=14)
+    plt.title('20% Coordinated Random Gaussian Byz Noise', fontsize=14)
     # ----------------------------------------------------------------------------------
 
     # Example Usage :::
@@ -135,6 +135,8 @@ if __name__ == '__main__':
         ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
     else:
         plt.xlabel('Communication Rounds', fontsize=14)
+        plt.xlim(-1, 501)
+        ax.xaxis.set_major_locator(ticker.MultipleLocator(100))
 
     if plot_type is 'loss':
         plt.ylabel('Training Loss', fontsize=14)
@@ -146,5 +148,4 @@ if __name__ == '__main__':
         raise NotImplementedError
 
     plt.legend(fontsize=11)
-
     plt.show()

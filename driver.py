@@ -85,7 +85,8 @@ def _parse_args():
     parser.add_argument('--lr_restart', type=int, default=100)
     parser.add_argument('--lr_decay', type=int, default=5)
     parser.add_argument('--dga_json', type=str, default=None,
-                        help='JSON config file path for dynamic gradient aggregation; see configs/gwe/rl.json for an example')
+                        help='JSON config file path for dynamic gradient aggregation; '
+                             'see configs/gwe/rl.json for an example')
     # Training params
     parser.add_argument('--num_comm_round', type=int, default=100,
                         help='Number of Server Client Communication Round')

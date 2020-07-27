@@ -38,35 +38,36 @@ class SequenceWise(nn.Module):
 
 
 class BatchRNN(nn.Module):
-    def __init__(self, input_size, hidden_size, rnn_type=nn.LSTM, bidirectional=False, batch_norm=True,dropout=0.0,multi=1):
+    def __init__(self, input_size, hidden_size, rnn_type=nn.LSTM, bidirectional=False, batch_norm=True, dropout=0.0,
+                 multi=1):
         super(BatchRNN, self).__init__()
-        self.input_size     = input_size
-        self.hidden_size    = hidden_size
+        self.input_size = input_size
+        self.hidden_size = hidden_size
         self.batch_norm_activate = batch_norm
-        self.bidirectional  = bidirectional
-        self.multi          = multi
-        self.dropout        = dropout
+        self.bidirectional = bidirectional
+        self.multi = multi
+        self.dropout = dropout
 
         if self.batch_norm_activate:
             self.batch_norm = SequenceWise(nn.BatchNorm1d(input_size))
-        self.rnn = rnn_type(input_size   = input_size,
-                            hidden_size  = hidden_size,
-                            bidirectional= bidirectional,
-                            bias         = True,
-                            batch_first  = True,
-                            dropout      = self.dropout)
+        self.rnn = rnn_type(input_size=input_size,
+                            hidden_size=hidden_size,
+                            bidirectional=bidirectional,
+                            bias=True,
+                            batch_first=True,
+                            dropout=self.dropout)
         self.num_directions = 2 if bidirectional else 1
 
     def forward(self, x):
-        if x.dim()==2:
-            x=x.unsqueeze(1)
+        if x.dim() == 2:
+            x = x.unsqueeze(1)
 
         if self.batch_norm_activate:
             x = x.contiguous()
             x = self.batch_norm(x)
         x, _ = self.rnn(x)
 
-        if self.bidirectional and self.multi<2:
+        if self.bidirectional and self.multi < 2:
             x = x.view(x.size(0), x.size(1), 2, -1).sum(2).view(x.size(0), x.size(1), -1)
         return x
 
@@ -89,38 +90,38 @@ class NeuralNetwork(nn.Module):
         criterion = nn.MSELoss()
 
         """
-        self.wantLSTM  = wantLSTM
-        self.batch_norm= batch_norm
+        self.wantLSTM = wantLSTM
+        self.batch_norm = batch_norm
         layers = []
 
-        self.softmax = nn.Softmax(dim = 1)
+        self.softmax = nn.Softmax(dim=1)
         if self.wantLSTM:
             # Recurrent Component of the architecture
             rnns = []
             for i in range(1, len(params) - 2):
-                multi = 1 if i==1 else 1
-                rnn = BatchRNN(input_size    = params[i-1]*multi,
-                                hidden_size  = params[i],
-                                rnn_type     = nn.LSTM,
-                                bidirectional= True,
-                                batch_norm   = batch_norm,
-                                multi        = 1,
-                                dropout      = 0.0)
-                rnns.append(('%d' %(i-1), rnn))
+                multi = 1 if i == 1 else 1
+                rnn = BatchRNN(input_size=params[i - 1] * multi,
+                               hidden_size=params[i],
+                               rnn_type=nn.LSTM,
+                               bidirectional=True,
+                               batch_norm=batch_norm,
+                               multi=1,
+                               dropout=0.0)
+                rnns.append(('%d' % (i - 1), rnn))
             self.rnn = nn.Sequential(OrderedDict(rnns))
 
             layers.append(nn.Linear(params[-3], params[-2], bias=True))
             layers.append(nn.ReLU(inplace=True))
             layers.append(nn.Linear(params[-2], params[-1], bias=True))
             mlp = nn.Sequential(*layers)
-            self.mlp = nn.Sequential(SequenceWise(mlp),)
+            self.mlp = nn.Sequential(SequenceWise(mlp), )
 
         else:
             if self.batch_norm:
                 self.batch_norm = nn.BatchNorm1d(params[0])
 
-            for i in range(1, len(params)-1):
-                layers.append(nn.Linear(params[i-1], params[i], bias=True))
+            for i in range(1, len(params) - 1):
+                layers.append(nn.Linear(params[i - 1], params[i], bias=True))
                 layers.append(nn.ReLU(inplace=True))
             layers.append(nn.Linear(params[-2], params[-1], bias=True))
             self.mlp = nn.Sequential(*layers)
@@ -128,13 +129,13 @@ class NeuralNetwork(nn.Module):
     def forward(self, x):
         if self.wantLSTM:
             x = self.rnn(x)
-            #x = x.squeeze(1)
+            # x = x.squeeze(1)
 
         if self.batch_norm:
             x = self.batch_norm(x)
         out = self.mlp(x)
         out = out.squeeze()
-        #out = self.softmax(out)
+        # out = self.softmax(out)
         return out
 
 
@@ -169,9 +170,10 @@ class RL:
         # Finalized config-file
         self.rl_config = rl_config
         if not 'optimizer_config' in self.rl_config:
-            self.rl_config['optimizer_config'] = {'optimizer_scheme': 'Adam', 'lr': 0.0002, 'amsgrad': True, 'lrs': 'StepLR'}
+            self.rl_config['optimizer_config'] = {'optimizer_scheme': 'Adam', 'lr': 0.0002, 'amsgrad': True,
+                                                  'lrs': 'StepLR'}
         if not 'annealing_config' in self.rl_config:
-            self.rl_config['annealing_config'] = { 'step_interval': 'epoch', 'step_size': 1, 'gamma': 0.95}
+            self.rl_config['annealing_config'] = {'step_interval': 'epoch', 'step_size': 1, 'gamma': 0.95}
 
         self.network_params = rl_config['network_params']
         if isinstance(self.network_params, str) is True:
@@ -180,7 +182,7 @@ class RL:
         self.out_size = self.network_params[-1]
         self.wantLSTM = rl_config.get('wantLSTM', False)
         self.max_replay_memory_size = rl_config.get('max_replay_memory_size', 1000)
-        self.replay_memory= []
+        self.replay_memory = []
         self.state_memory = []
         self.epsilon = rl_config.get('initial_epsilon', 0.5)
         self.epsilon_gamma = rl_config.get('epsilon_gamma', 0.9)
@@ -205,17 +207,17 @@ class RL:
         if self.wantLSTM:
             N = len(state)
             state.resize(1, N)
-            if len(self.state_memory)==0:
+            if len(self.state_memory) == 0:
                 self.state_memory = np.zeros((self.minibatch_size, N))
             self.state_memory = np.concatenate((self.state_memory[1:], state), axis=0)
             state = self.state_memory
 
         if random.random() <= self.epsilon:
             print("Performed random action!")
-            action= torch.rand(self.out_size).cuda() if torch.cuda.is_available() else torch.rand(self.out_size)
+            action = torch.rand(self.out_size).cuda() if torch.cuda.is_available() else torch.rand(self.out_size)
         else:
             state = torch.from_numpy(state).cuda() if torch.cuda.is_available() else torch.from_numpy(state)
-            action= self.model(state.float())
+            action = self.model(state.float())
         return action
 
     def train(self, batch=None):
@@ -231,7 +233,7 @@ class RL:
 
         # sample random minibatch
         if self.wantLSTM:
-            if len(self.replay_memory)>= self.minibatch_size:
+            if len(self.replay_memory) >= self.minibatch_size:
                 minibatch = self.replay_memory[-self.minibatch_size:]
             else:
                 minibatch = self.replay_memory
@@ -239,7 +241,7 @@ class RL:
             minibatch = random.sample(self.replay_memory, min(len(self.replay_memory), self.minibatch_size))
 
         # unpack minibatch
-        state_batch  = torch.tensor(tuple(d[0] for d in minibatch)).float()
+        state_batch = torch.tensor(tuple(d[0] for d in minibatch)).float()
         action_batch = torch.tensor(tuple(d[1] for d in minibatch)).float()
         reward_batch = torch.tensor(tuple(d[2] for d in minibatch)).float().view(-1)
 
@@ -268,7 +270,7 @@ class RL:
         self.optimizer.step()
 
         # Tracking a running average of loss
-        if self.runningLoss==0:
+        if self.runningLoss == 0:
             self.runningLoss = loss.item()
         else:
             self.runningLoss = 0.95 * self.runningLoss + 0.05 * loss.item()
@@ -278,9 +280,9 @@ class RL:
 
     def make_model(self):
         # make model
-        self.model = NeuralNetwork(self.network_params, \
-                        self.rl_config['wantLSTM'] if 'wantLSTM' in self.rl_config else False, \
-                        self.rl_config['batchNorm'] if 'batchNorm' in self.rl_config else False)
+        self.model = NeuralNetwork(self.network_params,
+                                   self.rl_config['wantLSTM'] if 'wantLSTM' in self.rl_config else False,
+                                   self.rl_config['batchNorm'] if 'batchNorm' in self.rl_config else False)
 
         if torch.cuda.is_available():
             self.model = self.model.cuda()
@@ -289,8 +291,7 @@ class RL:
         soptimizer = SchedulingOptimization(model=self.model,
                                             opt_alg=self.rl_config['optimizer_config']['optimizer_scheme'],
                                             opt_group=self.rl_config['optimizer_config'],
-                                            lrs_group=self.rl_config['annealing_config']
-                                    )
+                                            lrs_group=self.rl_config['annealing_config'])
 
         # make optimizer
         self.optimizer = soptimizer.optimizer
@@ -304,11 +305,11 @@ class RL:
             self.load()
 
         if os.path.exists(self.stats_name):
-            with open(self.stats_name, 'r') as logfp: # loading the iteration no., val_loss and lr_weight
+            with open(self.stats_name, 'r') as logfp:  # loading the iteration no., val_loss and lr_weight
                 elems = json.load(logfp)
                 self.cur_iter_no = elems["i"]
-                self.val_loss    = elems["val_loss"]
-                self.val_cer     = elems["val_cer"]
+                self.val_loss = elems["val_loss"]
+                self.val_cer = elems["val_cer"]
                 self.runningLoss = elems["weight"]
 
     def load(self):
@@ -320,9 +321,9 @@ class RL:
         Save a model as well as training information
         """
         save_state = {
-            'model_state_dict' : self.model.state_dict(),
-            'optimizer_state_dict' : self.optimizer.state_dict() if self.optimizer is not None else None,
-            'lr_scheduler_state_dict' : self.lr_scheduler.state_dict() if self.lr_scheduler is not None else None
+            'model_state_dict': self.model.state_dict(),
+            'optimizer_state_dict': self.optimizer.state_dict() if self.optimizer is not None else None,
+            'lr_scheduler_state_dict': self.lr_scheduler.state_dict() if self.lr_scheduler is not None else None
         }
 
         outputdir = os.path.dirname(self.model_name)
@@ -338,9 +339,8 @@ class RL:
 
         # logging the latest best values
         with open(self.stats_name, 'w') as logfp:
-            json.dump({"i":i+1,
-                        "val_loss":float(val_loss),
-                        "val_cer":float(val_cer),
-                        "weight":float(lr_weight)},
-                        logfp)
-
+            json.dump({"i": i + 1,
+                       "val_loss": float(val_loss),
+                       "val_cer": float(val_cer),
+                       "weight": float(lr_weight)},
+                      logfp)

@@ -155,7 +155,3 @@ class RandomSignFlipAttack(ByzAttack):
             faulty_grad[i] = [grad_mean[i] if np.random.random() < 0.5 else -grad_mean[i]]
         for client in byz_clients:
             client.grad = faulty_grad
-
-
-
-

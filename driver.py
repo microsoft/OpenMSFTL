@@ -3,7 +3,6 @@ from ftl.training_utils.misc_utils import pickle_it
 import argparse
 import os
 import numpy as np
-from typing import Dict
 
 
 def _parse_args():
@@ -102,11 +101,7 @@ def _parse_args():
 
     args = parser.parse_args()
     return args
-
-
-def group_params(args):
-    # Group params into dicts
-    pass
+# TODO: Put configs in different config.json files grouped
 
 
 def run_main():

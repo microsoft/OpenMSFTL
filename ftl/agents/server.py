@@ -15,7 +15,7 @@ import copy
 
 class Server:
     def __init__(self,
-                 model,
+                 server_model,
                  server_opt_config: Dict,
                  aggregator_config: Dict,
                  clients: List[Client] = None,
@@ -40,7 +40,7 @@ class Server:
 
         # Aggregator tracks the model and optimizer
         self.aggregator = Aggregator(aggregation_config=aggregator_config,
-                                     model=model,
+                                     model=server_model,
                                      dual_opt_alg=self.optimizer_scheme,
                                      opt_group={'lr': self.current_lr, 'lrs': self.lrs})
 

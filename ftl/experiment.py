@@ -12,28 +12,38 @@ import numpy as np
 
 def run_exp(args):
     np.random.seed(args.seed)
-    attack_config = {"frac_adv": args.frac_adv,
-                     "attack_mode": args.attack_mode,
-                     "attack_model": args.attack_model,
-                     "attack_n_std": args.attack_n_std,
-                     "noise_scale": args.noise_scale,
-                     "attack_std": args.attack_std}
-
-    server_opt_config = {"optimizer_scheme": args.server_opt,
-                         "lr0": args.server_lr0,
-                         "lr_restart": args.lr_restart,
-                         "lr_schedule": args.lrs,
-                         "lr_decay": args.lr_decay}
-
-    client_config = {'optimizer_scheme': args.opt,
-                     'lr': args.lr0,
-                     'weight_decay': args.reg,
-                     'momentum': args.momentum,
-                     'num_batches': args.num_batches}
+    attack_config = {
+        "frac_adv": args.frac_adv,
+        "attack_mode": args.attack_mode,
+        "attack_model": args.attack_model,
+        "attack_n_std": args.attack_n_std,
+        "noise_scale": args.noise_scale,
+        "attack_std": args.attack_std}
+    server_opt_config = {
+        "optimizer_scheme": args.server_opt,
+        "lr0": args.server_lr0,
+        "lr_restart": args.lr_restart,
+        "lr_schedule": args.lrs,
+        "lr_decay": args.lr_decay}
+    client_config = {
+        'optimizer_scheme': args.opt,
+        'lr': args.lr0,
+        'weight_decay': args.reg,
+        'momentum': args.momentum,
+        'num_batches': args.num_batches}
+    aggregation_config = {
+        "aggregation_scheme": args.agg,
+        "rank": args.rank,
+        "adaptive_k_th": args.adaptive_k_th,
+        "krum_frac": args.m_krum}
 
     print('# ------------------------------------------------- #')
-    print('#               Initialize Network                  #')
+    print('#               Initializing Network                #')
     print('# ------------------------------------------------- #')
+    print("Attack config:\n{}\n".format(json.dumps(attack_config, indent=4)))
+    print("Server config:\n{}\n".format(json.dumps(server_opt_config, indent=4)))
+    print("Client config:\n{}\n".format(json.dumps(client_config, indent=4)))
+    print("Aggregation config:\n{}\n".format(json.dumps(aggregation_config, indent=4)))
 
     # *** Set up Client Nodes ****
     # -----------------------------
@@ -54,7 +64,7 @@ def run_exp(args):
                              split=args.dev_split,
                              do_sorting=args.do_sort)
 
-    # Set up model architecture (learner)
+    # Set up model architecture (learner) , Here we use the same Nw for both server and client.
     model_net = get_model(args=args)
 
     num_sampled_clients = int(args.frac_clients * num_client_nodes)
@@ -76,25 +86,15 @@ def run_exp(args):
 
     # **** Set up Server (Master Node)  ****
     # ---------------------------------------
-    print("Attack config:\n{}\n".format(json.dumps(attack_config, indent=4)))
-    print("Server config:\n{}\n".format(json.dumps(server_opt_config, indent=4)))
-    print("Client config:\n{}\n".format(json.dumps(client_config, indent=4)))
-
-    aggregation_config = {
-        "aggregation_scheme": args.agg,
-        "rank": args.rank,
-        "adaptive_k_th": args.adaptive_k_th,
-        "krum_frac": args.m_krum
-    }
     server = Server(aggregator_config=aggregation_config,
                     server_opt_config=server_opt_config,
                     clients=clients,
-                    model=copy.deepcopy(model_net),
+                    server_model=copy.deepcopy(model_net),
                     val_loader=data_reader.val_loader,
                     test_loader=data_reader.test_loader)
 
     print('# ------------------------------------------------- #')
-    print('#            FTL Training                          #')
+    print('#            FTL Training                           #')
     print('# ------------------------------------------------- #')
     best_val_acc = 0.0
     best_test_acc = 0.0

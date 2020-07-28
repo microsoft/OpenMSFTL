@@ -17,6 +17,7 @@ class Aggregator:
     def __init__(self, agg_strategy: str,
                  model: nn.Module,
                  rank: int = None,
+                 adaptive_k_th: float = None,
                  dual_opt_alg: str = "Adam",
                  opt_group: Dict = None,
                  max_grad_norm: float = None,
@@ -34,6 +35,7 @@ class Aggregator:
         self.agg_strategy = agg_strategy
         self.model = model
         self.rank = rank
+        self.adaptive_k_th = adaptive_k_th
 
         # Instantiate the optimizer for an aggregator
         server_opt = SchedulingOptimization(model=model, opt_alg=dual_opt_alg, opt_group=opt_group)
@@ -63,7 +65,9 @@ class Aggregator:
             agg_grad = self.__fed_avg(clients=clients, alphas=alphas)
 
         elif self.agg_strategy == 'fed_lr_avg':
-            agg_grad, Sigma = self.__fed_lr_avg(clients=clients, k=self.rank)
+            agg_grad, Sigma = self.__fed_lr_avg(clients=clients,
+                                                k=self.rank,
+                                                adaptive_k_th=self.adaptive_k_th)
             self.Sigma.append(Sigma)
 
         elif self.agg_strategy == 'krum':
@@ -112,7 +116,9 @@ class Aggregator:
 
         return agg_grad
 
-    def __fed_lr_avg(self, clients: List[Client], k: int) -> Tuple[np.ndarray, List[float]]:
+    def __fed_lr_avg(self, clients: List[Client],
+                     k: int,
+                     adaptive_k_th: float) -> Tuple[np.ndarray, List[float]]:
         """
         Implements proposed Faster Convergence of FL through MF: Acharya. A.
 
@@ -126,7 +132,11 @@ class Aggregator:
             stacked_grad[ix, :] = client.grad
         if k is None:
             k = min(stacked_grad.shape[0], stacked_grad.shape[1])
-        lr_factorization = FastLRDecomposition(n_components=k, X=stacked_grad)
+            lr_factorization = FastLRDecomposition(n_components=k,
+                                                   X=stacked_grad,
+                                                   adaptive_k_th=adaptive_k_th)
+        else:
+            lr_factorization = FastLRDecomposition(n_components=k, X=stacked_grad)
 
         return lr_factorization.agg_grad, lr_factorization.Sigma
 

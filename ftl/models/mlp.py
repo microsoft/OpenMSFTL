@@ -27,3 +27,4 @@ class MLP(nn.Module):
         z = self.softmax(x)
 
         return z
+

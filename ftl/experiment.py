@@ -80,6 +80,7 @@ def run_exp(args):
     print("Client config:\n{}\n".format(json.dumps(client_config, indent=4)))
     server = Server(aggregation_scheme=args.agg,
                     rank=args.rank,
+                    adaptive_k_th=args.adaptive_k_th,
                     krum_frac=args.m_krum,
                     optimizer_scheme=args.server_opt,
                     server_config=server_config,

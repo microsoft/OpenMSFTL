@@ -131,4 +131,4 @@ def run_exp(args):
             print('* Best Test Acc {}'.format(best_test_acc))
         print(' ')
 
-    return server.train_loss, server.test_acc, server.aggregator.Sigma
+    return server.train_loss, server.test_acc, server.aggregator.gar.Sigma_tracked

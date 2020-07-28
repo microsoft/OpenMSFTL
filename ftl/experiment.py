@@ -93,7 +93,7 @@ def run_exp(args):
     print('#            FTL Training                          #')
     print('# ------------------------------------------------- #')
     best_val_acc = 0.0
-    corr_test_acc = 0.0
+    best_test_acc = 0.0
 
     for epoch in range(1, args.num_comm_round + 1):
         print(' ------------------------------------------ ')
@@ -109,20 +109,21 @@ def run_exp(args):
         print('--------------------------------')
         print('Average Epoch Loss = {}'.format(server.train_loss[-1]))
 
-        val_acc = server.run_validation()
-        print("Validation Accuracy = {}".format(val_acc))
-        server.val_acc.append(val_acc)
+        if len(server.val_loader.dataset) > 0:
+            val_acc = server.run_validation()
+            print("Validation Accuracy = {}".format(val_acc))
+            server.val_acc.append(val_acc)
+            if val_acc > best_val_acc:
+                best_val_acc = val_acc
+            print('* Best Val Acc So Far {}'.format(best_val_acc))
 
-        test_acc = server.run_test()
-        server.test_acc.append(test_acc)
-        print("Test Accuracy = {}".format(test_acc))
-
-        if val_acc > best_val_acc:
-            best_val_acc = val_acc
-            corr_test_acc = test_acc
-
-        print('* Best Val Acc So Far {}'.format(best_val_acc))
-        print('* Corresponding Test Acc {}'.format(corr_test_acc))
+        if len(server.test_loader.dataset) > 0:
+            test_acc = server.run_test()
+            server.test_acc.append(test_acc)
+            print("Test Accuracy = {}".format(test_acc))
+            if test_acc > best_test_acc:
+                best_test_acc = test_acc
+            print('* Best Test Acc {}'.format(best_test_acc))
         print(' ')
 
     return server.train_loss, server.test_acc, server.aggregator.Sigma

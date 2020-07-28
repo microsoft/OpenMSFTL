@@ -24,6 +24,7 @@ class FastLRDecomposition:
     def decompose(self, X):
         # n_samples, n_features = X.shape
         # sign flipping is done inside
+        print('Doing a {} rank SVD'.format(self.n_components))
         U, S, V = randomized_svd(X, n_components=self.n_components,
                                  n_iter=self.iterated_power,
                                  flip_sign=True)

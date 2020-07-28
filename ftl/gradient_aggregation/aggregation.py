@@ -132,11 +132,9 @@ class Aggregator:
             stacked_grad[ix, :] = client.grad
         if k is None:
             k = min(stacked_grad.shape[0], stacked_grad.shape[1])
-            lr_factorization = FastLRDecomposition(n_components=k,
-                                                   X=stacked_grad,
-                                                   adaptive_k_th=adaptive_k_th)
-        else:
-            lr_factorization = FastLRDecomposition(n_components=k, X=stacked_grad)
+        lr_factorization = FastLRDecomposition(n_components=k,
+                                               X=stacked_grad,
+                                               adaptive_k_th=adaptive_k_th)
 
         return lr_factorization.agg_grad, lr_factorization.Sigma
 
@@ -196,7 +194,7 @@ class Aggregator:
                 dist[i][j] = dist[j][i] = np.linalg.norm(clients[i].grad - clients[j].grad)
         return dist
 
-#####################
+    #####################
     def state_dict(self):
         """Returns the state of the aggregator as a :class:`dict`.
 

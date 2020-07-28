@@ -10,26 +10,20 @@ from typing import Dict
 from torch.utils.data import DataLoader
 import random
 import numpy as np
+import copy
 
 
 class Server:
     def __init__(self,
                  model,
+                 server_opt_config: Dict,
                  aggregation_scheme: str = 'fed_avg',
                  rank: int = 10,
                  adaptive_k_th: float = None,
                  krum_frac: float = 0.7,
-                 server_opt_config: Dict = None,
                  clients: List[Client] = None,
                  val_loader: DataLoader = None,
                  test_loader: DataLoader = None):
-
-        # Specify Default Config if none is provided
-        if not server_opt_config:
-            server_opt_config = {"optimizer_scheme": 'Adam',
-                                 "lr0": 1.0,
-                                 "lr_restart": 100,
-                                 "lr_decay": 10}
 
         # server opt parameters
         self.optimizer_scheme = server_opt_config["optimizer_scheme"]
@@ -45,7 +39,7 @@ class Server:
 
         # Server has a pointer to all clients
         self.clients = clients
-        self.current_lr = self.server_lr0
+        self.current_lr = copy.deepcopy(self.server_lr0)
 
         # Aggregator tracks the model and optimizer
         self.aggregator = Aggregator(agg_strategy=aggregation_scheme,

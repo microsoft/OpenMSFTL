@@ -79,6 +79,13 @@ def run_exp(args):
     print("Attack config:\n{}\n".format(json.dumps(attack_config, indent=4)))
     print("Server config:\n{}\n".format(json.dumps(server_opt_config, indent=4)))
     print("Client config:\n{}\n".format(json.dumps(client_config, indent=4)))
+
+    aggregation_config = {
+        "aggregation_scheme": args.agg,
+        "rank": args.rank,
+        "adaptive_k_th": args.adaptive_k_th,
+        "krum_frac": args.m_krum
+    }
     server = Server(aggregation_scheme=args.agg,
                     rank=args.rank,
                     adaptive_k_th=args.adaptive_k_th,

@@ -52,7 +52,9 @@ class Aggregator:
             for param_group in self.optimizer.param_groups:
                 param_group['lr'] = current_lr
 
-    def update_model(self, clients: List[Client], current_lr: float = 0.01, alphas: np.ndarray = None) -> np.array:
+    def update_model(self, clients: List[Client],
+                     current_lr: float = 0.01,
+                     alphas: np.ndarray = None) -> np.array:
         """
         Update server model with aggregated gradients
         :param current_lr:
@@ -71,7 +73,8 @@ class Aggregator:
             agg_grad = self.__fed_avg(G=G, alphas=alphas)
         elif self.agg_strategy == 'fed_lr_avg':
             agg_grad, Sigma = self.__fed_lr_avg(stacked_grad=G, k=self.rank,
-                                                adaptive_k_th=self.adaptive_k_th)
+                                                adaptive_k_th=self.adaptive_k_th,
+                                                alphas=alphas)
             self.Sigma.append(Sigma)
         elif self.agg_strategy == 'krum':
             agg_grad, _ = self.__m_krum(clients=clients, frac_m=self.krum_frac)
@@ -119,7 +122,8 @@ class Aggregator:
 
     def __fed_lr_avg(self, stacked_grad: np.ndarray,
                      k: int,
-                     adaptive_k_th: float) -> Tuple[np.ndarray, List[float]]:
+                     adaptive_k_th: float,
+                     alphas=None) -> Tuple[np.ndarray, List[float]]:
         """
         Implements proposed Faster Convergence of FL through MF: Acharya. A.
 
@@ -133,7 +137,7 @@ class Aggregator:
                                                X=stacked_grad,
                                                adaptive_k_th=adaptive_k_th)
         # Compute Aggregation
-        agg_grad = self.weighted_average(stacked_grad=lr_factorization.G)
+        agg_grad = self.weighted_average(stacked_grad=lr_factorization.G, alphas=alphas)
         return agg_grad, lr_factorization.Sigma
 
     def __fed_median(self, clients: List[Client]):

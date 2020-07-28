@@ -9,7 +9,7 @@ class AggregationOperator:
     def __init__(self, aggregation_config):
         self.aggregation_config = aggregation_config
 
-    def aggregate(self, G) -> np.ndarray:
+    def aggregate(self, G: np.ndarray, alphas=None) -> np.ndarray:
         pass
 
     @staticmethod
@@ -31,3 +31,14 @@ class AggregationOperator:
 class FedAvg(AggregationOperator):
     def __init__(self, aggregation_config):
         AggregationOperator.__init__(aggregation_config=aggregation_config)
+
+    def aggregate(self, G: np.ndarray, alphas=None) -> np.ndarray:
+        agg_grad = self.weighted_average(stacked_grad=G, alphas=alphas)
+        return agg_grad
+
+
+class SpectralFedAvg(FedAvg):
+    def __init__(self, aggregation_config):
+        AggregationOperator.__init__(aggregation_config=aggregation_config)
+        self.rank = self.aggregation_config["rank"]
+        self.adaptive_rank_th = self.aggregation_config["adaptive_k_th"]

@@ -99,12 +99,10 @@ def run_exp(args):
         print(' ------------------------------------------ ')
         print('         Communication Round {}             '.format(epoch))
         print(' -------------------------------------------')
-
         server.init_client_models()
         server.train_client_models(k=num_sampled_clients,
                                    client_config=client_config,
                                    attack_config=attack_config)
-
         print('Metrics :')
         print('--------------------------------')
         print('Average Epoch Loss = {}'.format(server.train_loss[-1]))

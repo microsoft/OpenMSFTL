@@ -19,10 +19,11 @@ def run_exp(args):
                      "noise_scale": args.noise_scale,
                      "attack_std": args.attack_std}
 
-    server_config = {"lr0": args.server_lr0,
-                     "lr_restart": args.lr_restart,
-                     "lr_schedule": args.lrs,
-                     "lr_decay": args.lr_decay}
+    server_opt_config = {"optimizer_scheme": args.server_opt,
+                         "lr0": args.server_lr0,
+                         "lr_restart": args.lr_restart,
+                         "lr_schedule": args.lrs,
+                         "lr_decay": args.lr_decay}
 
     client_config = {'optimizer_scheme': args.opt,
                      'lr': args.lr0,
@@ -59,8 +60,8 @@ def run_exp(args):
     num_sampled_clients = int(args.frac_clients * num_client_nodes)
     if args.dga_json is not None:
         with open(args.dga_json) as jfp:
-            server_config["dga_config"] = json.load(jfp)
-            assert server_config["dga_config"]["network_params"][-1] == num_sampled_clients, \
+            server_opt_config["dga_config"] = json.load(jfp)
+            assert server_opt_config["dga_config"]["network_params"][-1] == num_sampled_clients, \
                 "Invalid network output size in {}".format(args.dga_json)
 
     # Copy model architecture to clients
@@ -76,14 +77,13 @@ def run_exp(args):
     # **** Set up Server (Master Node)  ****
     # ---------------------------------------
     print("Attack config:\n{}\n".format(json.dumps(attack_config, indent=4)))
-    print("Server config:\n{}\n".format(json.dumps(server_config, indent=4)))
+    print("Server config:\n{}\n".format(json.dumps(server_opt_config, indent=4)))
     print("Client config:\n{}\n".format(json.dumps(client_config, indent=4)))
     server = Server(aggregation_scheme=args.agg,
                     rank=args.rank,
                     adaptive_k_th=args.adaptive_k_th,
                     krum_frac=args.m_krum,
-                    optimizer_scheme=args.server_opt,
-                    server_config=server_config,
+                    server_opt_config=server_opt_config,
                     clients=clients,
                     model=copy.deepcopy(model_net),
                     val_loader=data_reader.val_loader,

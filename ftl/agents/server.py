@@ -19,20 +19,24 @@ class Server:
                  rank: int = 10,
                  adaptive_k_th: float = None,
                  krum_frac: float = 0.7,
-                 optimizer_scheme: str = None,
-                 server_config: Dict = None,
+                 server_opt_config: Dict = None,
                  clients: List[Client] = None,
                  val_loader: DataLoader = None,
                  test_loader: DataLoader = None):
 
-        if not server_config:
-            server_config = {"lr0": 1.0, "lr_restart": 100, "lr_decay": 10}
+        # Specify Default Config if none is provided
+        if not server_opt_config:
+            server_opt_config = {"optimizer_scheme": 'Adam',
+                                 "lr0": 1.0,
+                                 "lr_restart": 100,
+                                 "lr_decay": 10}
 
-        # keep server parameters
-        self.server_lr0 = server_config["lr0"]
-        self.server_lr_restart = server_config["lr_restart"]
-        self.lrs = server_config["lr_schedule"]
-        self.lr_decay = server_config["lr_decay"]
+        # server opt parameters
+        self.optimizer_scheme = server_opt_config["optimizer_scheme"]
+        self.server_lr0 = server_opt_config["lr0"]
+        self.server_lr_restart = server_opt_config["lr_restart"]
+        self.lrs = server_opt_config["lr_schedule"]
+        self.lr_decay = server_opt_config["lr_decay"]
         self.num_rounds = 0
 
         # Server has access to Test and Dev Data Sets to evaluate Training Process
@@ -49,12 +53,12 @@ class Server:
                                      adaptive_k_th=adaptive_k_th,
                                      m_krum=krum_frac,
                                      model=model,
-                                     dual_opt_alg=optimizer_scheme,
+                                     dual_opt_alg=self.optimizer_scheme,
                                      opt_group={'lr': self.current_lr, 'lrs': self.lrs})
 
         # set a weight estimator for each client gradient
         self.weight_estimator = None
-        dga_config = server_config.get('dga_config', None)
+        dga_config = server_opt_config.get('dga_config', None)
         if dga_config is not None:
             dga_type = dga_config.get('type', None)
             if dga_type == 'RL':

@@ -30,7 +30,7 @@ class GAR:
 
 class FedAvg(GAR):
     def __init__(self, aggregation_config):
-        GAR.__init__(aggregation_config=aggregation_config)
+        GAR.__init__(self, aggregation_config=aggregation_config)
 
     def aggregate(self, G: np.ndarray, alphas=None) -> np.ndarray:
         agg_grad = self.weighted_average(stacked_grad=G, alphas=alphas)
@@ -39,7 +39,7 @@ class FedAvg(GAR):
 
 class SpectralFedAvg(FedAvg):
     def __init__(self, aggregation_config):
-        GAR.__init__(aggregation_config=aggregation_config)
+        GAR.__init__(self, aggregation_config=aggregation_config)
         self.rank = self.aggregation_config["rank"]
         self.adaptive_rank_th = self.aggregation_config["adaptive_k_th"]
         self.Sigma = None

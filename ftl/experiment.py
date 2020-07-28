@@ -36,6 +36,13 @@ def run_exp(args):
         "rank": args.rank,
         "adaptive_k_th": args.adaptive_k_th,
         "krum_frac": args.m_krum}
+    data_config = {
+        "data_set": args.data_set,
+        "batch_size": args.batch_size,
+        "split": args.dev_split,
+        "do_sorting": args.do_sort,
+        "seed": args.seed
+    }
 
     print('# ------------------------------------------------- #')
     print('#               Initializing Network                #')
@@ -57,12 +64,8 @@ def run_exp(args):
         client.attack_model = get_attack(attack_config=attack_config)
 
     # Get Data and Distribute among clients
-    data_reader = DataReader(batch_size=args.batch_size,
-                             data_set=args.data_set,
-                             clients=clients,
-                             download=True,
-                             split=args.dev_split,
-                             do_sorting=args.do_sort)
+    # Also handles the data poisoning attacks
+    data_reader = DataReader(data_config=data_config, clients=clients)
 
     # Set up model architecture (learner) , Here we use the same Nw for both server and client.
     model_net = get_model(args=args)
@@ -94,7 +97,7 @@ def run_exp(args):
                     test_loader=data_reader.test_loader)
 
     print('# ------------------------------------------------- #')
-    print('#            FTL Training                           #')
+    print('#            Launching Federated Training           #')
     print('# ------------------------------------------------- #')
     best_val_acc = 0.0
     best_test_acc = 0.0

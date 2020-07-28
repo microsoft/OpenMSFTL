@@ -13,13 +13,9 @@ root = os.path.join(curr_dir, './data/')
 
 class DataReader:
     def __init__(self,
-                 data_set: str,
+                 data_config: Dict,
                  clients: List[Client],
-                 batch_size: int = 32,
-                 download: bool = True,
-                 split: float = 0.1,
-                 random_seed: int = 1,
-                 do_sorting=False):
+                 download: bool = True):
         """
         For More Info:
         This is the universal DataLoader Class. This can support all data
@@ -31,18 +27,13 @@ class DataReader:
         Computer Vision: mnist  :  http://yann.lecun.com/exdb/mnist/
                          cifar10:  https://www.cs.toronto.edu/~kriz/cifar.html
 
-        :param data_set:   pass data set name. One from the above list of supported Data sets.
-        :param batch_size: Choose Batch Size , default is 32
-        :param download:   Whether to download the data. Default True
-        :param split:      Choose what fraction of Train should be treated as dev, Only if dev_set flag is True
-                           Default is 0.1
         """
-        torch.random.manual_seed(random_seed)
-        self.data_set = data_set
+        torch.random.manual_seed(data_config["seed"])
+        self.data_set = data_config["data_set"]
         self.download = download
-        self.batch_size = batch_size
-        self.split = split
-        self.do_sorting = do_sorting
+        self.batch_size = data_config["batch_size"]
+        self.split = data_config["split"]
+        self.do_sorting = data_config["do_sorting"]
 
         # keep track of data distribution among clients
         self.clients = clients
@@ -58,9 +49,9 @@ class DataReader:
         self.val_loader = None
         self.test_loader = None
 
-        if data_set == 'mnist':
+        if self.data_set == 'mnist':
             self._get_mnist()
-        elif data_set == 'cifar10':
+        elif self.data_set == 'cifar10':
             self._get_cifar10()
         else:
             raise NotImplementedError

@@ -180,7 +180,7 @@ class Aggregator:
             assert len(alphas) == stacked_grad.shape[0]
         agg_grad = np.zeros_like(stacked_grad[0, :])
         for ix in range(0, stacked_grad.shape[0]):
-            agg_grad[ix] += alphas[ix] * stacked_grad[ix, :]
+            agg_grad += alphas[ix] * stacked_grad[ix, :]
         return agg_grad
 
     @staticmethod

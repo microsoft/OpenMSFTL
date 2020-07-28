@@ -86,7 +86,7 @@ def _parse_args():
                         help='Momentum')
     parser.add_argument('--lr_restart', type=int, default=100)
     parser.add_argument('--lr_decay', type=int, default=5)
-    parser.add_argument('--dga_json', type=str, default='./configs/dga/rl.json',
+    parser.add_argument('--dga_json', type=str, default=None,
                         help='JSON config file path for dynamic gradient aggregation; '
                              'see configs/dga/rl.json for an example')
     # Training params

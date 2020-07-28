@@ -12,7 +12,7 @@ class FastLRDecomposition:
         self.iterated_power = iterated_power
         self.Sigma = []
         self.normalized_Sigma = None
-        self.agg_grad = None
+        self.G = None
         self.adaptive_k_th = adaptive_k_th
 
         if X is not None:
@@ -45,8 +45,7 @@ class FastLRDecomposition:
         else:
             lr_approx = np.dot(U * S, V)
 
-        agg_grad = np.mean(lr_approx, axis=0)
-        self.agg_grad = agg_grad
+        self.G = lr_approx
 
 
 

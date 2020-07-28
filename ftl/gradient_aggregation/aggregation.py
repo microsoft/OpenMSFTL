@@ -132,8 +132,9 @@ class Aggregator:
         lr_factorization = FastLRDecomposition(n_components=k,
                                                X=stacked_grad,
                                                adaptive_k_th=adaptive_k_th)
-
-        return lr_factorization.agg_grad, lr_factorization.Sigma
+        # Compute Aggregation
+        agg_grad = self.weighted_average(stacked_grad=lr_factorization.G)
+        return agg_grad, lr_factorization.Sigma
 
     def __fed_median(self, clients: List[Client]):
         """

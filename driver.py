@@ -53,7 +53,7 @@ def _parse_args():
                              'Options: fed_avg, krum, trimmed_mean, bulyan')
     parser.add_argument('--rank', type=int, default=None,
                         help='For LRMF SVD rank')
-    parser.add_argument('--adaptive_k_th', type=float, default=0.6,
+    parser.add_argument('--adaptive_k_th', type=float, default=None,
                         help='For LRMF adaptive rank based on values')
     parser.add_argument('--m_krum', type=float, default=0.7,
                         help='Krum needs m=n-f so ideally we can calculate this'

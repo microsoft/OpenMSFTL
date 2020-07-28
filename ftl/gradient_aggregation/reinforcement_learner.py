@@ -292,10 +292,8 @@ class RL:
                                             opt_alg=self.rl_config['optimizer_config']['optimizer_scheme'],
                                             opt_group=self.rl_config['optimizer_config'],
                                             lrs_group=self.rl_config['annealing_config'])
-
         # make optimizer
         self.optimizer = soptimizer.optimizer
-
         # make lr_scheduler
         self.lr_scheduler = soptimizer.lr_scheduler
 

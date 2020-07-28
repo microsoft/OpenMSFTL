@@ -13,7 +13,6 @@ class Aggregator:
     This class updates a global model with gradients aggregated from clients and
     keeps track of the model object and weights.
     """
-
     def __init__(self, agg_strategy: str,
                  model: nn.Module,
                  rank: int = None,
@@ -61,18 +60,21 @@ class Aggregator:
         :param alphas: Weight for each gradient
         :return: The weights of the updated global model
         """
+        if len(clients) == 0:
+            raise Exception('Client List is Empty')
+        # create a stacked Gradient Matrix G = [G0 | G1 | .... | Gn]'
+        # each row corresponds to gradient vector for each client
+        G = np.zeros((len(clients), len(clients[0].grad)), dtype=clients[0].grad.dtype)
+        for ix, client in enumerate(clients):
+            G[ix, :] = client.grad
         if self.agg_strategy == 'fed_avg':
-            agg_grad = self.__fed_avg(clients=clients, alphas=alphas)
-
+            agg_grad = self.__fed_avg(G=G, alphas=alphas)
         elif self.agg_strategy == 'fed_lr_avg':
-            agg_grad, Sigma = self.__fed_lr_avg(clients=clients,
-                                                k=self.rank,
+            agg_grad, Sigma = self.__fed_lr_avg(stacked_grad=G, k=self.rank,
                                                 adaptive_k_th=self.adaptive_k_th)
             self.Sigma.append(Sigma)
-
         elif self.agg_strategy == 'krum':
             agg_grad, _ = self.__m_krum(clients=clients, frac_m=self.krum_frac)
-
         else:
             raise NotImplementedError
 
@@ -104,19 +106,18 @@ class Aggregator:
     # ------------------------------------------------- #
     #               GAR Implementations                 #
     # ------------------------------------------------- #
-
-    def __fed_avg(self, clients: List[Client], alphas: np.ndarray = None) -> np.ndarray:
+    # TODO:: move to Common Class
+    def __fed_avg(self, G: np.ndarray, alphas: np.ndarray = None) -> np.ndarray:
         """
         This implements classic FedAvg: McMahan et al., Communication-Efficient Learning of Deep
         Networks from Decentralized Data, (NeuRips 2017)
-        :param clients: List of client nodes to aggregate over
         :return: aggregated gradient
         """
-        agg_grad = self.weighted_average(clients=clients, alphas=alphas)
 
+        agg_grad = self.weighted_average(stacked_grad=G, alphas=alphas)
         return agg_grad
 
-    def __fed_lr_avg(self, clients: List[Client],
+    def __fed_lr_avg(self, stacked_grad: np.ndarray,
                      k: int,
                      adaptive_k_th: float) -> Tuple[np.ndarray, List[float]]:
         """
@@ -126,10 +127,6 @@ class Aggregator:
         :param k: perform (k) rank svd
         :return: aggregated gradient
         """
-        # stack all client grads
-        stacked_grad = np.zeros((len(clients), len(clients[0].grad)), dtype=clients[0].grad.dtype)
-        for ix, client in enumerate(clients):
-            stacked_grad[ix, :] = client.grad
         if k is None:
             k = min(stacked_grad.shape[0], stacked_grad.shape[1])
         lr_factorization = FastLRDecomposition(n_components=k,
@@ -172,17 +169,18 @@ class Aggregator:
         raise NotImplementedError
 
     @staticmethod
-    def weighted_average(clients, alphas=None):
+    def weighted_average(stacked_grad: np.ndarray, alphas=None):
         """
-        Implements weighted average of client grads if no weights are supplied
-        then its equivalent to simple average / Fed Avg
+        Implements weighted average of client grads i.e. rows of G
+        If no weights are supplied then its equivalent to simple average / Fed Avg
         """
         if alphas is None:
-            alphas = [1.0 / len(clients)] * len(clients)
-        agg_grad = np.zeros_like(clients[0].grad)
-        for alpha, client in zip(alphas, clients):
-            agg_grad += alpha * client.grad
-
+            alphas = [1.0 / stacked_grad.shape[0]] * stacked_grad.shape[0]
+        else:
+            assert len(alphas) == stacked_grad.shape[0]
+        agg_grad = np.zeros_like(stacked_grad[0, :])
+        for ix in range(0, stacked_grad.shape[0]):
+            agg_grad[ix] += alphas[ix] * stacked_grad[ix, :]
         return agg_grad
 
     @staticmethod

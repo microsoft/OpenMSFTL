@@ -69,7 +69,7 @@ class RLWeightEstimator(WeightEstimatorBase):
         assert self.RL.network_params[0] == len(input_feature), \
             "Invalid network input size in {}!={}".format(self.RL.network_params[0], len(input_feature))
 
-        ####  Reinforcement Learning for estimating weights
+        # Reinforcement Learning for estimating weights
         rl_weights = self.RL.forward(input_feature).cpu().detach().numpy()
         rl_weights = self._post_process_weights(rl_weights)
 
@@ -89,7 +89,7 @@ class RLWeightEstimator(WeightEstimatorBase):
         """
         assert len(self.weights) > 0, "Initialize or compute weights before calling this"
         # Expected structure of batch
-        #state, weights, reward, state_1 = batch
+        # state, weights, reward, state_1 = batch
         should_use_rl_model = False
         if abs(org_error_rate - rl_error_rate) < self.delta_th:
             reward = 0.1
@@ -105,7 +105,7 @@ class RLWeightEstimator(WeightEstimatorBase):
         # Taking the policy from a game-based RL
         # The reward is 0.1 for each bird’s move without dying when it is not passing through a pipe, 1 if the bird
         # successfully pass through a pipe and -1 if the bird crashes.
-        batch=((input_feature), (self.weights), [reward])
+        batch = (input_feature, self.weights, [reward])
         self.RL.train(batch)
         self.RL.save(self.steps, reward, rl_error_rate, self.RL.runningLoss)
         if self.verbose > 0:

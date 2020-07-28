@@ -31,4 +31,3 @@ class AggregationOperator:
 class FedAvg(AggregationOperator):
     def __init__(self, aggregation_config):
         AggregationOperator.__init__(aggregation_config=aggregation_config)
-

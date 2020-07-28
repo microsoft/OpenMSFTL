@@ -2,8 +2,9 @@ from ftl.models.model_helper import dist_weights_to_model, dist_grads_to_model
 from ftl.training_utils.optimization import SchedulingOptimization
 from ftl.agents.client import Client
 from ftl.compression.fast_lr_decomp import FastLRDecomposition
+from .gar import FedAvg,SpectralFedAvg
 import torch.nn as nn
-from typing import Dict, List, Tuple
+from typing import Dict, List
 import numpy as np
 import copy
 
@@ -28,12 +29,13 @@ class Aggregator:
         """
         if opt_group is None:
             opt_group = {}
+        self.aggregation_config = aggregation_config
+        # self.agg_strategy = aggregation_config["aggregation_scheme"]
+        # self.rank = aggregation_config["rank"]
+        # self.adaptive_k_th = aggregation_config["adaptive_k_th"]
+        # self.krum_frac = aggregation_config["krum_frac"]
 
-        self.agg_strategy = aggregation_config["aggregation_scheme"]
-        self.rank = aggregation_config["rank"]
-        self.adaptive_k_th = aggregation_config["adaptive_k_th"]
-        self.krum_frac = aggregation_config["krum_frac"]
-
+        self.gar = self.get_gar()
         self.model = model
         # Instantiate the optimizer for an aggregator
         server_opt = SchedulingOptimization(model=model, opt_alg=dual_opt_alg, opt_group=opt_group)
@@ -49,6 +51,14 @@ class Aggregator:
         if self.optimizer is not None:
             for param_group in self.optimizer.param_groups:
                 param_group['lr'] = current_lr
+
+    def get_gar(self):
+        if self.aggregation_config["aggregation_scheme"] == 'fed_avg':
+            return FedAvg(aggregation_config=self.aggregation_config)
+        elif self.aggregation_config["aggregation_scheme"] == 'fed_lr_avg':
+            return SpectralFedAvg(aggregation_config=self.aggregation_config)
+        else:
+            raise NotImplementedError
 
     def update_model(self, clients: List[Client],
                      current_lr: float = 0.01,
@@ -67,16 +77,17 @@ class Aggregator:
         G = np.zeros((len(clients), len(clients[0].grad)), dtype=clients[0].grad.dtype)
         for ix, client in enumerate(clients):
             G[ix, :] = client.grad
-        if self.agg_strategy == 'fed_avg':
-            agg_grad = self.__fed_avg(G=G, alphas=alphas)
-        elif self.agg_strategy == 'fed_lr_avg':
-            agg_grad = self.__fed_lr_avg(stacked_grad=G, k=self.rank,
-                                                adaptive_k_th=self.adaptive_k_th,
-                                                alphas=alphas)
-        elif self.agg_strategy == 'krum':
-            agg_grad, _ = self.__m_krum(clients=clients, frac_m=self.krum_frac)
-        else:
-            raise NotImplementedError
+        agg_grad = self.gar.aggregate(G=G, alphas=alphas)
+        # if self.agg_strategy == 'fed_avg':
+        #     agg_grad = self.__fed_avg(G=G, alphas=alphas)
+        # elif self.agg_strategy == 'fed_lr_avg':
+        #     agg_grad = self.__fed_lr_avg(stacked_grad=G, k=self.rank,
+        #                                         adaptive_k_th=self.adaptive_k_th,
+        #                                         alphas=alphas)
+        # # elif self.agg_strategy == 'krum':
+        # #     agg_grad, _ = self.__m_krum(clients=clients, frac_m=self.krum_frac)
+        # else:
+        #     raise NotImplementedError
 
         # Now Run a step of Dual Optimizer (Server Step)
         self.__server_step(agg_grad=agg_grad, current_lr=current_lr)

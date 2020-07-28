@@ -17,10 +17,7 @@ class Server:
     def __init__(self,
                  model,
                  server_opt_config: Dict,
-                 aggregation_scheme: str = 'fed_avg',
-                 rank: int = 10,
-                 adaptive_k_th: float = None,
-                 krum_frac: float = 0.7,
+                 aggregator_config: Dict,
                  clients: List[Client] = None,
                  val_loader: DataLoader = None,
                  test_loader: DataLoader = None):
@@ -42,10 +39,7 @@ class Server:
         self.current_lr = copy.deepcopy(self.server_lr0)
 
         # Aggregator tracks the model and optimizer
-        self.aggregator = Aggregator(agg_strategy=aggregation_scheme,
-                                     rank=rank,
-                                     adaptive_k_th=adaptive_k_th,
-                                     m_krum=krum_frac,
+        self.aggregator = Aggregator(aggregation_config=aggregator_config,
                                      model=model,
                                      dual_opt_alg=self.optimizer_scheme,
                                      opt_group={'lr': self.current_lr, 'lrs': self.lrs})

@@ -86,10 +86,7 @@ def run_exp(args):
         "adaptive_k_th": args.adaptive_k_th,
         "krum_frac": args.m_krum
     }
-    server = Server(aggregation_scheme=args.agg,
-                    rank=args.rank,
-                    adaptive_k_th=args.adaptive_k_th,
-                    krum_frac=args.m_krum,
+    server = Server(aggregator_config=aggregation_config,
                     server_opt_config=server_opt_config,
                     clients=clients,
                     model=copy.deepcopy(model_net),

@@ -13,14 +13,12 @@ class Aggregator:
     This class updates a global model with gradients aggregated from clients and
     keeps track of the model object and weights.
     """
-    def __init__(self, agg_strategy: str,
+    def __init__(self,
+                 aggregation_config: Dict,
                  model: nn.Module,
-                 rank: int = None,
-                 adaptive_k_th: float = None,
                  dual_opt_alg: str = "Adam",
                  opt_group: Dict = None,
-                 max_grad_norm: float = None,
-                 m_krum: float = 0.7):
+                 max_grad_norm: float = None):
         """
         :param agg_strategy: aggregation strategy, default to "fed_avg"
         :param model: class:`nn.Module`, the global model
@@ -31,17 +29,17 @@ class Aggregator:
         if opt_group is None:
             opt_group = {}
 
-        self.agg_strategy = agg_strategy
-        self.model = model
-        self.rank = rank
-        self.adaptive_k_th = adaptive_k_th
+        self.agg_strategy = aggregation_config["aggregation_scheme"]
+        self.rank = aggregation_config["rank"]
+        self.adaptive_k_th = aggregation_config["adaptive_k_th"]
+        self.krum_frac = aggregation_config["krum_frac"]
 
+        self.model = model
         # Instantiate the optimizer for an aggregator
         server_opt = SchedulingOptimization(model=model, opt_alg=dual_opt_alg, opt_group=opt_group)
         self.optimizer = server_opt.optimizer
         self.lr_scheduler = server_opt.lr_scheduler
         self.max_grad_norm = max_grad_norm
-        self.krum_frac = m_krum
         self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.model.parameters()])
 
         # Bad Handling Fix with Base Class

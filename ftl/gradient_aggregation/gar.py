@@ -56,12 +56,12 @@ class SpectralFedAvg(FedAvg):
             self.rank = min(X.shape[0], X.shape[1])
         print('Doing a {} rank SVD'.format(self.rank))
         X = np.transpose(X)
-        n_samples, n_features = X.shape
         U, S, V = randomized_svd(X, n_components=self.rank,
                                  flip_sign=True)
         if self.adaptive_rank_th:
             if not 0 < self.adaptive_rank_th < 1:
                 raise Exception('adaptive_rank_th should be between 0 and 1')
+            n_samples, n_features = X.shape
             explained_variance_ = (S ** 2) / (n_samples - 1)
             total_var = np.var(X, ddof=1, axis=0)
             explained_variance_ratio_ = explained_variance_ / total_var.sum()
@@ -70,17 +70,20 @@ class SpectralFedAvg(FedAvg):
             adaptive_rank = np.searchsorted(cum_var_explained, v=self.adaptive_rank_th)
             print('Truncating Spectral Grad Matrix to rank {} using '
                   '{} threshold'.format(adaptive_rank, self.adaptive_rank_th))
-            U_k = U[:, :adaptive_rank]
-            S_k = S[:adaptive_rank]
-            V_k = V[:adaptive_rank, :]
+            U_k = U[:, 0:adaptive_rank]
+            S_k = S[0:adaptive_rank]
+            V_k = V[0:adaptive_rank, :]
+
         else:
             U_k = U
             S_k = S
             V_k = V
+
         if self.drop_top_comp:
             U_k = U_k[:, 1:]
             S_k = S_k[1:]
-            V_k = V_k[1:, ]
+            V_k = V_k[1:, :]
+
         lr_approx = np.dot(U_k * S_k, V_k)
         lr_approx = np.transpose(lr_approx)
         return lr_approx, S

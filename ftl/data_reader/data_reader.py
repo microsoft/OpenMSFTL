@@ -6,6 +6,7 @@ from ftl.agents.client import Client
 import torch
 import os
 import numpy as np
+import sklearn
 
 curr_dir = os.path.dirname(__file__)
 root = os.path.join(curr_dir, './data/')
@@ -133,6 +134,7 @@ class DataReader:
 
         x_train = x[0: self.num_train, :, :]
         y_train = y[0:self.num_train]
+        sklearn.utils.shuffle(x_train,y_train)
 
         if self.do_sorting:
             y_sorted_ix = np.argsort(y_train)

@@ -66,7 +66,7 @@ class SpectralFedAvg(FedAvg):
             total_var = np.var(X, ddof=1, axis=0)
             explained_variance_ratio_ = explained_variance_ / total_var.sum()
             cum_var_explained = np.cumsum(explained_variance_ratio_)
-            print(cum_var_explained)
+            # print(cum_var_explained)
             adaptive_rank = np.searchsorted(cum_var_explained, v=self.adaptive_rank_th)
             print('Truncating Spectral Grad Matrix to rank {} using '
                   '{} threshold'.format(adaptive_rank, self.adaptive_rank_th))

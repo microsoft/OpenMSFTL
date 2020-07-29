@@ -59,6 +59,7 @@ class SpectralFedAvg(FedAvg):
         U, S, V = randomized_svd(X, n_components=self.rank,
                                  flip_sign=True)
         self.normalized_Sigma = S / sum(S)
+        print(self.normalized_Sigma)
         if self.adaptive_rank_th:
             if not 0 < self.adaptive_rank_th < 1:
                 raise Exception('adaptive_rank_th should be between 0 and 1')

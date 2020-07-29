@@ -42,7 +42,7 @@ class SpectralFedAvg(FedAvg):
     def __init__(self, aggregation_config):
         GAR.__init__(self, aggregation_config=aggregation_config)
         self.rank = self.aggregation_config["rank"]
-        self.adaptive_rank_th = self.aggregation_config["adaptive_k_th"]
+        self.adaptive_rank_th = self.aggregation_config["adaptive_rank_th"]
 
     def aggregate(self, G: np.ndarray, alphas=None) -> np.ndarray:
         G_approx, S = self.fast_lr_decomposition(X=G)
@@ -73,6 +73,7 @@ class SpectralFedAvg(FedAvg):
             S_k = S[:adaptive_rank]
             V_k = V[0:adaptive_rank, :]
             lr_approx = np.dot(U_k * S_k, V_k)
+
         else:
             U_k = U[:, 1:]
             S_k = S[1:]

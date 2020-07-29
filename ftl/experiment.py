@@ -123,7 +123,7 @@ def run_exp(args):
                 best_val_acc = val_acc
             print('* Best Val Acc So Far {}'.format(best_val_acc))
 
-        if len(server.test_loader.dataset) > 0:
+        if server.test_loader.dataset:
             test_acc = server.run_test()
             server.test_acc.append(test_acc)
             print("Test Accuracy = {}".format(test_acc))

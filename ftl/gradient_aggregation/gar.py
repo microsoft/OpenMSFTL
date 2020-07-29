@@ -43,7 +43,6 @@ class SpectralFedAvg(FedAvg):
         GAR.__init__(self, aggregation_config=aggregation_config)
         self.rank = self.aggregation_config["rank"]
         self.adaptive_rank_th = self.aggregation_config["adaptive_k_th"]
-        self.normalized_Sigma = None
 
     def aggregate(self, G: np.ndarray, alphas=None) -> np.ndarray:
         G_approx, S = self.fast_lr_decomposition(X=G)
@@ -55,34 +54,30 @@ class SpectralFedAvg(FedAvg):
         if not self.rank:
             self.rank = min(X.shape[0], X.shape[1])
         print('Doing a {} rank SVD'.format(self.rank))
-        X = np.transpose(X)  ####
+        X = np.transpose(X)
+        n_samples, n_features = X.shape
         U, S, V = randomized_svd(X, n_components=self.rank,
                                  flip_sign=True)
-        self.normalized_Sigma = S / sum(S)
-        print(self.normalized_Sigma)
-
         if self.adaptive_rank_th:
             if not 0 < self.adaptive_rank_th < 1:
                 raise Exception('adaptive_rank_th should be between 0 and 1')
-            running_pow = 0.0
-            adaptive_rank = 0
-            for sv in self.normalized_Sigma:
-                running_pow += sv
-                adaptive_rank += 1
-                if running_pow >= self.adaptive_rank_th:
-                    break
-            print('Truncating Spectral Grad Matrix to rank {} using {} threshold'.format(adaptive_rank,
-                                                                                         self.adaptive_rank_th))
+            explained_variance_ = (S ** 2) / (n_samples - 1)
+            total_var = np.var(X, ddof=1, axis=0)
+            explained_variance_ratio_ = explained_variance_ / total_var.sum()
+            cum_var_explained = np.cumsum(explained_variance_ratio_)
+            adaptive_rank = np.searchsorted(cum_var_explained, v=self.adaptive_rank_th)
+            print('Truncating Spectral Grad Matrix to rank {} using '
+                  '{} threshold'.format(adaptive_rank, self.adaptive_rank_th))
             U_k = U[:, 0:adaptive_rank]
             S_k = S[:adaptive_rank]
             V_k = V[0:adaptive_rank, :]
             lr_approx = np.dot(U_k * S_k, V_k)
         else:
-            U_k = U[:, 2:]
-            S_k = S[2:]
-            V_k = V[2:]
+            U_k = U[:, 1:]
+            S_k = S[1:]
+            V_k = V[1:]
             lr_approx = np.dot(U_k * S_k, V_k)
-            lr_approx = np.dot(U * S, V)
+            # lr_approx = np.dot(U * S, V)
 
         lr_approx = np.transpose(lr_approx)
         return lr_approx, S

@@ -68,7 +68,8 @@ class DataReader:
 
         # Handle Train and Dev
         # --------------------------------------
-        mnist_train = datasets.MNIST(root=root, download=self.download, train=True, transform=trans)
+        mnist_train = datasets.MNIST(root=root, download=self.download, train=True,
+                                     transform=trans)
         # compute number of data points
         self.num_dev = int(self.split * mnist_train.data.shape[0])
         self.num_train = mnist_train.data.shape[0] - self.num_dev
@@ -148,7 +149,9 @@ class DataReader:
             x_val = np.moveaxis(x_val, -1, 1)
 
         self.val_loader = DataLoader(TensorDataset(torch.from_numpy(x_val),
-                                                   torch.from_numpy(y_val)), batch_size=self.batch_size)
+                                                   torch.from_numpy(y_val)),
+                                     batch_size=self.batch_size,
+                                     shuffle=True)
 
         # Now lets distribute the training data among clients
         self.data_distribution_map = self._get_data_partition_indices()  # populates the ix map
@@ -163,7 +166,9 @@ class DataReader:
                 x_local = np.moveaxis(x_local, -1, 1)
 
             client.local_train_data = DataLoader(TensorDataset(torch.from_numpy(x_local),
-                                                               torch.from_numpy(y_local)), batch_size=self.batch_size)
+                                                               torch.from_numpy(y_local)),
+                                                 batch_size=self.batch_size,
+                                                 shuffle=True)
 
     def _get_data_partition_indices(self) -> Dict[Client, List[int]]:
         num_clients = len(self.clients)

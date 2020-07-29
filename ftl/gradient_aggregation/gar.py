@@ -65,6 +65,7 @@ class SpectralFedAvg(FedAvg):
             explained_variance_ = (S ** 2) / (n_samples - 1)
             total_var = np.var(X, ddof=1, axis=0)
             explained_variance_ratio_ = explained_variance_ / total_var.sum()
+            print(explained_variance_ratio_)
             cum_var_explained = np.cumsum(explained_variance_ratio_)
             # print(cum_var_explained)
             adaptive_rank = np.searchsorted(cum_var_explained, v=self.adaptive_rank_th)

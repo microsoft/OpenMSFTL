@@ -115,7 +115,7 @@ def run_exp(args):
         print('--------------------------------')
         print('Average Epoch Loss = {}'.format(server.train_loss[-1]))
 
-        if len(server.val_loader.dataset) > 0:
+        if server.val_loader.dataset:
             val_acc = server.run_validation()
             print("Validation Accuracy = {}".format(val_acc))
             server.val_acc.append(val_acc)

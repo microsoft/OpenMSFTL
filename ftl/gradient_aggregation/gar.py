@@ -54,7 +54,8 @@ class SpectralFedAvg(FedAvg):
     def fast_lr_decomposition(self, X):
         print('Doing a {} rank SVD'.format(self.rank))
         U, S, V = randomized_svd(X, n_components=self.rank,
-                                 n_iter='QR',
+                                 n_iter=7,
+                                 power_iteration_normalizer='QR',
                                  flip_sign=True)
         self.normalized_Sigma = S / sum(S)
         if self.adaptive_rank_th:

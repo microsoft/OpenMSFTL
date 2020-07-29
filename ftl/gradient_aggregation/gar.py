@@ -78,9 +78,9 @@ class SpectralFedAvg(FedAvg):
             V_k = V[0:adaptive_rank, :]
             lr_approx = np.dot(U_k * S_k, V_k)
         else:
-            U_k = U[:, 1:]
-            S_k = S[1:]
-            V_k = V[1:]
+            U_k = U[:, 2:]
+            S_k = S[2:]
+            V_k = V[2:]
             lr_approx = np.dot(U_k * S_k, V_k)
             lr_approx = np.dot(U * S, V)
 

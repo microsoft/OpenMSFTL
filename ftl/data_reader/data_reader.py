@@ -148,10 +148,11 @@ class DataReader:
             print('Swapping axis, Torch convolutions expects channel first')
             x_val = np.moveaxis(x_val, -1, 1)
 
-        self.val_loader = DataLoader(TensorDataset(torch.from_numpy(x_val),
-                                                   torch.from_numpy(y_val)),
-                                     batch_size=self.batch_size,
-                                     shuffle=True)
+        if len(y_val) > 0:
+            self.val_loader = DataLoader(TensorDataset(torch.from_numpy(x_val),
+                                                       torch.from_numpy(y_val)),
+                                         batch_size=self.batch_size,
+                                         shuffle=True)
 
         # Now lets distribute the training data among clients
         self.data_distribution_map = self._get_data_partition_indices()  # populates the ix map

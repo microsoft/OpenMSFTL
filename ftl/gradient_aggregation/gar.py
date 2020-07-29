@@ -52,10 +52,11 @@ class SpectralFedAvg(FedAvg):
         return agg_grad
 
     def fast_lr_decomposition(self, X):
+        if not self.rank:
+            self.rank = min(X.shape[0], X.shape[1])
         print('Doing a {} rank SVD'.format(self.rank))
+        X = np.transpose(X)
         U, S, V = randomized_svd(X, n_components=self.rank,
-                                 n_iter=7,
-                                 power_iteration_normalizer='QR',
                                  flip_sign=True)
         self.normalized_Sigma = S / sum(S)
         if self.adaptive_rank_th:
@@ -77,6 +78,7 @@ class SpectralFedAvg(FedAvg):
         else:
             lr_approx = np.dot(U * S, V)
 
+        lr_approx = np.transpose(lr_approx)
         return lr_approx, S
 
     # def __m_krum(self, clients: List[Client], frac_m: float = 0.7) -> [np.ndarray, int]:

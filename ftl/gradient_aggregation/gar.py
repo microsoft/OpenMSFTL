@@ -43,6 +43,7 @@ class SpectralFedAvg(FedAvg):
         GAR.__init__(self, aggregation_config=aggregation_config)
         self.rank = self.aggregation_config["rank"]
         self.adaptive_rank_th = self.aggregation_config["adaptive_rank_th"]
+        self.drop_top_comp = self.aggregation_config["drop_top_comp"]
 
     def aggregate(self, G: np.ndarray, alphas=None) -> np.ndarray:
         G_approx, S = self.fast_lr_decomposition(X=G)
@@ -69,18 +70,18 @@ class SpectralFedAvg(FedAvg):
             adaptive_rank = np.searchsorted(cum_var_explained, v=self.adaptive_rank_th)
             print('Truncating Spectral Grad Matrix to rank {} using '
                   '{} threshold'.format(adaptive_rank, self.adaptive_rank_th))
-            U_k = U[:, 0:adaptive_rank]
+            U_k = U[:, :adaptive_rank]
             S_k = S[:adaptive_rank]
-            V_k = V[0:adaptive_rank, :]
-            lr_approx = np.dot(U_k * S_k, V_k)
-
+            V_k = V[:adaptive_rank, :]
         else:
-            U_k = U[:, 1:]
-            S_k = S[1:]
-            V_k = V[1:]
-            lr_approx = np.dot(U_k * S_k, V_k)
-            # lr_approx = np.dot(U * S, V)
-
+            U_k = U
+            S_k = S
+            V_k = V
+        if self.drop_top_comp:
+            U_k = U_k[:, 1:]
+            S_k = S_k[1:]
+            V_k = V_k[1:, ]
+        lr_approx = np.dot(U_k * S_k, V_k)
         lr_approx = np.transpose(lr_approx)
         return lr_approx, S
 

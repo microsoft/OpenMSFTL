@@ -54,6 +54,7 @@ def _parse_args():
                         help='For LRMF SVD rank')
     parser.add_argument('--adaptive_rank_th', type=float, default=None,
                         help='For LRMF adaptive rank based on values')
+    parser.add_argument('--drop_top_comp', type=bool, default=False)
     parser.add_argument('--m_krum', type=float, default=0.7,
                         help='Krum needs m=n-f so ideally we can calculate this'
                              'accurately at each round: (num_clients - num_adv)/num_clients'

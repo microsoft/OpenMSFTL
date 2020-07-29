@@ -35,6 +35,7 @@ def run_exp(args):
         "aggregation_scheme": args.agg,
         "rank": args.rank,
         "adaptive_rank_th": args.adaptive_rank_th,
+        "drop_top_comp": args.drop_top_comp,
         "krum_frac": args.m_krum}
     data_config = {
         "data_set": args.data_set,

@@ -55,11 +55,12 @@ class SpectralFedAvg(FedAvg):
         if not self.rank:
             self.rank = min(X.shape[0], X.shape[1])
         print('Doing a {} rank SVD'.format(self.rank))
-        X = np.transpose(X)
+        X = np.transpose(X)  ####
         U, S, V = randomized_svd(X, n_components=self.rank,
                                  flip_sign=True)
         self.normalized_Sigma = S / sum(S)
         print(self.normalized_Sigma)
+
         if self.adaptive_rank_th:
             if not 0 < self.adaptive_rank_th < 1:
                 raise Exception('adaptive_rank_th should be between 0 and 1')
@@ -77,6 +78,10 @@ class SpectralFedAvg(FedAvg):
             V_k = V[0:adaptive_rank, :]
             lr_approx = np.dot(U_k * S_k, V_k)
         else:
+            U_k = U[:, 1:]
+            S_k = S[1:]
+            V_k = V[1:]
+            lr_approx = np.dot(U_k * S_k, V_k)
             lr_approx = np.dot(U * S, V)
 
         lr_approx = np.transpose(lr_approx)

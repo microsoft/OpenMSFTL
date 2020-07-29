@@ -1,20 +1,5 @@
-from .dpn import *
-from .densenet import *
-from .efficientnet import *
-from .googlenet import *
-from .lenet import *
 from .mlp import *
-from .mobilenet import *
-from .mobilenetv2 import *
-from .pnasnet import *
-from .regnet import *
 from .resnet import *
-from .resnext import *
-from .senet import *
-from .shufflenet import *
-from .shufflenetv2 import *
-from .vgg import *
-
 from .model_helper import *
 
 """

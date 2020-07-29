@@ -92,11 +92,12 @@ class DataReader:
         self.no_of_labels = 10
         # Handle Train and Dev
         # --------------------------------------
-        train_trans = transforms.Compose([transforms.ToTensor(),
-                                          transforms.Normalize((0.4914, 0.4822, 0.4465),
-                                                               (0.2023, 0.1994, 0.2010)),
-                                          transforms.RandomCrop(32, padding=4),
-                                          transforms.RandomHorizontalFlip()])
+        train_trans = transforms.Compose([
+            transforms.RandomCrop(32, padding=4),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ])
         cifar_train = datasets.CIFAR10(root=root, download=self.download, train=True, transform=train_trans)
         self.num_dev = int(self.split * cifar_train.data.shape[0])
         self.num_train = cifar_train.data.shape[0] - self.num_dev
@@ -112,7 +113,7 @@ class DataReader:
         x_test = cifar_test.data
         y_test = cifar_test.targets
         # swap axis
-        x_test = np.moveaxis(x_test, -1, 1)
+        # x_test = np.moveaxis(x_test, -1, 1)
         self.test_loader = DataLoader(TensorDataset(torch.from_numpy(x_test),
                                                     torch.from_numpy(np.array(y_test))),
                                       batch_size=self.batch_size)  # We don't need to partition this
@@ -147,9 +148,9 @@ class DataReader:
         y_val = y[self.num_train:]
 
         # if tensor of dim > 3 i.e. num channels > 1 handle channel
-        if len(x_val.shape) > 3:
-            print('Swapping axis, Torch convolutions expects channel first')
-            x_val = np.moveaxis(x_val, -1, 1)
+        # if len(x_val.shape) > 3:
+        #     print('Swapping axis, Torch convolutions expects channel first')
+        #     x_val = np.moveaxis(x_val, -1, 1)
 
         if len(y_val) > 0:
             self.val_loader = DataLoader(TensorDataset(torch.from_numpy(x_val),

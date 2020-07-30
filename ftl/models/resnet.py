@@ -1,13 +1,3 @@
-"""
-Cite:
-@misc{Idelbayev18a,
-  author       = "Yerlan Idelbayev",
-  title        = "Proper {ResNet} Implementation for {CIFAR10/CIFAR100} in {PyTorch}",
-  howpublished = "\url{https://github.com/akamaster/pytorch_resnet_cifar10}",
-  note         = "Accessed: 20xx-xx-xx"
-}
-"""
-
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init

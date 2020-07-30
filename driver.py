@@ -11,6 +11,7 @@ def _parse_args():
     # Data IO Related Params
     parser.add_argument('--data_set', type=str, default='cifar10',
                         help='Pass data-set')
+    parser.add_argument('--num_labels', type=int, default=10)
     parser.add_argument('--dev_split', type=float, default=0.1,
                         help='Provide train test split | '
                              'fraction of data used for training')

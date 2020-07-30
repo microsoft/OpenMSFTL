@@ -40,9 +40,11 @@ def run_exp(args):
     data_config = {
         "data_set": args.data_set,
         "batch_size": args.batch_size,
-        "split": args.dev_split,
+        "dev_split": args.dev_split,
         "do_sorting": args.do_sort,
-        "seed": args.seed
+        "seed": args.seed,
+        "download": args.download,
+        "num_labels": args.num_labels
     }
 
     print('# ------------------------------------------------- #')

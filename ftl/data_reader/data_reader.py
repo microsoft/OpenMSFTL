@@ -110,7 +110,7 @@ class DataReader:
                                                               (0.2023, 0.1994, 0.2010))])
         cifar_test = datasets.CIFAR10(root=root, download=self.download, train=False, transform=test_trans)
         self.num_test = cifar_test.data.shape[0]
-        x_test = cifar_test.data
+        x_test = cifar_test.data.transpose((0,3,1,2))
         y_test = cifar_test.targets
         # swap axis
         # x_test = np.moveaxis(x_test, -1, 1)
@@ -126,7 +126,7 @@ class DataReader:
         :param data_set: provide the Torch data set you need to split
         :return: Returns two DataLoader object, Training, Validation
         """
-        x = data_set.data
+        x = data_set.data.transpose((0, 3, 1, 2))
         y = data_set.targets
 
         if not isinstance(x, np.ndarray):

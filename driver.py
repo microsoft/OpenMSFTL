@@ -9,7 +9,7 @@ def _parse_args():
     parser = argparse.ArgumentParser(description='driver.py')
 
     # Data IO Related Params
-    parser.add_argument('--data_set', type=str, default='mnist',
+    parser.add_argument('--data_set', type=str, default='cifar10',
                         help='Pass data-set')
     parser.add_argument('--dev_split', type=float, default=0.1,
                         help='Provide train test split | '
@@ -19,7 +19,7 @@ def _parse_args():
     parser.add_argument('--do_sort', type=bool, default=False)
 
     # Model Params
-    parser.add_argument('--m', type=str, default='mlp',
+    parser.add_argument('--m', type=str, default='resnet32',
                         help='specify the network architecture you want to use')
     parser.add_argument('--pre_trained', default=True,
                         help='Some architectures like resnet support loading pre-trained weights if this is set')

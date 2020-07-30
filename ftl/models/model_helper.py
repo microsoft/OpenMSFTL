@@ -1,5 +1,5 @@
 from .mlp import MLP
-from .resnet import ResNet18
+from .resnet import resnet32
 import torch
 import functools
 
@@ -40,7 +40,7 @@ def get_model(args):
         if args.data_set not in ['cifar10']:
             print('Resnet is not yet supported for {}'.format(args.data_set))
             raise NotImplementedError
-        model = ResNet18()
+        model = resnet32()
 
     # If Not implemented yet throw error
     else:

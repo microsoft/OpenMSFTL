@@ -1,2 +1,2 @@
 # FTL
-Federated Learning Simulation
+Microsoft OpenFederatedLearning 

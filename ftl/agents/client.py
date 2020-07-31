@@ -6,7 +6,7 @@ import numpy as np
 
 class Client:
     def __init__(self,
-                 client_id,
+                 client_id: int,
                  learner=None,
                  attack_model=None,
                  stochastic_attack=False,

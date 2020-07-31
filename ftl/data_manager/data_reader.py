@@ -175,7 +175,7 @@ class DataReader:
                                                  batch_size=self.batch_size,
                                                  shuffle=True)
 
-    def _get_data_partition_indices(self) -> Dict[Client, List[int]]:
+    def _get_data_partition_indices(self) -> Dict[int, List[int]]:
         num_clients = len(self.clients)
         num_samples_per_machine = self.num_train // num_clients
 

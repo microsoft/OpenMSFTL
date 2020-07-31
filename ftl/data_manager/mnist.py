@@ -20,5 +20,3 @@ class MNIST(DataManager):
 
         mnist_train = datasets.MNIST(root=root, download=self.download, train=True, transform=trans)
         mnist_test = datasets.MNIST(root=root, download=self.download, train=False, transform=trans)
-
-

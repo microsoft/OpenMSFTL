@@ -1,4 +1,3 @@
-from ftl.data_reader import DataReader
 from ftl.agents import Client, Server
 from ftl.models import get_model
 from ftl.training_utils import cycle
@@ -55,23 +54,46 @@ def run_exp(args):
     print("Client config:\n{}\n".format(json.dumps(client_config, indent=4)))
     print("Aggregation config:\n{}\n".format(json.dumps(aggregation_config, indent=4)))
 
+    # ** Set up model architecture (learner) **
+    # -----------------------------------------
+    print('initializing Learner')
+    model_net = get_model(args=args)
+
+    print('Setting Up the Network')
     # *** Set up Client Nodes ****
     # -----------------------------
-    print('Setting Up the FTL Network and distributing data .... ')
+    clients = []
     num_client_nodes = args.num_clients
-    clients = [Client(client_id=client_id) for client_id in range(num_client_nodes)]
-    # Make some client nodes adversarial
-    sampled_adv_clients = random.sample(population=clients, k=int(args.frac_adv * num_client_nodes))
-    for client in sampled_adv_clients:
-        client.mal = True
-        client.attack_model = get_attack(attack_config=attack_config)
+    sampled_adv_client_ix = random.sample(population=np.arange(start=0, stop=num_client_nodes))
 
-    # Get Data and Distribute among clients
-    # Also handles the data poisoning attacks
-    data_reader = DataReader(data_config=data_config, clients=clients)
+    for client_id in range(num_client_nodes):
+        client = Client(client_id)
+        client.learner = copy.deepcopy(model_net)
+        client.trainer.train_iter = iter(cycle(client.local_train_data))
+        client.C = Compression(num_bits=args.num_bits,
+                               compression_function=args.compression_operator,
+                               dropout_p=args.dropout_p,
+                               fraction_coordinates=args.frac_coordinates)
+        if client_id in sampled_adv_client_ix:
+            client.mal = True
+            client.attack_model = get_attack(attack_config=attack_config)
 
-    # Set up model architecture (learner) , Here we use the same Nw for both server and client.
-    model_net = get_model(args=args)
+    # **** Set up Server (Master Node) ****
+    # --------------------------------------
+    server = Server(aggregator_config=aggregation_config,
+                    server_opt_config=server_opt_config,
+                    clients=clients,
+                    server_model=copy.deepcopy(model_net),
+                    val_loader=None,
+                    test_loader=None)
+
+    # ** Data Handling **
+    # -------------------
+    print('Processing and distributing Data across the network')
+
+    print('# ------------------------------------------------- #')
+    print('#            Launching Federated Training           #')
+    print('# ------------------------------------------------- #')
 
     num_sampled_clients = int(args.frac_clients * num_client_nodes)
     if args.dga_json is not None:
@@ -80,28 +102,6 @@ def run_exp(args):
             assert server_opt_config["dga_config"]["network_params"][-1] == num_sampled_clients, \
                 "Invalid network output size in {}".format(args.dga_json)
 
-    # Copy model architecture to clients
-    # Also pass instances of compression operator
-    for client in clients:
-        client.learner = copy.deepcopy(model_net)
-        client.trainer.train_iter = iter(cycle(client.local_train_data))
-        client.C = Compression(num_bits=args.num_bits,
-                               compression_function=args.compression_operator,
-                               dropout_p=args.dropout_p,
-                               fraction_coordinates=args.frac_coordinates)
-
-    # **** Set up Server (Master Node)  ****
-    # ---------------------------------------
-    server = Server(aggregator_config=aggregation_config,
-                    server_opt_config=server_opt_config,
-                    clients=clients,
-                    server_model=copy.deepcopy(model_net),
-                    val_loader=data_reader.val_loader,
-                    test_loader=data_reader.test_loader)
-
-    print('# ------------------------------------------------- #')
-    print('#            Launching Federated Training           #')
-    print('# ------------------------------------------------- #')
     best_val_acc = 0.0
     best_test_acc = 0.0
 

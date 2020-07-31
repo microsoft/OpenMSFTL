@@ -43,8 +43,7 @@ def run_exp(args):
         "do_sorting": args.do_sort,
         "seed": args.seed,
         "download": args.download,
-        "num_labels": args.num_labels
-    }
+        "num_labels": args.num_labels}
 
     print('# ------------------------------------------------- #')
     print('#               Initializing Network                #')
@@ -92,9 +91,9 @@ def run_exp(args):
     # ** Data Handling **
     # -------------------
     print('Processing and distributing Data across the network')
-    process_data(data_config=data_config,
-                 clients=clients,
-                 server=server)
+    data_manager = process_data(data_config=data_config,
+                                clients=clients,
+                                server=server)
 
     print('# ------------------------------------------------- #')
     print('#            Launching Federated Training           #')

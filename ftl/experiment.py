@@ -64,12 +64,13 @@ def run_exp(args):
     # -----------------------------
     clients = []
     num_client_nodes = args.num_clients
-    sampled_adv_client_ix = random.sample(population=np.arange(start=0, stop=num_client_nodes))
+    num_mal_clients = int(attack_config["frac_adv"] * num_client_nodes)
+    sampled_adv_client_ix = random.sample(population=set(range(0, num_client_nodes)), k=num_mal_clients)
 
     for client_id in range(num_client_nodes):
         client = Client(client_id)
         client.learner = copy.deepcopy(model_net)
-        client.trainer.train_iter = iter(cycle(client.local_train_data))
+        # client.trainer.train_iter = iter(cycle(client.local_train_data)) Do this in Data Manager
         client.C = Compression(num_bits=args.num_bits,
                                compression_function=args.compression_operator,
                                dropout_p=args.dropout_p,
@@ -77,6 +78,7 @@ def run_exp(args):
         if client_id in sampled_adv_client_ix:
             client.mal = True
             client.attack_model = get_attack(attack_config=attack_config)
+        clients.append(client)
 
     # **** Set up Server (Master Node) ****
     # --------------------------------------

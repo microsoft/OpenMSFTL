@@ -9,7 +9,7 @@ def _parse_args():
     parser = argparse.ArgumentParser(description='driver.py')
 
     # Data IO Related Params
-    parser.add_argument('--data_set', type=str, default='cifar10',
+    parser.add_argument('--data_set', type=str, default='mnist',
                         help='Pass data-set')
     parser.add_argument('--num_labels', type=int, default=10)
     parser.add_argument('--dev_split', type=float, default=0.1,
@@ -18,9 +18,10 @@ def _parse_args():
     parser.add_argument('--batch_size', type=int, default=100,
                         help='Training mini Batch Size')
     parser.add_argument('--do_sort', type=bool, default=False)
+    parser.add_argument('--download', type=bool, default=True)
 
     # Model Params
-    parser.add_argument('--m', type=str, default='resnet32',
+    parser.add_argument('--m', type=str, default='mlp',
                         help='specify the network architecture you want to use')
     parser.add_argument('--pre_trained', default=True,
                         help='Some architectures like resnet support loading pre-trained weights if this is set')
@@ -33,7 +34,7 @@ def _parse_args():
                         help='randomly pick fraction of clients each round of training')
 
     # Attack Params
-    parser.add_argument('--frac_adv', type=float, default=0.0,
+    parser.add_argument('--frac_adv', type=float, default=0.2,
                         help='Specify Fraction of Adversarial Nodes')
     parser.add_argument('--attack_mode', type=str, default='coordinated',
                         help='Options: coordinated, un_coordinated ')

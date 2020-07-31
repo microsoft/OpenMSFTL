@@ -12,14 +12,17 @@
     "epsilon_gamma": 0.90,
     "max_replay_memory_size": 1000,
     "minibatch_size": 16,
-    "optimizer_config":{
+
+  "optimizer_config":
+    {
 	"optimizer_scheme": "Adam",
 	"lrs": "StepLR",
 	"lr": 0.001,
 	"amsgrad": true
     },
 
-    "annealing_config":{
+  "annealing_config":
+    {
 	"step_interval": "epoch",
 	"step_size": 1,
 	"gamma": 0.95

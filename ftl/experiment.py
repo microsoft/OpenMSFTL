@@ -1,8 +1,8 @@
 from ftl.agents import Client, Server
 from ftl.models import get_model
-from ftl.training_utils import cycle
 from ftl.compression import Compression
 from ftl.attacks import get_attack
+from ftl.data_manager import process_data
 import copy
 import random
 import json
@@ -92,6 +92,9 @@ def run_exp(args):
     # ** Data Handling **
     # -------------------
     print('Processing and distributing Data across the network')
+    process_data(data_config=data_config,
+                 clients=clients,
+                 server=server)
 
     print('# ------------------------------------------------- #')
     print('#            Launching Federated Training           #')

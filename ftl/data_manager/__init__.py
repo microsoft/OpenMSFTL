@@ -3,5 +3,5 @@ from .data_manager import *
 from .data_helper import *
 
 
-from .mnist import *
-from .cifar import *
+from .fed_mnist import *
+from .fed_cifar import *

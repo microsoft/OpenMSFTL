@@ -1,5 +1,6 @@
 from typing import Dict, List
 from ftl.agents import Client, Server
+from torchvision import datasets
 import torch
 import numpy as np
 
@@ -29,7 +30,12 @@ class DataManager:
         self.num_test = 0
         self.no_of_labels = data_config["num_labels"]
 
-    def load_data(self):
+    def fetch_data(self) -> [datasets, datasets]:
+        """ Downloads Data and Apply appropriate Transformations . returns train, test dataset """
+        pass
+
+    def distribute_data(self):
+        """ process train, test dataset and distribute among clients"""
         pass
 
     def _get_data_partition_map(self) -> Dict[int, List[int]]:

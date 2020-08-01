@@ -94,6 +94,7 @@ def run_exp(args):
     data_manager = process_data(data_config=data_config,
                                 clients=clients,
                                 server=server)
+    data_manager.distribute_data()
 
     print('# ------------------------------------------------- #')
     print('#            Launching Federated Training           #')

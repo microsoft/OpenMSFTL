@@ -69,7 +69,6 @@ def run_exp(args):
     for client_id in range(num_client_nodes):
         client = Client(client_id)
         client.learner = copy.deepcopy(model_net)
-        # client.trainer.train_iter = iter(cycle(client.local_train_data)) Do this in Data Manager
         client.C = Compression(num_bits=args.num_bits,
                                compression_function=args.compression_operator,
                                dropout_p=args.dropout_p,

@@ -48,7 +48,7 @@ class DataManager:
 
     def _iid_dist(self):
         """ Distribute the data iid into all the clients """
-        all_indexes = np.arange(self.num_train)
+        all_indexes = np.arange(self.num_train + self.num_dev)
         # Let's assign points for Dev data
         self.val_ix = set(np.random.choice(a=all_indexes, size=self.num_dev, replace=False))
         all_indexes = list(set(all_indexes) - self.val_ix)

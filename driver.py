@@ -17,7 +17,7 @@ def _parse_args():
                              'fraction of data used for training')
     parser.add_argument('--batch_size', type=int, default=100,
                         help='Training mini Batch Size')
-    parser.add_argument('--do_sort', type=bool, default=False)
+    parser.add_argument('--data_dist_strategy', type=str, default='iid')
     parser.add_argument('--download', type=bool, default=True)
 
     # Model Params

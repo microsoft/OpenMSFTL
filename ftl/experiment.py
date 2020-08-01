@@ -40,7 +40,7 @@ def run_exp(args):
         "data_set": args.data_set,
         "batch_size": args.batch_size,
         "dev_split": args.dev_split,
-        "do_sorting": args.do_sort,
+        "data_dist_strategy": args.data_dist_strategy,
         "seed": args.seed,
         "download": args.download,
         "num_labels": args.num_labels}

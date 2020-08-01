@@ -51,7 +51,7 @@ def infer(test_loader, model):
     test_loss = 0
     correct = 0
     with torch.no_grad():
-        for data, target in test_loader:
+        for batch_ix, (data, target) in enumerate(test_loader):
             data, target = data.float().to(device), target.to(device)
             output = model(data)
             test_loss += torch.nn.functional.cross_entropy(output, target).item()

@@ -41,8 +41,8 @@ class FedMNIST(DataManager):
 
         # populate server data loaders
         val_dataset = Subset(dataset=_train_dataset, indices=self.val_ix)
-        self.server.val_loader = DataLoader(val_dataset.dataset)
-        self.server.test_loader = DataLoader(_test_dataset)
+        self.server.val_loader = DataLoader(val_dataset.dataset, batch_size=self.batch_size)
+        self.server.test_loader = DataLoader(_test_dataset, batch_size=self.batch_size)
 
         # populate client data loader
         for client in self.clients:

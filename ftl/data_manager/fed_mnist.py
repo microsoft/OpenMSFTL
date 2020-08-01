@@ -1,8 +1,8 @@
 from .data_manager import DataManager
 from ftl.agents import Client, Server
-from ftl.training_utils import cycle
+
 from torchvision import datasets, transforms
-from torch.utils.data import DataLoader, Subset
+
 from typing import Dict, List
 import os
 
@@ -25,30 +25,7 @@ class FedMNIST(DataManager):
 
         return _train_dataset, _test_dataset
 
-    def distribute_data(self):
-        _train_dataset, _test_dataset = self.download_data()
-        self.server.test_loader = DataLoader(_test_dataset)
 
-        # update data set stats
-        total_train_samples = _train_dataset.data.shape[0]
-        self.num_dev = int(self.dev_split * total_train_samples)
-        self.num_train = total_train_samples - self.num_dev
-        self.num_test = _test_dataset.data.shape[0]
-        assert self.no_of_labels == len(_train_dataset.classes), 'Number of Labels of DataSet and Model Mismatch, ' \
-                                                                 'fix passed arguments to change softmax dim'
-        # partition data
-        self._populate_data_partition_map()
-
-        # populate server data loaders
-        val_dataset = Subset(dataset=_train_dataset, indices=self.val_ix)
-        self.server.val_loader = DataLoader(val_dataset.dataset, batch_size=self.batch_size)
-        self.server.test_loader = DataLoader(_test_dataset, batch_size=self.batch_size)
-
-        # populate client data loader
-        for client in self.clients:
-            local_dataset = Subset(dataset=_train_dataset, indices=self.data_distribution_map[client.client_id])
-            client.local_train_data = DataLoader(local_dataset.dataset, shuffle=True, batch_size=self.batch_size)
-            client.trainer.train_iter = iter(cycle(client.local_train_data))
 
 
 

@@ -28,6 +28,7 @@ class DataManager:
         self.num_train = 0
         self.num_dev = 0
         self.num_test = 0
+        self.val_ix = None
         self.no_of_labels = data_config["num_labels"]
 
     def fetch_data(self) -> [datasets, datasets]:
@@ -48,9 +49,15 @@ class DataManager:
 
     def _iid_dist(self, data_distribution_map):
         """ Distribute the data iid into all the clients """
+        all_indexes = np.arange(self.num_train)
+        # Let's assign points for Dev data
+        self.val_ix = set(np.random.choice(a=all_indexes, size=self.num_dev, replace=False))
+        all_indexes = list(set(all_indexes) - self.val_ix)
+
+        # split rest to clients for train
         num_clients = len(self.clients)
         num_samples_per_machine = self.num_train // num_clients
-        all_indexes = np.arange(self.num_train)
+
         for machine_ix in range(0, num_clients - 1):
             data_distribution_map[self.clients[machine_ix].client_id] = \
                 set(np.random.choice(a=all_indexes, size=num_samples_per_machine, replace=False))

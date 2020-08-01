@@ -29,6 +29,7 @@ class DataManager:
         self.num_dev = 0
         self.num_test = 0
         self.val_ix = None
+        self.data_distribution_map = {}
         self.no_of_labels = data_config["num_labels"]
 
     def fetch_data(self) -> [datasets, datasets]:
@@ -39,15 +40,13 @@ class DataManager:
         """ process train, test dataset and distribute among clients"""
         pass
 
-    def _get_data_partition_map(self) -> Dict[int, List[int]]:
-        data_distribution_map = {}
+    def _populate_data_partition_map(self):
         if self.data_distribution_strategy == 'iid':
-            self._iid_dist(data_distribution_map=data_distribution_map)
+            self._iid_dist()
         else:
             raise NotImplemented
-        return data_distribution_map
 
-    def _iid_dist(self, data_distribution_map):
+    def _iid_dist(self):
         """ Distribute the data iid into all the clients """
         all_indexes = np.arange(self.num_train)
         # Let's assign points for Dev data
@@ -59,9 +58,9 @@ class DataManager:
         num_samples_per_machine = self.num_train // num_clients
 
         for machine_ix in range(0, num_clients - 1):
-            data_distribution_map[self.clients[machine_ix].client_id] = \
+            self.data_distribution_map[self.clients[machine_ix].client_id] = \
                 set(np.random.choice(a=all_indexes, size=num_samples_per_machine, replace=False))
-            all_indexes = list(set(all_indexes) - data_distribution_map[self.clients[machine_ix].client_id])
+            all_indexes = list(set(all_indexes) - self.data_distribution_map[self.clients[machine_ix].client_id])
         # put the rest in the last machine
-        data_distribution_map[self.clients[-1].client_id] = all_indexes
+        self.data_distribution_map[self.clients[-1].client_id] = all_indexes
 

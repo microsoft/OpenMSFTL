@@ -16,7 +16,7 @@ class MLP(nn.Module):
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
-        x = x.reshape(x.shape[0], x.shape[1] * x.shape[2])
+        x = x.reshape(x.shape[0], x.shape[1] * x.shape[2] * x.shape[3])
         x = self.fc_in(x)
         x = self.dropout(x)
         x = self.relu(x)

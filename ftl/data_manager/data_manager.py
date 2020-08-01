@@ -32,7 +32,7 @@ class DataManager:
     def load_data(self):
         pass
 
-    def _populate_data_partition_map(self) -> Dict[int, List[int]]:
+    def _get_data_partition_map(self) -> Dict[int, List[int]]:
         data_distribution_map = {}
         if self.data_distribution_strategy == 'iid':
             self._iid_dist(data_distribution_map=data_distribution_map)

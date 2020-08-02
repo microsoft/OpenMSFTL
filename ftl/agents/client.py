@@ -43,7 +43,8 @@ class Client:
         self.trainer.reset_gradient_power()
         # for bi in range(num_batches):
         local_train_loader = DataLoader(self.local_train_data.dataset, shuffle=True, batch_size=100)
-        self.trainer.train(model=self.learner, optimizer=opt, local_iterations=num_batches)
+        self.trainer.train(model=self.learner, optimizer=opt,
+                           local_iterations=num_batches, train_loader=local_train_loader)
         # compute the local gradient
         dst_model_weights = np.concatenate([w.data.cpu().numpy().flatten() for w in self.learner.parameters()])
         self.grad = src_model_weights - dst_model_weights

@@ -44,9 +44,11 @@ class DataManager:
     def _iid_dist(self):
         """ Distribute the data iid into all the clients """
         all_indexes = np.arange(self.num_train + self.num_dev)
+
         # Let's assign points for Dev data
-        self.val_ix = set(np.random.choice(a=all_indexes, size=self.num_dev, replace=False))
-        all_indexes = list(set(all_indexes) - self.val_ix)
+        if self.num_dev > 0:
+            self.val_ix = set(np.random.choice(a=all_indexes, size=self.num_dev, replace=False))
+            all_indexes = list(set(all_indexes) - self.val_ix)
 
         # split rest to clients for train
         num_clients = len(self.clients)
@@ -66,7 +68,6 @@ class DataManager:
     def distribute_data(self):
         """ Distributes Data among clients, Server accordingly. Makes ready to train-test """
         _train_dataset, _test_dataset = self.download_data()
-        self.server.test_loader = DataLoader(_test_dataset)
 
         # update data set stats
         total_train_samples = _train_dataset.data.shape[0]
@@ -79,8 +80,9 @@ class DataManager:
         self._populate_data_partition_map()
 
         # populate server data loaders
-        val_dataset = Subset(dataset=_train_dataset, indices=self.val_ix)
-        self.server.val_loader = DataLoader(val_dataset.dataset, batch_size=self.batch_size)
+        if self.val_ix:
+            val_dataset = Subset(dataset=_train_dataset, indices=self.val_ix)
+            self.server.val_loader = DataLoader(val_dataset.dataset, batch_size=self.batch_size)
         self.server.test_loader = DataLoader(_test_dataset, batch_size=self.batch_size)
 
         # populate client data loader

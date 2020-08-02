@@ -1,6 +1,7 @@
 from ftl.training_utils.trainer import Trainer
 from ftl.training_utils.optimization import SchedulingOptimization
 from ftl.compression.compression import Compression
+from torch.utils.data import DataLoader
 import numpy as np
 
 
@@ -35,14 +36,14 @@ class Client:
                                      opt_alg=opt_alg,
                                      opt_group=opt_group
                                      ).optimizer
-
         src_model_weights = np.concatenate([w.data.cpu().numpy().flatten() for w in self.learner.parameters()])
+
         # Reset gradient just in case
         self.learner.zero_grad()
         self.trainer.reset_gradient_power()
-        for bi in range(num_batches):
-            self.trainer.train(model=self.learner,
-                               optimizer=opt)
+        # for bi in range(num_batches):
+        local_train_loader = DataLoader(self.local_train_data.dataset, shuffle=True, batch_size=100)
+        self.trainer.train(model=self.learner, optimizer=opt, local_iterations=num_batches)
         # compute the local gradient
         dst_model_weights = np.concatenate([w.data.cpu().numpy().flatten() for w in self.learner.parameters()])
         self.grad = src_model_weights - dst_model_weights

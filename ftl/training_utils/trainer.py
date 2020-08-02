@@ -5,23 +5,27 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class Trainer:
     def __init__(self):
         self.epoch_losses = []
-        self.train_iter = None
+        # self.train_iter = None
         self.reset_gradient_power()
 
-    def train(self, model, optimizer):
+    def train(self, model, optimizer, train_loader, local_iterations=1):
         model = model.to(device)
         model.train()
-
-        x, y = next(self.train_iter)
-        x, y = x.float(), y
-        x, y = x.to(device), y.to(device)
-        y_hat = model(x)
-        optimizer.zero_grad()
-        loss = torch.nn.functional.cross_entropy(y_hat, y)
-        loss.backward()
-        self.__accumulate_gradient_power(model)
-        self.epoch_losses.append(loss)
-        optimizer.step()
+        batch_ix = -1
+        for batch_ix, (x, y) in enumerate(train_loader):
+            # x, y = next(self.train_iter)
+            if batch_ix == local_iterations:
+                break
+            x, y = x.float(), y
+            x, y = x.to(device), y.to(device)
+            y_hat = model(x)
+            optimizer.zero_grad()
+            loss = torch.nn.functional.cross_entropy(y_hat, y)
+            loss.backward()
+            self.__accumulate_gradient_power(model)
+            self.epoch_losses.append(loss)
+            optimizer.step()
+        print('Local Iterations: {}'.format(batch_ix))
 
     def reset_gradient_power(self):
         """

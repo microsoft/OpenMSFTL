@@ -11,7 +11,6 @@ class Trainer:
     def train(self, model, optimizer, train_loader, local_iterations=1):
         model = model.to(device)
         model.train()
-        batch_ix = -1
         for batch_ix, (x, y) in enumerate(train_loader):
             # x, y = next(self.train_iter)
             if batch_ix == local_iterations:
@@ -25,7 +24,6 @@ class Trainer:
             self.__accumulate_gradient_power(model)
             self.epoch_losses.append(loss)
             optimizer.step()
-        print('Local Iterations: {}'.format(batch_ix))
 
     def reset_gradient_power(self):
         """

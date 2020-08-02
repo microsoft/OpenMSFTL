@@ -1,8 +1,6 @@
-from .data_manager import DataManager
+from .federated_data_manager import DataManager
 from ftl.agents import Client, Server
-
 from torchvision import datasets, transforms
-
 from typing import Dict, List
 import os
 

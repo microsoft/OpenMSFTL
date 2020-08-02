@@ -1,8 +1,8 @@
 from typing import Dict, List
 from ftl.agents import Client, Server
 from .fed_cifar import FedCIFAR10
-from .fed_mnist import FedMNIST
-from .data_manager import DataManager
+from .vision_datasets import FedMNIST
+from .federated_data_manager import DataManager
 
 
 def process_data(data_config: Dict,

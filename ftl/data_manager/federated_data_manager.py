@@ -61,9 +61,10 @@ class DataManager:
 
     def download_data(self) -> [datasets, datasets]:
         """ Downloads Data and Apply appropriate Transformations . returns train, test dataset """
-        pass
+        raise NotImplementedError("This method needs to be implemented")
 
     def distribute_data(self):
+        """ Distributes Data among clients, Server accordingly. Makes ready to train-test """
         _train_dataset, _test_dataset = self.download_data()
         self.server.test_loader = DataLoader(_test_dataset)
 

@@ -120,11 +120,10 @@ class Server:
         self.agg_grad = self.aggregator.get_aggregate(clients=sampled_clients, alphas=None)
 
     def update_global_model(self):
-        self.opt.zero_grad()
+        print('server lr = {}'.format(self.lrs.get_lr()))
         dist_grads_to_model(grads=self.agg_grad, parameters=self.learner.to('cpu').parameters())
         self.opt.step()
         self.lrs.step()
-        print('server lr = {}'.format(self.lrs.get_lr()))
         self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.learner.to('cpu').parameters()])
         dist_weights_to_model(weights=self.w_current, parameters=self.learner.to('cpu').parameters())
 

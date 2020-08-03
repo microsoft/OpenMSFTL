@@ -23,9 +23,9 @@ class SchedulingOptimization:
             opt_group = {}
 
         self.opt_group = opt_group
-        self.opt_alg = self.opt_group.get('optimizer_scheme', 'SGD')
-        self.lrs = self.opt_group.get('lr_schedule', None)
         self.lrs_group = lrs_group
+        self.opt_alg = self.opt_group.get('optimizer_scheme', 'SGD')
+        self.lrs = self.lrs_group.get('lr_schedule', None)
 
         self.params = model.parameters()
         self.optimizer = self._get_optimizer()

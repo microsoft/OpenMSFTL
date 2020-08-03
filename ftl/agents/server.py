@@ -41,7 +41,6 @@ class Server:
         # Aggregator tracks the model and optimizer
         self.aggregator = Aggregator(aggregation_config=aggregator_config,
                                      model=server_model,
-                                     dual_opt_alg=self.optimizer_scheme,
                                      opt_group={'lr': self.current_lr, 'lrs': self.lrs})
 
         # set a weight estimator for each client gradient

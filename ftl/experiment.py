@@ -96,6 +96,7 @@ def run_exp(args):
     # --------------------------------------
     server = Server(aggregator_config=aggregation_config,
                     server_opt_config=server_opt_config,
+                    server_lrs_config=server_lrs_config,
                     clients=clients,
                     server_model=copy.deepcopy(model_net),
                     val_loader=None,

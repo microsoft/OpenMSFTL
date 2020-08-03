@@ -48,7 +48,7 @@ class SchedulingOptimization:
                             )
         elif self.opt_alg == "Adam":
             return optim.Adam(params=self.params,
-                              lr=self.opt_group.get('lr', 0.001),
+                              lr=self.opt_group.get('lr0', 0.001),
                               betas=self.opt_group.get('betas', (0.9, 0.999)),
                               eps=self.opt_group.get('eps', 1e-08),
                               weight_decay=self.opt_group.get('weight_decay', 0.0),

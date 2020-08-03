@@ -1,11 +1,9 @@
 import numpy as np
+from typing import Dict
 
 
 class Compression:
-    def __init__(self, num_bits: int,
-                 compression_function: str,
-                 dropout_p: float,
-                 fraction_coordinates: float):
+    def __init__(self, compression_config: Dict):
         """
         This class applies a compression operator to the passed
         client gradient update.
@@ -13,17 +11,11 @@ class Compression:
         We implements the following algorithms:
         1. QSGD described in:
            Dan Alistarh et.al. QSGD: Communication-Efficient SGD via Gradient Quantization and Encoding, NeuRips 2017
-
-        :param num_bits:
-        :param compression_function:
-        :param dropout_p:
-        :param fraction_coordinates:
         """
-
-        self.compression_function = compression_function
-        self.num_bits = num_bits
-        self.fraction_coordinates = fraction_coordinates
-        self.dropout_p = dropout_p
+        self.compression_function = compression_config.get("compression_function", 'full')
+        self.num_bits = compression_config.get("num_bits", 8)
+        self.fraction_coordinates = compression_config.get("fraction_coordinate", 0.5)
+        self.dropout_p = compression_config.get("dropout_p", 0.5)
 
     def compress(self, grad, layer_wise=False):
         if layer_wise:

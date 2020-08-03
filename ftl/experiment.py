@@ -11,6 +11,7 @@ import numpy as np
 
 def run_exp(args):
     np.random.seed(args.seed)
+
     attack_config = {
         "frac_adv": args.frac_adv,
         "attack_mode": args.attack_mode,
@@ -18,24 +19,35 @@ def run_exp(args):
         "attack_n_std": args.attack_n_std,
         "noise_scale": args.noise_scale,
         "attack_std": args.attack_std}
+
     server_opt_config = {
         "optimizer_scheme": args.server_opt,
         "lr0": args.server_lr0,
         "lr_restart": args.lr_restart,
         "lr_schedule": args.lrs,
         "lr_decay": args.lr_decay}
-    client_config = {
-        'optimizer_scheme': args.opt,
-        'lr': args.lr0,
-        'weight_decay': args.reg,
-        'momentum': args.momentum,
-        'num_batches': args.num_batches}
+
+    client_opt_config = {
+        'optimizer_scheme': args.client_opt,
+        'lr0': args.client_lr0,
+        'weight_decay': args.client_reg,
+        'momentum': args.client_momentum,
+        'num_batches': args.num_local_steps}
+
+    client_compression_config = {
+        "num_bits": args.num_bits,
+        "compression_function": args.compression_operator,
+        "dropout_p": args.dropout_p,
+        "fraction_coordinate": args.frac_coordinates
+    }
+
     aggregation_config = {
         "aggregation_scheme": args.agg,
         "rank": args.rank,
         "adaptive_rank_th": args.adaptive_rank_th,
         "drop_top_comp": args.drop_top_comp,
         "krum_frac": args.m_krum}
+
     data_config = {
         "data_set": args.data_set,
         "batch_size": args.batch_size,
@@ -50,7 +62,7 @@ def run_exp(args):
     print('# ------------------------------------------------- #')
     print("Attack config:\n{}\n".format(json.dumps(attack_config, indent=4)))
     print("Server config:\n{}\n".format(json.dumps(server_opt_config, indent=4)))
-    print("Client config:\n{}\n".format(json.dumps(client_config, indent=4)))
+    print("Client config:\n{}\n".format(json.dumps(client_opt_config, indent=4)))
     print("Aggregation config:\n{}\n".format(json.dumps(aggregation_config, indent=4)))
 
     # ** Set up model architecture (learner) **
@@ -65,14 +77,11 @@ def run_exp(args):
     num_client_nodes = args.num_clients
     num_mal_clients = int(attack_config["frac_adv"] * num_client_nodes)
     sampled_adv_client_ix = random.sample(population=set(range(0, num_client_nodes)), k=num_mal_clients)
-
     for client_id in range(num_client_nodes):
         client = Client(client_id)
         client.learner = copy.deepcopy(model_net)
-        client.C = Compression(num_bits=args.num_bits,
-                               compression_function=args.compression_operator,
-                               dropout_p=args.dropout_p,
-                               fraction_coordinates=args.frac_coordinates)
+        client.populate_optimizer()
+        client.C = Compression(compression_config=client_compression_config)
         if client_id in sampled_adv_client_ix:
             client.mal = True
             client.attack_model = get_attack(attack_config=attack_config)
@@ -95,6 +104,8 @@ def run_exp(args):
                                 server=server)
     data_manager.distribute_data()
 
+    # *** Training **
+    # ---------------
     print('# ------------------------------------------------- #')
     print('#            Launching Federated Training           #')
     print('# ------------------------------------------------- #')
@@ -115,7 +126,7 @@ def run_exp(args):
         print(' -------------------------------------------')
         server.init_client_models()
         server.train_client_models(k=num_sampled_clients,
-                                   client_config=client_config,
+                                   client_config=client_opt_config,
                                    attack_config=attack_config)
         print('Metrics :')
         print('--------------------------------')

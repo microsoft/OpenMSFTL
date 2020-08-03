@@ -14,7 +14,8 @@ class Client:
                  stochastic_attack_prob=0.8,
                  C: Compression = None,
                  mal: bool = False,
-                 T: float = 1.0):
+                 T: float = 1.0,
+                 client_opt_config=None):
         self.client_id = client_id
         self.trainer = Trainer()
         self.learner = learner
@@ -31,11 +32,30 @@ class Client:
         self.grad = None
         self.T = T
 
-    def client_step(self, opt_alg, opt_group, num_batches=1):
+        # client opt config
+        if not client_opt_config:
+            client_opt_config = {'optimizer_scheme': 'SGD',
+                                 'lr0': 0.002,
+                                 'weight_decay': 0.0,
+                                 'momentum': 0.9,
+                                 'num_batches': 1}
+        self.client_opt_config = client_opt_config
+        self.optimizer = None
+        self.lr_scheduler = None
+
+    def populate_optimizer(self):
+        if not self.learner:
+            raise Exception("You need to populate client model before initializing optimizer")
         opt = SchedulingOptimization(model=self.learner,
-                                     opt_alg=opt_alg,
-                                     opt_group=opt_group
-                                     ).optimizer
+                                     opt_alg=self.client_opt_config.get("optimizer_scheme", 'SGD'))
+        self.optimizer = opt.optimizer
+        self.lr_scheduler = opt.lr_scheduler
+
+    def client_step(self, num_batches=1):
+        # opt = SchedulingOptimization(model=self.learner,
+        #                              opt_alg=opt_alg,
+        #                              opt_group=opt_group
+        #                              ).optimizer
         src_model_weights = np.concatenate([w.data.cpu().numpy().flatten() for w in self.learner.parameters()])
 
         # Reset gradient just in case
@@ -43,7 +63,7 @@ class Client:
         self.trainer.reset_gradient_power()
         # for bi in range(num_batches):
         local_train_loader = DataLoader(self.local_train_data.dataset, shuffle=True, batch_size=100)
-        self.trainer.train(model=self.learner, optimizer=opt,
+        self.trainer.train(model=self.learner, optimizer=self.optimizer,
                            local_iterations=num_batches, train_loader=local_train_loader)
         # compute the local gradient
         dst_model_weights = np.concatenate([w.data.cpu().numpy().flatten() for w in self.learner.parameters()])

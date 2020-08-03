@@ -43,7 +43,7 @@ class SchedulingOptimization:
     def _get_optimizer(self):
         if self.opt_alg == 'SGD':
             return optim.SGD(params=self.params,
-                             lr=self.opt_group.get('lr', 0.001),
+                             lr=self.opt_group.get('lr0', 0.001),
                              momentum=self.opt_group.get('momentum', 0.0),
                              weight_decay=self.opt_group.get('weight_decay', 0.0),
                              nesterov=self.opt_group.get('nesterov', False),

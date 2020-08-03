@@ -69,23 +69,29 @@ def _parse_args():
     parser.add_argument('--frac_coordinates', type=float, default=0.1)
     parser.add_argument('--dropout_p', type=float, default=0.1)
 
-    # Opt Params
-    parser.add_argument('--opt', type=str, default='SGD',
+    # Client Opt Params
+    parser.add_argument('--client_opt', type=str, default='SGD',
                         help='Name of the client optimizer: "SGD" or "Adam"')
+    parser.add_argument('--client_lr0', type=float, default=0.002,
+                        help='Pass the initial LR you want to use for client optimizer')
+    parser.add_argument('--client_reg', type=float, default=0.05,
+                        help='Pass Client L2 regularization co-efficient')
+    parser.add_argument('--client_momentum', type=float, default=0.9,
+                        help='Momentum of Client Optimizer')
+    parser.add_argument('--num_local_steps', type=int, default=5,
+                        help='Number of local client steps per comm round')
+
     parser.add_argument('--server_opt', type=str, default='Adam',
                         help='Name of the server (dual) optimizer: "SGD" or "Adam"')
     parser.add_argument('--server_lr0', type=float, default=0.01,
                         help='Pass the initial LR for the server optimizer')
-    parser.add_argument('--lr0', type=float, default=0.002,
-                        help='Pass the initial LR you want to use for client optimizer')
+
     parser.add_argument('--lrs', type=str, default='StepLR',
                         help='Pass the LR Scheduler you want to use')
-    parser.add_argument('--reg', type=float, default=0.05,
-                        help='Pass regularization co-efficient')
+
     parser.add_argument('--drop_p', type=float, default=0.5,
                         help='Prob dropout model weights')
-    parser.add_argument('--momentum', type=float, default=0.9,
-                        help='Momentum')
+
     parser.add_argument('--lr_restart', type=int, default=100)
     parser.add_argument('--lr_decay', type=int, default=5)
     parser.add_argument('--dga_json', type=str, default=None,
@@ -94,8 +100,7 @@ def _parse_args():
     # Training params
     parser.add_argument('--num_comm_round', type=int, default=100,
                         help='Number of Server Client Communication Round')
-    parser.add_argument('--num_batches', type=int, default=5,
-                        help='Number of local client steps per comm round')
+
 
     # Results Related Params
     parser.add_argument('--o', type=str, default=None, help='Pass results location')
@@ -111,31 +116,33 @@ def run_main():
     args = _parse_args()
     print(args)
 
-    result_file = 'num_clients_' + str(args.num_clients) + \
-                  '.frac_adv_' + str(args.frac_adv) + '.attack_mode_' + args.attack_mode +\
-                  '.attack_model_' + args.attack_model + '.attack_n_std_' + str(args.attack_n_std) + \
-                  '.attack_std_' + str(args.attack_std) + '.noise_scale' + str(args.noise_scale) +\
-                  '.agg_' + args.agg + '.rank_' + str(args.rank) +\
-                  '.compression_' + args.compression_operator + '.bits_' + str(args.num_bits) +\
-                  '.frac_cd_' + str(args.frac_coordinates) + '.p_' + str(args.dropout_p) + \
-                  '.c_opt_' + args.opt + '.s_opt_' + args.server_opt
-
-    if not args.o:
-        directory = "results/" + args.data_set + "/" + args.m + "/"
-    else:
-        directory = "results/" + args.o + '/'
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+    # TODO: Commenting FOr now
+    # result_file = 'num_clients_' + str(args.num_clients) + \
+    #               '.frac_adv_' + str(args.frac_adv) + '.attack_mode_' + args.attack_mode +\
+    #               '.attack_model_' + args.attack_model + '.attack_n_std_' + str(args.attack_n_std) + \
+    #               '.attack_std_' + str(args.attack_std) + '.noise_scale' + str(args.noise_scale) +\
+    #               '.agg_' + args.agg + '.rank_' + str(args.rank) +\
+    #               '.compression_' + args.compression_operator + '.bits_' + str(args.num_bits) +\
+    #               '.frac_cd_' + str(args.frac_coordinates) + '.p_' + str(args.dropout_p) + \
+    #               '.c_opt_' + args.opt + '.s_opt_' + args.server_opt
+    #
+    # if not args.o:
+    #     directory = "results/" + args.data_set + "/" + args.m + "/"
+    # else:
+    #     directory = "results/" + args.o + '/'
+    # if not os.path.exists(directory):
+    #     os.makedirs(directory)
 
     results = []
     for random_seed in np.arange(1, args.n_repeat + 1):
         args.seed = random_seed
         results.append(run_exp(args=args))
 
+    # Commenting for now
     # Dumps the results in appropriate files
-    pickle_it(args, 'parameters.' + result_file, directory)
-    pickle_it(results, result_file, directory)
-    print('results saved in "{}"'.format(directory))
+    # pickle_it(args, 'parameters.' + result_file, directory)
+    # pickle_it(results, result_file, directory)
+    # print('results saved in "{}"'.format(directory))
 
 
 if __name__ == '__main__':

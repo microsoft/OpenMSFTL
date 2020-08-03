@@ -86,7 +86,8 @@ class Server:
 
         print('current lr = {}'.format(self.current_lr))
 
-    def train_client_models(self, k: int, client_config: Dict = None,
+    def train_client_models(self, k: int,
+                            client_config: Dict = None,
                             attack_config: Dict = None):
         """
         Update each client model
@@ -94,12 +95,12 @@ class Server:
         :param k: number of clients to be selected
         :param client_config: specifying parameters for client trainer
         """
-        if not client_config:
-            client_config = {'optimizer_scheme': 'SGD',
-                             'lr': 0.002,
-                             'weight_decay': 0.0,
-                             'momentum': 0.9,
-                             'num_batches': 1}
+        # if not client_config:
+        #     client_config = {'optimizer_scheme': 'SGD',
+        #                      'lr': 0.002,
+        #                      'weight_decay': 0.0,
+        #                      'momentum': 0.9,
+        #                      'num_batches': 1}
         # Sample Clients to Train this round
         sampled_clients = random.sample(population=self.clients, k=k)
 
@@ -109,16 +110,15 @@ class Server:
 
         # TODO : Parallel Calls (Defer)
         input_feature = np.zeros(3 * k, np.float)  # non-private stats used for weight aggregation
+
         for ix, client in enumerate(sampled_clients):
-            client.client_step(opt_alg=client_config['optimizer_scheme'],
-                               opt_group={'lr': client_config['lr'],
-                                          'weight_decay': client_config['weight_decay'],
-                                          'momentum': client_config['momentum']},
-                               num_batches=client_config['num_batches'])
-            # print('Client : {} loss = {}'.format(client.client_id, client.trainer.epoch_losses[-1]))
-            # collect client's stats (normalized loss, mean of grad, var of grad)
-            for sx, stat_val in enumerate(client.get_stats()):
-                input_feature[ix + sx * k] = stat_val
+            client.client_step(num_batches=client_config['num_batches'])
+
+            # # TODO: Disabling for now
+            # # print('Client : {} loss = {}'.format(client.client_id, client.trainer.epoch_losses[-1]))
+            # # collect client's stats (normalized loss, mean of grad, var of grad)
+            # for sx, stat_val in enumerate(client.get_stats()):
+            #     input_feature[ix + sx * k] = stat_val
 
             epoch_loss += client.trainer.epoch_losses[-1]
 

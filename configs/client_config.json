@@ -1,0 +1,39 @@
+{
+  "num_client_nodes": 100,
+  "fraction_participant_clients": 0.5,
+
+  "data_config":{
+    "data_set": "mnist",
+    "batch_size": 512,
+    "dev_split": 0.1,
+    "data_dist_strategy": "iid",
+    "seed": 999,
+    "download": true,
+    "num_labels": 10
+  },
+
+  "client_opt_config": {
+        "optimizer_scheme": "SGD",
+        "lr0": 0.002,
+        "weight_decay": 0.05,
+        "momentum": 0.9,
+        "batch_size": 100,
+        "num_batches": 5
+  },
+
+  "client_compression_config": {
+        "num_bits": 2,
+        "compression_function": "full",
+        "dropout_p": 0.1,
+        "fraction_coordinate": 0.1
+  },
+
+  "attack_config" : {
+        "frac_adv": 0,
+        "attack_mode": "coordinated",
+        "attack_model": "random_gaussian",
+        "attack_n_std": 1.5,
+        "noise_scale": 1,
+        "attack_std": 1
+  }
+}

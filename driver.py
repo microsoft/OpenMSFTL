@@ -8,99 +8,21 @@ import numpy as np
 def _parse_args():
     parser = argparse.ArgumentParser(description='driver.py')
 
-    # Data IO Related Params
-    parser.add_argument('--data_set', type=str, default='mnist',
-                        help='Pass data-set')
-    parser.add_argument('--num_labels', type=int, default=10)
-    parser.add_argument('--dev_split', type=float, default=0,
-                        help='Provide train test split | '
-                             'fraction of data used for training')
-    parser.add_argument('--batch_size', type=int, default=100,
-                        help='Training mini Batch Size')
-    parser.add_argument('--data_dist_strategy', type=str, default='iid')
-    parser.add_argument('--download', type=bool, default=True)
-
     # Model Params
     parser.add_argument('--m', type=str, default='mlp',
                         help='specify the network architecture you want to use')
-    parser.add_argument('--pre_trained', default=True,
-                        help='Some architectures like resnet support loading pre-trained weights if this is set')
     parser.add_argument('--dim_in', type=int, default=28*28,
                         help='in dim needed only for mlp')
 
-    # Network Params
-    parser.add_argument('--num_clients', type=int, default=100)
-    parser.add_argument('--frac_clients', type=float, default=0.5,
-                        help='randomly pick fraction of clients each round of training')
-
-    # Attack Params
-    parser.add_argument('--frac_adv', type=float, default=0,
-                        help='Specify Fraction of Adversarial Nodes')
-    parser.add_argument('--attack_mode', type=str, default='coordinated',
-                        help='Options: coordinated, un_coordinated ')
-    parser.add_argument('--attack_model', type=str, default='drift',
-                        help='Options: drift (Co-ordinated), random_gaussian(both),'
-                             'additive_gaussian(both)')
-    parser.add_argument('--attack_n_std', type=float, default=1.0,
-                        help='For drift attack specify how many std away to drift the grad')
-    parser.add_argument('--noise_scale', type=float, default=1.0,
-                        help='scale of the gaussian noise w.r.t original value')
-    parser.add_argument('--attack_std', type=float, default=1.0,
-                        help='For random byz attacks drawn from gaussian specify std')
-
-    # Defense Params
-    parser.add_argument('--agg', type=str, default='fed_avg',
-                        help='Specify Aggregation/ Defence Rule. '
-                             'Options: fed_avg, krum, trimmed_mean, bulyan')
-    parser.add_argument('--rank', type=int, default=None,
-                        help='For LRMF SVD rank')
-    parser.add_argument('--adaptive_rank_th', type=float, default=None,
-                        help='For LRMF adaptive rank based on values')
-    parser.add_argument('--drop_top_comp', type=bool, default=False)
-    parser.add_argument('--m_krum', type=float, default=0.7,
-                        help='Krum needs m=n-f so ideally we can calculate this'
-                             'accurately at each round: (num_clients - num_adv)/num_clients'
-                             'but for practical purposes we treat this as hyper-parameter')
-    parser.add_argument('--compression_operator', type=str, default='full',
-                        help='Specify Aggregation Rule,'
-                             'Options: full, top, rand, svd, qsgd_biased, '
-                             'qsgd_unbiased, sign, dropout_biased, dropout_unbiased')
-    parser.add_argument('--num_bits', type=int, default=2)
-    parser.add_argument('--frac_coordinates', type=float, default=0.1)
-    parser.add_argument('--dropout_p', type=float, default=0.1)
-
     # Client Opt Params
-    parser.add_argument('--client_opt', type=str, default='SGD',
-                        help='Name of the client optimizer: "SGD" or "Adam"')
-    parser.add_argument('--client_lr0', type=float, default=0.002,
-                        help='Pass the initial LR you want to use for client optimizer')
-    parser.add_argument('--client_reg', type=float, default=0.05,
-                        help='Pass Client L2 regularization co-efficient')
-    parser.add_argument('--client_momentum', type=float, default=0.9,
-                        help='Momentum of Client Optimizer')
-    parser.add_argument('--num_local_steps', type=int, default=5,
-                        help='Number of local client steps per comm round')
-
-    parser.add_argument('--server_opt', type=str, default='Adam',
-                        help='Name of the server (dual) optimizer: "SGD" or "Adam"')
-    parser.add_argument('--server_lr0', type=float, default=0.01,
-                        help='Pass the initial LR for the server optimizer')
-
-    parser.add_argument('--lrs', type=str, default='StepLR',
-                        help='Pass the LR Scheduler you want to use')
-
-    parser.add_argument('--drop_p', type=float, default=0.5,
-                        help='Prob dropout model weights')
-
-    parser.add_argument('--lr_restart', type=int, default=100)
-    parser.add_argument('--lr_decay', type=int, default=5)
+    parser.add_argument('--server_config', type=str, default='./configs/server_config.json')
+    parser.add_argument('--client_config', type=str, default='./configs/client_config.json')
     parser.add_argument('--dga_json', type=str, default=None,
                         help='JSON config file path for dynamic gradient aggregation; '
                              'see configs/dga/rl.json for an example')
     # Training params
     parser.add_argument('--num_comm_round', type=int, default=100,
                         help='Number of Server Client Communication Round')
-
 
     # Results Related Params
     parser.add_argument('--o', type=str, default=None, help='Pass results location')

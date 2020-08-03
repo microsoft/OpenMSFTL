@@ -11,54 +11,17 @@ import numpy as np
 
 def run_exp(args):
     np.random.seed(args.seed)
-    attack_config = {
-        "frac_adv": args.frac_adv,
-        "attack_mode": args.attack_mode,
-        "attack_model": args.attack_model,
-        "attack_n_std": args.attack_n_std,
-        "noise_scale": args.noise_scale,
-        "attack_std": args.attack_std}
+    client_config = json.load(open(args.client_config))
+    server_config = json.load(open(args.server_config))
 
-    server_opt_config = {
-        "optimizer_scheme": args.server_opt,
-        "lr0": args.server_lr0}
+    data_config = client_config["data_config"]
+    client_opt_config = client_config["client_opt_config"]
+    attack_config = client_config["attack_config"]
+    client_compression_config = client_config["client_compression_config"]
 
-    server_lrs_config = {
-        "lr_restart": args.lr_restart,
-        "lr_schedule": args.lrs,
-        "lr_decay": args.lr_decay
-    }
-
-    client_opt_config = {
-        'optimizer_scheme': args.client_opt,
-        'lr0': args.client_lr0,
-        'weight_decay': args.client_reg,
-        'momentum': args.client_momentum,
-        "batch_size": args.batch_size,
-        'num_batches': args.num_local_steps}
-
-    client_compression_config = {
-        "num_bits": args.num_bits,
-        "compression_function": args.compression_operator,
-        "dropout_p": args.dropout_p,
-        "fraction_coordinate": args.frac_coordinates
-    }
-
-    aggregation_config = {
-        "aggregation_scheme": args.agg,
-        "rank": args.rank,
-        "adaptive_rank_th": args.adaptive_rank_th,
-        "drop_top_comp": args.drop_top_comp,
-        "krum_frac": args.m_krum}
-
-    data_config = {
-        "data_set": args.data_set,
-        "batch_size": args.batch_size,
-        "dev_split": args.dev_split,
-        "data_dist_strategy": args.data_dist_strategy,
-        "seed": args.seed,
-        "download": args.download,
-        "num_labels": args.num_labels}
+    server_opt_config = server_config["server_opt_config"]
+    server_lrs_config = server_config["server_lrs_config"]
+    aggregation_config = server_config["aggregation_config"]
 
     print('# ------------------------------------------------- #')
     print('#               Initializing Network                #')
@@ -77,7 +40,7 @@ def run_exp(args):
     # *** Set up Client Nodes ****
     # -----------------------------
     clients = []
-    num_client_nodes = args.num_clients
+    num_client_nodes = client_config["num_client_nodes"]
     num_mal_clients = int(attack_config["frac_adv"] * num_client_nodes)
     sampled_adv_client_ix = random.sample(population=set(range(0, num_client_nodes)), k=num_mal_clients)
     for client_id in range(num_client_nodes):
@@ -115,7 +78,7 @@ def run_exp(args):
     print('#            Launching Federated Training           #')
     print('# ------------------------------------------------- #')
 
-    num_sampled_clients = int(args.frac_clients * num_client_nodes)
+    num_sampled_clients = int(client_config["fraction_participant_clients"] * num_client_nodes)
     if args.dga_json is not None:
         with open(args.dga_json) as jfp:
             server_opt_config["dga_config"] = json.load(jfp)

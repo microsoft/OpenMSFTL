@@ -29,7 +29,9 @@ class Server:
         self.test_loader = test_loader
         self.clients = clients
         self.aggregator = Aggregator(aggregation_config=aggregator_config)
-        opt_obj = SchedulingOptimization(opt_group=server_opt_config, lrs_group=server_lrs_config)
+        opt_obj = SchedulingOptimization(model=self.learner,
+                                         opt_group=server_opt_config,
+                                         lrs_group=server_lrs_config)
         self.opt = opt_obj.optimizer
         self.lrs = opt_obj.lr_scheduler
         self.test_acc = []
@@ -54,27 +56,27 @@ class Server:
         # Server only keeps track of the pointer to the updated weights at each round
         # self.w_current = self.aggregator.w_current
 
-    def get_global_model(self):
-        """
-        return: global model
-        """
-        return self.aggregator.model
-
-    def init_client_models(self):
-        for client in self.clients:
-            dist_weights_to_model(weights=self.w_current, parameters=client.learner.parameters())
-
-    def _update_server_lr(self):
-        if self.num_rounds % self.server_lr_restart == 0:
-            self.current_lr = self.server_lr0 / self.lr_decay
-            self.aggregator.set_lr(self.current_lr)
-
-        # take a step in lr_scheduler
-        if self.aggregator.lr_scheduler is not None:
-            self.aggregator.lr_scheduler.step()
-            self.current_lr = get_lr(self.aggregator.optimizer)
-
-        print('current lr = {}'.format(self.current_lr))
+    # def get_global_model(self):
+    #     """
+    #     return: global model
+    #     """
+    #     return self.aggregator.model
+    #
+    # def init_client_models(self):
+    #     for client in self.clients:
+    #         dist_weights_to_model(weights=self.w_current, parameters=client.learner.parameters())
+    #
+    # def _update_server_lr(self):
+    #     if self.num_rounds % self.server_lr_restart == 0:
+    #         self.current_lr = self.server_lr0 / self.lr_decay
+    #         self.aggregator.set_lr(self.current_lr)
+    #
+    #     # take a step in lr_scheduler
+    #     if self.aggregator.lr_scheduler is not None:
+    #         self.aggregator.lr_scheduler.step()
+    #         self.current_lr = get_lr(self.aggregator.optimizer)
+    #
+    #     print('current lr = {}'.format(self.current_lr))
 
     def train_client_models(self, num_participating_client: int,
                             client_config: Dict = None,

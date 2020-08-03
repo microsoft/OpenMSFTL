@@ -16,7 +16,8 @@
   "server_lrs_config": {
     "lr_restart": 100,
     "lr_schedule": "StepLR",
-    "lr_decay": 5
+    "step_size": 1,
+    "gamma": 0.99
   },
 
   "aggregation_config" : {

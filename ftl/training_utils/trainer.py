@@ -23,7 +23,6 @@ class Trainer:
             loss.backward()
             self.optimizer.step()
             if self.scheduler:
-                print('Current client LR = {}'.format(self.scheduler.get_lr()))
                 self.scheduler.step()
             self.__accumulate_gradient_power(model)
             self.epoch_losses.append(loss)

@@ -4,8 +4,8 @@
 
   "data_config":
   {
-    "data_set": "cifar10",
-    "batch_size": 512,
+    "data_set": "mnist",
+    "batch_size": 256,
     "dev_split": 0.1,
     "data_dist_strategy": "iid",
     "seed": 999,
@@ -16,19 +16,19 @@
   "learner_config":
   {
     "net": "mlp",
-    "dim_in": 3072,
-    "drop_p": 0.1,
-    "comm_rounds": 100
+    "dim_in": 784,
+    "drop_p": 0.5,
+    "comm_rounds": 200
   },
 
   "client_opt_config":
   {
     "optimizer_scheme": "SGD",
     "lr0": 0.002,
-    "weight_decay": 0.01,
+    "weight_decay": 0.05,
     "momentum": 0.9,
-    "batch_size": 256,
-    "num_batches": 20
+    "batch_size": 100,
+    "num_batches": 5
   },
 
   "client_lrs_config":

@@ -79,10 +79,11 @@ def run_exp(args):
     num_mal_clients = int(attack_config["frac_adv"] * num_client_nodes)
     sampled_adv_client_ix = random.sample(population=set(range(0, num_client_nodes)), k=num_mal_clients)
     for client_id in range(num_client_nodes):
-        client = Client(client_id)
-        client.learner = copy.deepcopy(model_net)
+        client = Client(client_id=client_id,
+                        client_opt_config=client_opt_config,
+                        learner=copy.deepcopy(model_net),
+                        C=Compression(compression_config=client_compression_config))
         client.populate_optimizer()
-        client.C = Compression(compression_config=client_compression_config)
         if client_id in sampled_adv_client_ix:
             client.mal = True
             client.attack_model = get_attack(attack_config=attack_config)

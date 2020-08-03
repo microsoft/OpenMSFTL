@@ -42,8 +42,8 @@ class Client:
         src_model_weights = np.concatenate([w.data.cpu().numpy().flatten() for w in self.learner.parameters()])
 
         # Reset gradient just in case
-        self.learner.zero_grad()
-        self.trainer.reset_gradient_power()
+        # self.learner.zero_grad()
+        # self.trainer.reset_gradient_power()
         # for bi in range(num_batches):
         local_train_loader = DataLoader(self.local_train_data.dataset, shuffle=True,
                                         batch_size=self.client_opt_config.get("batch_size", 64))

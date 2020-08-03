@@ -27,18 +27,19 @@ def dist_grads_to_model(grads, parameters):
         offset += new_size
 
 
-def get_model(args):
+def get_model(learner_config, data_set):
     # Load MLP
-    if args.m == 'mlp':
-        if args.data_set not in ['mnist']:
-            print('MLP not yet supported for {}'.format(args.data_set))
+    net = learner_config["net"]
+    if net == 'mlp':
+        if data_set not in ['mnist']:
+            print('MLP not yet supported for {}'.format(data_set))
             raise NotImplementedError
-        model = MLP(dim_in=args.dim_in, p=args.drop_p)
+        model = MLP(dim_in=learner_config["dim_in"], p=learner_config["drop_p"])
 
     # Load ResNet 18
-    elif args.m == 'resnet32':
-        if args.data_set not in ['cifar10']:
-            print('Resnet is not yet supported for {}'.format(args.data_set))
+    elif net == 'resnet32':
+        if data_set not in ['cifar10']:
+            print('Resnet is not yet supported for {}'.format(data_set))
             raise NotImplementedError
         model = resnet32()
 

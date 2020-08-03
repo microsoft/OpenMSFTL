@@ -1,20 +1,29 @@
 {
-  "server_opt_config" :{
-        "optimizer_scheme": "Adam",
-        "lr0": 0.002
+  "learner_config":
+  {
+    "net": "mlp",
+    "dim_in": 784,
+    "drop_p": 0.1,
+    "comm_rounds": 100
+  },
+
+  "server_opt_config" :
+  {
+    "optimizer_scheme": "Adam",
+    "lr0": 0.002
   },
 
   "server_lrs_config": {
-      "lr_restart": 100,
-      "lr_schedule": "StepLR",
-      "lr_decay": 5
+    "lr_restart": 100,
+    "lr_schedule": "StepLR",
+    "lr_decay": 5
   },
 
   "aggregation_config" : {
-      "aggregation_scheme": "fed_avg",
-      "rank": null,
-      "adaptive_rank_th": 0.9,
-      "drop_top_comp": false,
-      "krum_frac": 0.7
+    "aggregation_scheme": "fed_avg",
+    "rank": null,
+    "adaptive_rank_th": 0.9,
+    "drop_top_comp": false,
+    "krum_frac": 0.7
   }
 }

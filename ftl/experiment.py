@@ -23,6 +23,7 @@ def run_exp(args):
     server_opt_config = server_config["server_opt_config"]
     server_lrs_config = server_config["server_lrs_config"]
     aggregation_config = server_config["aggregation_config"]
+    learner_config = server_config["learner_config"]
 
     print('# ------------------------------------------------- #')
     print('#               Initializing Network                #')
@@ -35,7 +36,7 @@ def run_exp(args):
     # ** Set up model architecture (learner) **
     # -----------------------------------------
     print('initializing Learner')
-    model_net = get_model(args=args)
+    model_net = get_model(learner_config=learner_config, data_set=data_config["data_set"])
 
     print('Setting Up the Network')
     # *** Set up Client Nodes ****

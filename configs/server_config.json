@@ -1,12 +1,4 @@
 {
-  "learner_config":
-  {
-    "net": "mlp",
-    "dim_in": 784,
-    "drop_p": 0.1,
-    "comm_rounds": 100
-  },
-
   "server_opt_config" :
   {
     "optimizer_scheme": "Adam",
@@ -16,7 +8,7 @@
   "server_lrs_config": {
     "lr_restart": 100,
     "lr_schedule": "StepLR",
-    "step_size": 1,
+    "step_size": 10,
     "gamma": 0.99
   },
 

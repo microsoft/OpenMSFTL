@@ -1,7 +1,6 @@
 from typing import Dict, List
 from ftl.agents import Client, Server
-from .fed_cifar import FedCIFAR10
-from .vision_datasets import FedMNIST
+from .vision_datasets import FedMNIST, FedCIFAR10
 from .federated_data_manager import DataManager
 
 

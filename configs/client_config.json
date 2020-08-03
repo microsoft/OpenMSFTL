@@ -1,10 +1,10 @@
 {
-  "num_client_nodes": 100,
-  "fraction_participant_clients": 0.5,
+  "num_client_nodes": 10,
+  "fraction_participant_clients": 1,
 
   "data_config":
   {
-    "data_set": "mnist",
+    "data_set": "cifar10",
     "batch_size": 512,
     "dev_split": 0.1,
     "data_dist_strategy": "iid",
@@ -13,21 +13,29 @@
     "num_labels": 10
   },
 
+  "learner_config":
+  {
+    "net": "mlp",
+    "dim_in": 784,
+    "drop_p": 0.1,
+    "comm_rounds": 100
+  },
+
   "client_opt_config":
   {
     "optimizer_scheme": "SGD",
     "lr0": 0.002,
-    "weight_decay": 0.05,
+    "weight_decay": 0.01,
     "momentum": 0.9,
-    "batch_size": 100,
-    "num_batches": 5
+    "batch_size": 256,
+    "num_batches": 20
   },
 
   "client_lrs_config":
   {
     "lr_restart": 100,
     "lr_schedule": "StepLR",
-    "step_size": 1,
+    "step_size": 20,
     "gamma": 0.99
   },
 

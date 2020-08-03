@@ -121,12 +121,12 @@ class Server:
 
     def update_global_model(self):
         self.opt.zero_grad()
-        dist_grads_to_model(grads=self.agg_grad, parameters=self.learner.parameters())
+        dist_grads_to_model(grads=self.agg_grad, parameters=self.learner.to('cpu').parameters())
         self.opt.step()
         self.lrs.step()
         print('server lr = {}'.format(self.lrs.get_lr()))
-        self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.learner.parameters()])
-        dist_weights_to_model(weights=self.w_current, parameters=self.learner.parameters())
+        self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.learner.to('cpu').parameters()])
+        dist_weights_to_model(weights=self.w_current, parameters=self.learner.to('cpu').parameters())
 
     # def _update_global_model(self, sampled_clients, input_feature):
     #     if self.weight_estimator is None:

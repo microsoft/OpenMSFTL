@@ -62,10 +62,6 @@ class Server:
     #     """
     #     return self.aggregator.model
     #
-    # def init_client_models(self):
-    #     for client in self.clients:
-    #         dist_weights_to_model(weights=self.w_current, parameters=client.learner.parameters())
-    #
     # def _update_server_lr(self):
     #     if self.num_rounds % self.server_lr_restart == 0:
     #         self.current_lr = self.server_lr0 / self.lr_decay
@@ -77,6 +73,10 @@ class Server:
     #         self.current_lr = get_lr(self.aggregator.optimizer)
     #
     #     print('current lr = {}'.format(self.current_lr))
+
+    def init_client_models(self):
+        for client in self.clients:
+            dist_weights_to_model(weights=self.w_current, parameters=client.learner.parameters())
 
     def train_client_models(self, num_participating_client: int,
                             client_config: Dict = None,

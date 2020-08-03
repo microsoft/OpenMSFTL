@@ -24,15 +24,15 @@ class Client:
         self.grad = None
         self.learner = learner
         self.client_opt_config = client_opt_config
-        opt, lrs = self._get_optimizer()
-        self.trainer = Trainer(optimizer=opt, scheduler=lrs)
+        self.trainer = Trainer()
 
     def _get_optimizer(self):
         if not self.learner:
             raise Exception("You need to populate client model before initializing optimizer")
         opt = SchedulingOptimization(model=self.learner,
                                      opt_group=self.client_opt_config)
-        return opt.optimizer, opt.lr_scheduler
+        self.trainer.optimizer = opt.optimizer
+        self.trainer.scheduler = opt.lr_scheduler
 
     def client_step(self, num_batches=1):
         # opt = SchedulingOptimization(model=self.learner,

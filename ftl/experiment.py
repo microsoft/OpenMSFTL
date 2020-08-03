@@ -11,7 +11,6 @@ import numpy as np
 
 def run_exp(args):
     np.random.seed(args.seed)
-
     attack_config = {
         "frac_adv": args.frac_adv,
         "attack_mode": args.attack_mode,

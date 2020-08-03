@@ -33,7 +33,7 @@ class Client:
         if not self.learner:
             raise Exception("You need to populate client model before initializing optimizer")
         opt = SchedulingOptimization(model=self.learner,
-                                     opt_alg=self.client_opt_config.get("optimizer_scheme", 'SGD'))
+                                     opt_group=self.client_opt_config)
         self.optimizer = opt.optimizer
         self.lr_scheduler = opt.lr_scheduler
 

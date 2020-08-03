@@ -16,6 +16,7 @@ def run_exp(args):
 
     data_config = client_config["data_config"]
     client_opt_config = client_config["client_opt_config"]
+    client_lrs_config = client_config["client_lrs_config"]
     attack_config = client_config["attack_config"]
     client_compression_config = client_config["client_compression_config"]
 
@@ -44,10 +45,11 @@ def run_exp(args):
     num_mal_clients = int(attack_config["frac_adv"] * num_client_nodes)
     sampled_adv_client_ix = random.sample(population=set(range(0, num_client_nodes)), k=num_mal_clients)
     for client_id in range(num_client_nodes):
-        client = Client(client_id=client_id)
-        client.client_opt_config = client_opt_config
-        client.learner = copy.deepcopy(model_net)
-        client.C = Compression(compression_config=client_compression_config)
+        client = Client(client_id=client_id,
+                        client_opt_config=client_opt_config,
+                        client_lrs_config=client_lrs_config,
+                        learner=copy.deepcopy(model_net),
+                        C=Compression(compression_config=client_compression_config))
         client.populate_optimizer()
         if client_id in sampled_adv_client_ix:
             client.mal = True
@@ -79,11 +81,11 @@ def run_exp(args):
     print('# ------------------------------------------------- #')
 
     num_sampled_clients = int(client_config["fraction_participant_clients"] * num_client_nodes)
-    if args.dga_json is not None:
-        with open(args.dga_json) as jfp:
-            server_opt_config["dga_config"] = json.load(jfp)
-            assert server_opt_config["dga_config"]["network_params"][-1] == num_sampled_clients, \
-                "Invalid network output size in {}".format(args.dga_json)
+    # if args.dga_json is not None:
+    #     with open(args.dga_json) as jfp:
+    #         server_opt_config["dga_config"] = json.load(jfp)
+    #         assert server_opt_config["dga_config"]["network_params"][-1] == num_sampled_clients, \
+    #             "Invalid network output size in {}".format(args.dga_json)
 
     best_val_acc = 0.0
     best_test_acc = 0.0

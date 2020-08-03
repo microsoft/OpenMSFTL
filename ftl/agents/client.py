@@ -13,7 +13,8 @@ class Client:
                  C: Compression = None,
                  mal: bool = False,
                  T: float = 1.0,
-                 client_opt_config=None):
+                 client_opt_config=None,
+                 client_lrs_config=None):
 
         self.client_id = client_id
         self.mal = mal  # is it a malicious node ?
@@ -24,13 +25,15 @@ class Client:
         self.grad = None
         self.learner = learner
         self.client_opt_config = client_opt_config
+        self.client_lrs_config = client_lrs_config
         self.trainer = Trainer()
 
     def populate_optimizer(self):
         if not self.learner:
             raise Exception("You need to populate client model before initializing optimizer")
         opt = SchedulingOptimization(model=self.learner,
-                                     opt_group=self.client_opt_config)
+                                     opt_group=self.client_opt_config,
+                                     lrs_group=self.client_lrs_config)
         self.trainer.optimizer = opt.optimizer
         self.trainer.scheduler = opt.lr_scheduler
 

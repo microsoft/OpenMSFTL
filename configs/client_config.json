@@ -21,6 +21,12 @@
         "num_batches": 5
   },
 
+  "client_lrs_config": {
+    "lr_restart": 100,
+    "lr_schedule": "StepLR",
+    "lr_decay": 5
+  },
+
   "client_compression_config": {
         "num_bits": 2,
         "compression_function": "full",

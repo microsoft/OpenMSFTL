@@ -75,4 +75,4 @@ class SchedulingOptimization:
 
 def get_lr(optimizer):
     for param_group in optimizer.param_groups:
-        return param_group['lr']
+        return param_group['lr0']

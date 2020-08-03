@@ -37,6 +37,7 @@ class Server:
         self.test_acc = []
         self.val_acc = []
         self.train_loss = []
+        self.agg_grad = None
 
         # # Aggregator tracks the model and optimizer
         # self.aggregator = Aggregator(aggregation_config=aggregator_config,
@@ -114,14 +115,15 @@ class Server:
 
         # aggregate client updates
         # self._update_global_model(sampled_clients, input_feature)
+        self.agg_grad = self.aggregator.get_aggregate(clients=sampled_clients, alphas=None)
 
     def update_global_model(self):
-        agg_grad = self.aggregator.get_aggregate(clients=self.clients, alphas=None)
         self.opt.zero_grad()
-        dist_grads_to_model(grads=agg_grad, parameters=self.learner.to('cpu').parameters())
+        dist_grads_to_model(grads=self.agg_grad, parameters=self.learner.to('cpu').parameters())
         self.opt.step()
         self.lrs.step()
         self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.learner.to('cpu').parameters()])
+        dist_weights_to_model(weights=self.w_current, parameters=self.learner.to('cpu').parameters())
 
     # def _update_global_model(self, sampled_clients, input_feature):
     #     if self.weight_estimator is None:
@@ -155,12 +157,12 @@ class Server:
         """
         Run validation with the current model
         """
-        val_acc, _ = infer(test_loader=self.val_loader, model=self.get_global_model())
+        val_acc, _ = infer(test_loader=self.val_loader, model=self.learner)
         return val_acc
 
     def run_test(self):
         """
         Run test with the current model
         """
-        test_acc, _ = infer(test_loader=self.test_loader, model=self.get_global_model())
+        test_acc, _ = infer(test_loader=self.test_loader, model=self.learner)
         return test_acc

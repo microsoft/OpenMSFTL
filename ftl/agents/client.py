@@ -36,7 +36,8 @@ class Client:
 
     def client_step(self, num_batches=1):
         src_model_weights = np.concatenate([w.data.cpu().numpy().flatten() for w in self.learner.parameters()])
-        local_train_loader = DataLoader(self.local_train_data.dataset, shuffle=True,
+        local_train_loader = DataLoader(self.local_train_data.dataset,
+                                        shuffle=True,
                                         batch_size=self.client_opt_config.get("batch_size", 256))
         self.trainer.train(model=self.learner,
                            local_iterations=num_batches,

@@ -22,10 +22,13 @@ def run_exp(args):
 
     server_opt_config = {
         "optimizer_scheme": args.server_opt,
-        "lr0": args.server_lr0,
+        "lr0": args.server_lr0}
+
+    server_lrs_config = {
         "lr_restart": args.lr_restart,
         "lr_schedule": args.lrs,
-        "lr_decay": args.lr_decay}
+        "lr_decay": args.lr_decay
+    }
 
     client_opt_config = {
         'optimizer_scheme': args.client_opt,
@@ -127,9 +130,12 @@ def run_exp(args):
         print('         Communication Round {}             '.format(epoch))
         print(' -------------------------------------------')
         server.init_client_models()
-        server.train_client_models(k=num_sampled_clients,
+        server.train_client_models(num_participating_client=num_sampled_clients,
                                    client_config=client_opt_config,
                                    attack_config=attack_config)
+        # Now Aggregate Gradients and Update the global model using server step
+        server.update_global_model()
+
         print('Metrics :')
         print('--------------------------------')
         print('Average Epoch Loss = {}'.format(server.train_loss[-1]))

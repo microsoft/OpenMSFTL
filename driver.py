@@ -34,7 +34,7 @@ def _parse_args():
                         help='randomly pick fraction of clients each round of training')
 
     # Attack Params
-    parser.add_argument('--frac_adv', type=float, default=0.2,
+    parser.add_argument('--frac_adv', type=float, default=0,
                         help='Specify Fraction of Adversarial Nodes')
     parser.add_argument('--attack_mode', type=str, default='coordinated',
                         help='Options: coordinated, un_coordinated ')
@@ -49,7 +49,7 @@ def _parse_args():
                         help='For random byz attacks drawn from gaussian specify std')
 
     # Defense Params
-    parser.add_argument('--agg', type=str, default='fed_lr_avg',
+    parser.add_argument('--agg', type=str, default='fed_avg',
                         help='Specify Aggregation/ Defence Rule. '
                              'Options: fed_avg, krum, trimmed_mean, bulyan')
     parser.add_argument('--rank', type=int, default=None,

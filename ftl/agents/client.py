@@ -35,16 +35,7 @@ class Client:
         self.trainer.scheduler = opt.lr_scheduler
 
     def client_step(self, num_batches=1):
-        # opt = SchedulingOptimization(model=self.learner,
-        #                              opt_alg=opt_alg,
-        #                              opt_group=opt_group
-        #                              ).optimizer
         src_model_weights = np.concatenate([w.data.cpu().numpy().flatten() for w in self.learner.parameters()])
-
-        # Reset gradient just in case
-        # self.learner.zero_grad()
-        # self.trainer.reset_gradient_power()
-        # for bi in range(num_batches):
         local_train_loader = DataLoader(self.local_train_data.dataset, shuffle=True,
                                         batch_size=self.client_opt_config.get("batch_size", 256))
         self.trainer.train(model=self.learner,

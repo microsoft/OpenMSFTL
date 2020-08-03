@@ -27,6 +27,7 @@ class Trainer:
             self.__accumulate_gradient_power(model)
             self.epoch_losses.append(loss)
 
+    ############
     def reset_gradient_power(self):
         """
         Reset the gradient stats

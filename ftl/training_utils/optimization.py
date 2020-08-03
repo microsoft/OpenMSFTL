@@ -6,8 +6,8 @@ from typing import Dict
 class SchedulingOptimization:
     def __init__(self,
                  model,
-                 opt_group=None,
-                 lrs_group=None,
+                 opt_group: Dict = None,
+                 lrs_group: Dict = None,
                  verbose=0):
         """
         :param model: model instance to be optimized

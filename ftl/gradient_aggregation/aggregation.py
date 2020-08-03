@@ -21,7 +21,7 @@ class Aggregator:
         else:
             raise NotImplementedError
 
-    def get_aggregate(self, clients: List[Client], alphas: np.ndarray = None) -> np.array:
+    def aggregate_grads(self, clients: List[Client], alphas: np.ndarray = None) -> np.array:
         if len(clients) == 0:
             raise Exception('Client List is Empty')
         # create a stacked Gradient Matrix G = [G0 | G1 | .... | Gn]'

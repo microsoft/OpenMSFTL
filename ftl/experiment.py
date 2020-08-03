@@ -28,10 +28,10 @@ def run_exp(args):
     print('# ------------------------------------------------- #')
     print('#               Initializing Network                #')
     print('# ------------------------------------------------- #')
-    print("Attack config:\n{}\n".format(json.dumps(attack_config, indent=4)))
-    print("Server config:\n{}\n".format(json.dumps(server_opt_config, indent=4)))
-    print("Client config:\n{}\n".format(json.dumps(client_opt_config, indent=4)))
-    print("Aggregation config:\n{}\n".format(json.dumps(aggregation_config, indent=4)))
+    # print("Attack config:\n{}\n".format(json.dumps(attack_config, indent=4)))
+    # print("Server config:\n{}\n".format(json.dumps(server_opt_config, indent=4)))
+    # print("Client config:\n{}\n".format(json.dumps(client_opt_config, indent=4)))
+    # print("Aggregation config:\n{}\n".format(json.dumps(aggregation_config, indent=4)))
 
     # ** Set up model architecture (learner) **
     # -----------------------------------------
@@ -80,18 +80,8 @@ def run_exp(args):
     print('# ------------------------------------------------- #')
     print('#            Launching Federated Training           #')
     print('# ------------------------------------------------- #')
-
     num_sampled_clients = int(client_config["fraction_participant_clients"] * num_client_nodes)
-    # if args.dga_json is not None:
-    #     with open(args.dga_json) as jfp:
-    #         server_opt_config["dga_config"] = json.load(jfp)
-    #         assert server_opt_config["dga_config"]["network_params"][-1] == num_sampled_clients, \
-    #             "Invalid network output size in {}".format(args.dga_json)
-
-    best_val_acc = 0.0
-    best_test_acc = 0.0
-
-    for epoch in range(1, args.num_comm_round + 1):
+    for epoch in range(1, learner_config["comm_rounds"] + 1):
         print(' ------------------------------------------ ')
         print('         Communication Round {}             '.format(epoch))
         print(' -------------------------------------------')
@@ -101,26 +91,5 @@ def run_exp(args):
                                    attack_config=attack_config)
         # Now Aggregate Gradients and Update the global model using server step
         server.update_global_model()
-
-        print('Metrics :')
-        print('--------------------------------')
-        print('Average Epoch Loss = {}'.format(server.train_loss[-1]))
-
-        if server.val_loader:
-            val_acc = server.run_validation()
-            print("Validation Accuracy = {}".format(val_acc))
-            server.val_acc.append(val_acc)
-            if val_acc > best_val_acc:
-                best_val_acc = val_acc
-            print('* Best Val Acc So Far {}'.format(best_val_acc))
-
-        if server.test_loader:
-            test_acc = server.run_test()
-            server.test_acc.append(test_acc)
-            print("Test Accuracy = {}".format(test_acc))
-            if test_acc > best_test_acc:
-                best_test_acc = test_acc
-            print('* Best Test Acc {}'.format(best_test_acc))
-        print(' ')
-
+        server.compute_metrics(verbose=True)
     return server.train_loss, server.test_acc, server.aggregator.gar.Sigma_tracked

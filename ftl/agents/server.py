@@ -38,6 +38,8 @@ class Server:
         self.test_acc = []
         self.val_acc = []
         self.train_loss = []
+        self.best_val_acc = 0.0
+        self.best_test_acc = 0.0
         self.agg_grad = None
 
     def init_client_models(self):
@@ -69,7 +71,7 @@ class Server:
         if len(mal_nodes) > 0:
             launch_attack(attack_mode=attack_config["attack_mode"], mal_nodes=mal_nodes)
 
-        self.agg_grad = self.aggregator.get_aggregate(clients=sampled_clients, alphas=None)
+        self.agg_grad = self.aggregator.aggregate_grads(clients=sampled_clients, alphas=None)
 
     def update_global_model(self):
         print('server lr = {}'.format(self.lrs.get_lr()))
@@ -79,16 +81,23 @@ class Server:
         self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.learner.to('cpu').parameters()])
         dist_weights_to_model(weights=self.w_current, parameters=self.learner.to('cpu').parameters())
 
-    def run_validation(self):
-        """
-        Run validation with the current model
-        """
-        val_acc, _ = infer(test_loader=self.val_loader, model=self.learner)
-        return val_acc
-
-    def run_test(self):
-        """
-        Run test with the current model
-        """
-        test_acc, _ = infer(test_loader=self.test_loader, model=self.learner)
-        return test_acc
+    def compute_metrics(self, verbose: bool = True):
+        if verbose:
+            print('Metrics :')
+            print('--------------------------------')
+            print('Average Epoch Loss = {}'.format(self.train_loss[-1]))
+        if self.val_loader:
+            curr_val_acc, _ = infer(test_loader=self.val_loader, model=self.learner)
+            self.val_acc.append(curr_val_acc)
+            if curr_val_acc > self.best_val_acc:
+                self.best_val_acc = curr_val_acc
+            if verbose:
+                print('Validation Acc: Curr: {} (Best: {})'.format(curr_val_acc, self.best_val_acc))
+        if self.test_loader:
+            curr_test_acc, _ = infer(test_loader=self.test_loader, model=self.learner)
+            self.test_acc.append(curr_test_acc)
+            if curr_test_acc > self.best_test_acc:
+                self.best_test_acc = curr_test_acc
+            if verbose:
+                print('Test Acc: Curr: {} (Best: {})'.format(curr_test_acc, self.best_test_acc))
+        print(' ')

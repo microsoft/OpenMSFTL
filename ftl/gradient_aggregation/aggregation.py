@@ -16,7 +16,6 @@ class Aggregator:
     def __init__(self,
                  aggregation_config: Dict,
                  model: nn.Module,
-                 dual_opt_alg: str = "Adam",
                  opt_group: Dict = None,
                  max_grad_norm: float = None):
         """
@@ -32,7 +31,7 @@ class Aggregator:
         self.gar = self.get_gar()
         self.model = model
         # Instantiate the optimizer for an aggregator
-        server_opt = SchedulingOptimization(model=model, opt_alg=dual_opt_alg, opt_group=opt_group)
+        server_opt = SchedulingOptimization(model=model, opt_group=opt_group)
         self.optimizer = server_opt.optimizer
         self.lr_scheduler = server_opt.lr_scheduler
         self.max_grad_norm = max_grad_norm

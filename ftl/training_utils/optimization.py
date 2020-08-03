@@ -6,9 +6,8 @@ from typing import Dict
 class SchedulingOptimization:
     def __init__(self,
                  model,
-                 opt_alg: str = 'SGD',
-                 opt_group: Dict = None,
-                 lrs_group: Dict = None,
+                 opt_group=None,
+                 lrs_group=None,
                  verbose=0):
         """
         :param model: model instance to be optimized
@@ -22,10 +21,10 @@ class SchedulingOptimization:
             lrs_group = {}
         if opt_group is None:
             opt_group = {}
-        self.opt_alg = opt_alg
-        self.opt_group = opt_group
 
-        self.lrs = self.opt_group.get('lrs')
+        self.opt_group = opt_group
+        self.opt_alg = self.opt_group.get('optimizer_scheme', 'SGD')
+        self.lrs = self.opt_group.get('lr_schedule', None)
         self.lrs_group = lrs_group
 
         self.params = model.parameters()
@@ -37,10 +36,6 @@ class SchedulingOptimization:
             print("Optimizer Info")
             print("Type: {}".format(self.opt_alg))
             print("Params: {}".format(json.dumps(self.opt_group, indent=4)))
-            # if self.lrs is not None:
-            #     print("Scheduler Info")
-            #     print("Type: {}".format(self.lrs))
-            #     print("Params: {}".format(json.dumps(self.lrs_group, indent=4)))
 
     def _get_optimizer(self):
         if self.opt_alg == 'SGD':

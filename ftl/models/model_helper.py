@@ -31,18 +31,13 @@ def get_model(learner_config, data_set):
     # Load MLP
     net = learner_config["net"]
     if net == 'mlp':
-        # if data_set not in ['mnist']:
-        #     print('MLP not yet supported for {}'.format(data_set))
-        #     raise NotImplementedError
         model = MLP(dim_in=learner_config["dim_in"], p=learner_config["drop_p"])
-
     # Load ResNet 18
     elif net == 'resnet32':
         if data_set not in ['cifar10']:
             print('Resnet is not yet supported for {}'.format(data_set))
             raise NotImplementedError
         model = resnet32()
-
     # If Not implemented yet throw error
     else:
         raise NotImplementedError

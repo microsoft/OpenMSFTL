@@ -83,7 +83,6 @@ def run_exp(args):
                         client_opt_config=client_opt_config,
                         learner=copy.deepcopy(model_net),
                         C=Compression(compression_config=client_compression_config))
-        client.populate_optimizer()
         if client_id in sampled_adv_client_ix:
             client.mal = True
             client.attack_model = get_attack(attack_config=attack_config)

@@ -46,7 +46,7 @@ class Client:
         # self.trainer.reset_gradient_power()
         # for bi in range(num_batches):
         local_train_loader = DataLoader(self.local_train_data.dataset, shuffle=True,
-                                        batch_size=self.client_opt_config.get("batch_size", 64))
+                                        batch_size=self.client_opt_config.get("batch_size", 256))
         self.trainer.train(model=self.learner,
                            local_iterations=num_batches,
                            train_loader=local_train_loader)

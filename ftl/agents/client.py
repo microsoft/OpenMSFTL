@@ -26,7 +26,7 @@ class Client:
         self.client_opt_config = client_opt_config
         self.trainer = Trainer()
 
-    def _get_optimizer(self):
+    def populate_optimizer(self):
         if not self.learner:
             raise Exception("You need to populate client model before initializing optimizer")
         opt = SchedulingOptimization(model=self.learner,

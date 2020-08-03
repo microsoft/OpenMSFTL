@@ -41,8 +41,8 @@ class SchedulingOptimization:
         if self.opt_alg == 'SGD':
             return optim.SGD(params=self.params,
                              lr=self.opt_group.get('lr0', 0.001),
-                             momentum=self.opt_group.get('momentum', 0.0),
-                             weight_decay=self.opt_group.get('weight_decay', 0.0),
+                             momentum=self.opt_group.get('momentum', 0.9),
+                             weight_decay=self.opt_group.get('weight_decay', 0.05),
                              nesterov=self.opt_group.get('nesterov', False),
                              dampening=self.opt_group.get('dampening', 0.0)
                             )

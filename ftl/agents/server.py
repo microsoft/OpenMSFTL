@@ -95,12 +95,6 @@ class Server:
         :param k: number of clients to be selected
         :param client_config: specifying parameters for client trainer
         """
-        # if not client_config:
-        #     client_config = {'optimizer_scheme': 'SGD',
-        #                      'lr': 0.002,
-        #                      'weight_decay': 0.0,
-        #                      'momentum': 0.9,
-        #                      'num_batches': 1}
         # Sample Clients to Train this round
         sampled_clients = random.sample(population=self.clients, k=k)
 

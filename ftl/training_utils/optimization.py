@@ -24,8 +24,10 @@ class SchedulingOptimization:
             opt_group = {}
         self.opt_alg = opt_alg
         self.opt_group = opt_group
+
         self.lrs = self.opt_group.get('lrs')
         self.lrs_group = lrs_group
+
         self.params = model.parameters()
         self.optimizer = self._get_optimizer()
         self.lr_scheduler = self._get_scheduler()

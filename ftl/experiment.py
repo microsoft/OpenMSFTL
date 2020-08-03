@@ -32,6 +32,7 @@ def run_exp(args):
         'lr0': args.client_lr0,
         'weight_decay': args.client_reg,
         'momentum': args.client_momentum,
+        "batch_size": args.batch_size,
         'num_batches': args.num_local_steps}
 
     client_compression_config = {

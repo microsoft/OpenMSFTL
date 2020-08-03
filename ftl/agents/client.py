@@ -10,35 +10,21 @@ class Client:
                  client_id: int,
                  learner=None,
                  attack_model=None,
-                 stochastic_attack=False,
-                 stochastic_attack_prob=0.8,
                  C: Compression = None,
                  mal: bool = False,
                  T: float = 1.0,
                  client_opt_config=None):
+
         self.client_id = client_id
-        self.trainer = Trainer()
-        self.learner = learner
-
         self.mal = mal  # is it a malicious node ?
-        self.attack_model = attack_model  # Ex. Type of Byzantine / poisoning attack
-        self.stochastic_attack = stochastic_attack  # will this node be consistently byzantine ?
-        self.attack_prob = stochastic_attack_prob
-
+        self.attack_model = attack_model  # pass the attack model
         self.C = C
-
-        self.local_train_data = None
-
-        self.grad = None
         self.T = T
 
-        # client opt config
-        if not client_opt_config:
-            client_opt_config = {'optimizer_scheme': 'SGD',
-                                 'lr0': 0.002,
-                                 'weight_decay': 0.0,
-                                 'momentum': 0.9,
-                                 'num_batches': 1}
+        self.trainer = Trainer()
+        self.local_train_data = None
+        self.grad = None
+        self.learner = learner
         self.client_opt_config = client_opt_config
         self.optimizer = None
         self.lr_scheduler = None
@@ -62,9 +48,12 @@ class Client:
         self.learner.zero_grad()
         self.trainer.reset_gradient_power()
         # for bi in range(num_batches):
-        local_train_loader = DataLoader(self.local_train_data.dataset, shuffle=True, batch_size=100)
-        self.trainer.train(model=self.learner, optimizer=self.optimizer,
-                           local_iterations=num_batches, train_loader=local_train_loader)
+        local_train_loader = DataLoader(self.local_train_data.dataset, shuffle=True,
+                                        batch_size=self.client_opt_config.get("batch_size", 64))
+        self.trainer.train(model=self.learner,
+                           optimizer=self.optimizer,
+                           local_iterations=num_batches,
+                           train_loader=local_train_loader)
         # compute the local gradient
         dst_model_weights = np.concatenate([w.data.cpu().numpy().flatten() for w in self.learner.parameters()])
         self.grad = src_model_weights - dst_model_weights

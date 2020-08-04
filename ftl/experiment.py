@@ -26,6 +26,7 @@ def run_exp(args):
     server_opt_config = server_config["server_opt_config"]
     server_lrs_config = server_config["server_lrs_config"]
     aggregation_config = server_config["aggregation_config"]
+    np.random.seed(data_config["seed"])
 
     print('# ------------------------------------------------- #')
     print('#               Initializing Network                #')

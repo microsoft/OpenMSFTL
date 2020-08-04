@@ -8,7 +8,7 @@
     "batch_size": 256,
     "dev_split": 0.1,
     "data_dist_strategy": "iid",
-    "seed": 999,
+    "seed": 1,
     "download": true,
     "num_labels": 10
   },
@@ -17,6 +17,8 @@
   {
     "net": "mlp",
     "dim_in": 784,
+    "dim_hidden1": 1024,
+    "dim_hidden2": 512,
     "drop_p": 0.5,
     "comm_rounds": 200
   },
@@ -24,11 +26,11 @@
   "client_opt_config":
   {
     "optimizer_scheme": "SGD",
-    "lr0": 0.005,
-    "weight_decay": 0.05,
+    "lr0": 0.002,
+    "weight_decay": 0.005,
     "momentum": 0.9,
-    "batch_size": 100,
-    "num_batches": 1
+    "batch_size": 64,
+    "num_batches": 25
   },
 
   "client_lrs_config":

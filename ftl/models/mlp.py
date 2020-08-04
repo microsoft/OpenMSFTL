@@ -1,17 +1,22 @@
 from torch import nn
+import torch
+torch.manual_seed(1)
 
 
 class MLP(nn.Module):
-    def __init__(self, dim_in, dim_out=10,
-                 dim_hidden1=300, dim_hidden2=200,
-                 p=0.5):
+    def __init__(self,
+                 dim_in,
+                 dim_out=10,
+                 dim_hidden1=300,
+                 dim_hidden2=200,
+                 drop_p=0.5):
         super(MLP, self).__init__()
         self.fc_in = nn.Linear(dim_in, dim_hidden1)
         nn.init.xavier_uniform_(self.fc_in.weight)
         self.fc_hidden = nn.Linear(dim_hidden1, dim_hidden2)
         nn.init.xavier_uniform_(self.fc_hidden.weight)
         self.relu = nn.ReLU()
-        self.dropout = nn.Dropout(p=p)
+        self.dropout = nn.Dropout(p=drop_p)
         self.fc_out = nn.Linear(dim_hidden2, dim_out)
         self.softmax = nn.Softmax(dim=1)
 

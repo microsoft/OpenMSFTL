@@ -31,7 +31,10 @@ def get_model(learner_config, data_set):
     # Load MLP
     net = learner_config["net"]
     if net == 'mlp':
-        model = MLP(dim_in=learner_config["dim_in"], p=learner_config["drop_p"])
+        model = MLP(dim_in=learner_config.get("dim_in", 784),
+                    dim_hidden1=learner_config.get("dim_hidden1", 300),
+                    dim_hidden2=learner_config.get("dim_hidden2", 150),
+                    drop_p=learner_config["drop_p"])
     # Load ResNet 18
     elif net == 'resnet32':
         if data_set not in ['cifar10']:

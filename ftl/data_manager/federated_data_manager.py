@@ -11,6 +11,7 @@ class DataManager:
     """
     Base Class for all Data Readers
     """
+
     def __init__(self,
                  data_config: Dict,
                  clients: List[Client],
@@ -91,9 +92,14 @@ class DataManager:
 
         # populate client data loader
         for client in self.clients:
+            local_dataset = Subset(dataset=_train_dataset,
+                                   indices=self.data_distribution_map[client.client_id])
+
             client.local_train_data = Subset(dataset=_train_dataset,
                                              indices=self.data_distribution_map[client.client_id])
             # local_dataset = Subset(dataset=_train_dataset, indices=self.data_distribution_map[client.client_id])
-            # client.local_train_data = DataLoader(local_dataset.dataset, shuffle=True, batch_size=self.batch_size)
-            # client.trainer.train_iter = iter(cycle(client.local_train_data))
-
+            client.local_train_data = DataLoader(local_dataset.dataset,
+                                                 shuffle=True,
+                                                 batch_size=client.client_opt_config.get("batch_size", 256),
+                                                 pin_memory=True)
+            client.trainer.train_iter = iter(cycle(client.local_train_data))

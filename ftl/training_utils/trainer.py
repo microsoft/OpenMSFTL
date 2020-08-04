@@ -7,25 +7,27 @@ class Trainer:
         self.epoch_losses = []
         self.optimizer = optimizer
         self.scheduler = scheduler
+        self.train_iter = None
         self.reset_gradient_power()
 
-    def train(self, model, train_loader, local_iterations=1):
+    def train(self, model):
         model = model.to(device)
         model.train()
-        for batch_ix, (x, y) in enumerate(train_loader):
-            if batch_ix == local_iterations:
-                break
-            x, y = x.float(), y
-            x, y = x.to(device), y.to(device)
-            y_hat = model(x)
-            self.optimizer.zero_grad()
-            loss = torch.nn.functional.cross_entropy(y_hat, y)
-            loss.backward()
-            self.optimizer.step()
-            if self.scheduler:
-                self.scheduler.step()
-            self.__accumulate_gradient_power(model)
-            self.epoch_losses.append(loss)
+        # for batch_ix, (x, y) in enumerate(train_loader):
+        #     if batch_ix == local_iterations:
+        #         break
+        x, y = next(self.train_iter)
+        x, y = x.float(), y
+        x, y = x.to(device), y.to(device)
+        y_hat = model(x)
+        self.optimizer.zero_grad()
+        loss = torch.nn.functional.cross_entropy(y_hat, y)
+        loss.backward()
+        self.optimizer.step()
+        if self.scheduler:
+            self.scheduler.step()
+        self.__accumulate_gradient_power(model)
+        self.epoch_losses.append(loss)
 
     ############
     def reset_gradient_power(self):

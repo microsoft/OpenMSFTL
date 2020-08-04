@@ -40,6 +40,7 @@ class Server:
         self.train_loss = []
         self.best_val_acc = 0.0
         self.best_test_acc = 0.0
+        self.curr_client_losses = None
         self.agg_grad = None
 
     def init_client_models(self):
@@ -52,20 +53,20 @@ class Server:
         Update each client model
         :param attack_config:
         :param num_participating_client: number of clients to be selected
-        :param client_config: specifying parameters for client trainer
         """
         # Sample Clients to Train this round
         sampled_clients = random.sample(population=self.clients, k=num_participating_client)
-        epoch_loss_clients = []
+        self.curr_client_losses = []
         mal_nodes = []
         for ix, client in enumerate(sampled_clients):
             client.client_step()
-            epoch_loss_clients.append(client.trainer.epoch_losses[-1].item())
+            self.curr_client_losses.append(client.trainer.epoch_losses[-1].item())
             if client.mal:
                 mal_nodes.append(client)
-        train_loss = sum(epoch_loss_clients) / len(sampled_clients)
+        train_loss = sum(self.curr_client_losses) / len(sampled_clients)
         self.train_loss.append(train_loss)
-        print("Max Lossy Client: {}, Min Loss Client{}". format(max(epoch_loss_clients), min(epoch_loss_clients)))
+        print("Max Lossy Client: {}, Min Loss Client: {}". format(max(self.curr_client_losses),
+                                                                  min(self.curr_client_losses)))
         # Modify the gradients of malicious nodes if attack is defined
         if len(mal_nodes) > 0:
             launch_attack(attack_mode=attack_config["attack_mode"], mal_nodes=mal_nodes)

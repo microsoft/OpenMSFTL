@@ -90,5 +90,11 @@ def run_exp(args):
                                    attack_config=attack_config)
         # Now Aggregate Gradients and Update the global model using server step
         server.update_global_model()
+        print(' ------------------------------------------ ')
+        print('         Communication Round {}             '.format(epoch))
+        print(' -------------------------------------------')
+        print('Metrics :')
+        print('--------------------------------')
+        print('Average Epoch Loss = {}'.format(server.train_loss[-1]))
         server.compute_metrics(curr_epoch=epoch)
     return server.train_loss, server.test_acc, server.aggregator.gar.Sigma_tracked

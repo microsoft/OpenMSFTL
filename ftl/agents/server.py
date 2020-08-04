@@ -71,7 +71,7 @@ class Server:
                                                   for client in sampled_clients)
         train_loss = sum(epoch_losses) / len(sampled_clients)
         # train_loss = epoch_loss / len(sampled_clients)
-        self.train_loss.append(train_loss.item())
+        self.train_loss.append(train_loss)
 
         # Modify the gradients of malicious nodes if attack is defined
         if len(mal_nodes) > 0:
@@ -82,7 +82,7 @@ class Server:
     @staticmethod
     def parallel_client_step(client):
         client.client_step()
-        return client.trainer.epoch_losses[-1]
+        return client.trainer.epoch_losses[-1].item()
 
     def update_global_model(self):
         print('server lr = {}'.format(self.lrs.get_lr()))

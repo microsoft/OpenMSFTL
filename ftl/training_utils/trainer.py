@@ -11,6 +11,7 @@ class Trainer:
         self.reset_gradient_power()
 
     def train(self, model):
+        print(device)
         model = model.to(device)
         model.train()
         x, y = next(self.train_iter)

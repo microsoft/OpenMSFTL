@@ -31,6 +31,6 @@ class Aggregator:
         G = np.zeros((len(clients), len(clients[0].grad)), dtype=clients[0].grad.dtype)
         for ix, client in enumerate(clients):
             G[ix, :] = client.C.compress(client.grad)
-        agg_grad = self.gar.aggregate(G=G)
+        agg_grad = self.gar.aggregate(G=G, losses=client_losses)
         return agg_grad
 

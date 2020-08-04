@@ -10,6 +10,7 @@ from ftl.models.model_helper import dist_weights_to_model, dist_grads_to_model
 from ftl.training_utils import infer
 from ftl.training_utils.optimization import SchedulingOptimization
 from .client import Client
+import time
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -55,6 +56,7 @@ class Server:
         :param num_participating_client: number of clients to be selected
         """
         # Sample Clients to Train this round
+        t0 = time.time()
         sampled_clients = random.sample(population=self.clients, k=num_participating_client)
         self.curr_client_losses = []
         mal_nodes = []
@@ -67,10 +69,14 @@ class Server:
         self.train_loss.append(train_loss)
         print("Max Lossy Client: {}, Min Loss Client: {}". format(max(self.curr_client_losses),
                                                                   min(self.curr_client_losses)))
+        print('Time to Train One Round: {}'.format(time.time()-t0))
+
+        t0 = time.time()
         # Modify the gradients of malicious nodes if attack is defined
         if len(mal_nodes) > 0:
             launch_attack(attack_mode=attack_config["attack_mode"], mal_nodes=mal_nodes)
         self.agg_grad = self.aggregator.aggregate_grads(clients=sampled_clients, alphas=None)
+        print('Time to run GA: {}'.format(time.time() - t0))
 
     def update_global_model(self):
         print('server lr = {}'.format(self.lrs.get_lr()))

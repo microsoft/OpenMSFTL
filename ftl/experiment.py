@@ -82,7 +82,6 @@ def run_exp(args):
     print('# ------------------------------------------------- #')
     num_sampled_clients = int(client_config["fraction_participant_clients"] * num_client_nodes)
     for epoch in range(1, learner_config["comm_rounds"] + 1):
-
         server.init_client_models()
         server.train_client_models(num_participating_client=num_sampled_clients,
                                    attack_config=attack_config)

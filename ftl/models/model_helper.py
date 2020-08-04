@@ -1,5 +1,6 @@
 from .mlp import MLP
 from .resnet import resnet32
+from .alexnet import AlexNet
 import torch
 import functools
 
@@ -35,6 +36,8 @@ def get_model(learner_config, data_set):
                     dim_hidden1=learner_config.get("dim_hidden1", 300),
                     dim_hidden2=learner_config.get("dim_hidden2", 150),
                     drop_p=learner_config["drop_p"])
+    elif net == 'alexnet':
+        model = AlexNet(num_classes=learner_config.get("num_labels", 10))
     # Load ResNet 18
     elif net == 'resnet32':
         if data_set not in ['cifar10']:
@@ -45,7 +48,7 @@ def get_model(learner_config, data_set):
     else:
         raise NotImplementedError
 
-    print('Training Model: ')
+    print('Training Model: {}'.format(net))
     print('----------------------------')
     print(model)
     return model

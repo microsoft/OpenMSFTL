@@ -3,7 +3,7 @@
   "server_opt_config" :
   {
     "optimizer_scheme": "Adam",
-    "lr0": 0.002
+    "lr0": 0.02
   },
 
   "server_lrs_config": {
@@ -14,7 +14,7 @@
   },
 
   "aggregation_config" : {
-    "aggregation_scheme": "min_loss",
+    "aggregation_scheme": "fed_avg",
     "rank": 50,
     "adaptive_rank_th": 0.95,
     "drop_top_comp": false,

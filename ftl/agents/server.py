@@ -71,12 +71,15 @@ class Server:
                                                                   min(self.curr_client_losses)))
         print('Time to Train One Round: {}'.format(time.time()-t0))
 
-        t0 = time.time()
         # Modify the gradients of malicious nodes if attack is defined
         if len(mal_nodes) > 0:
+            t0 = time.time()
             launch_attack(attack_mode=attack_config["attack_mode"], mal_nodes=mal_nodes)
+            print('Time to launch attack: {}'.format(time.time() - t0))
+
+        t0 = time.time()
         self.agg_grad = self.aggregator.aggregate_grads(clients=sampled_clients, alphas=None)
-        print('Time to run GA: {}'.format(time.time() - t0))
+        print('Time to run GAR: {}'.format(time.time() - t0))
 
     def update_global_model(self):
         print('server lr = {}'.format(self.lrs.get_lr()))
@@ -88,6 +91,7 @@ class Server:
 
     def compute_metrics(self, curr_epoch: int, stat_freq: int = 5):
         if curr_epoch % stat_freq == 0:
+            t0 = time.time()
             if self.val_loader:
                 curr_val_acc = infer(test_loader=self.val_loader, model=self.learner)
                 self.val_acc.append(curr_val_acc)
@@ -100,6 +104,8 @@ class Server:
                 if curr_test_acc > self.best_test_acc:
                     self.best_test_acc = curr_test_acc
                 print('Test Acc: Curr: {} (Best: {})'.format(curr_test_acc, self.best_test_acc))
+
+            print('Time to run inference {}s'.format(time.time() - t0))
             print(' ')
         else:
             print('skipping val, test inference to save time')

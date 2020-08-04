@@ -24,7 +24,7 @@
   "client_opt_config":
   {
     "optimizer_scheme": "SGD",
-    "lr0": 0.002,
+    "lr0": 0.005,
     "weight_decay": 0.05,
     "momentum": 0.9,
     "batch_size": 100,
@@ -36,7 +36,7 @@
     "lr_restart": 100,
     "lr_schedule": "StepLR",
     "step_size": 20,
-    "gamma": 0.99
+    "gamma": 0.9
   },
 
   "client_compression_config":

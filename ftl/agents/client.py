@@ -40,10 +40,6 @@ class Client:
     def client_step(self):
         num_batches = self.client_opt_config.get("num_batches", 1)
         src_model_weights = np.concatenate([w.data.cpu().numpy().flatten() for w in self.learner.parameters()])
-        # local_train_loader = DataLoader(self.local_train_data.dataset,
-        #                                 shuffle=True,
-        #                                 batch_size=self.client_opt_config.get("batch_size", 256),
-        #                                 pin_memory=True)
         for batch_ix in range(0, num_batches):
             self.trainer.train(model=self.learner)
         # compute the local gradient

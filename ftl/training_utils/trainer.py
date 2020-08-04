@@ -13,9 +13,6 @@ class Trainer:
     def train(self, model):
         model = model.to(device)
         model.train()
-        # for batch_ix, (x, y) in enumerate(train_loader):
-        #     if batch_ix == local_iterations:
-        #         break
         x, y = next(self.train_iter)
         x, y = x.float(), y
         x, y = x.to(device), y.to(device)

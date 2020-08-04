@@ -94,10 +94,6 @@ class DataManager:
         for client in self.clients:
             local_dataset = Subset(dataset=_train_dataset,
                                    indices=self.data_distribution_map[client.client_id])
-
-            client.local_train_data = Subset(dataset=_train_dataset,
-                                             indices=self.data_distribution_map[client.client_id])
-            # local_dataset = Subset(dataset=_train_dataset, indices=self.data_distribution_map[client.client_id])
             client.local_train_data = DataLoader(local_dataset.dataset,
                                                  shuffle=True,
                                                  batch_size=client.client_opt_config.get("batch_size", 256),

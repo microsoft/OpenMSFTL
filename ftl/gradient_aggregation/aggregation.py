@@ -1,7 +1,7 @@
 from typing import Dict, List
 import numpy as np
 from ftl.agents.client import Client
-from .gar import FedAvg, SpectralFedAvg
+from .gar import FedAvg, SpectralFedAvg, MinLoss
 
 
 class Aggregator:
@@ -18,10 +18,12 @@ class Aggregator:
             return FedAvg(aggregation_config=self.aggregation_config)
         elif self.aggregation_config["aggregation_scheme"] == 'fed_spectral_avg':
             return SpectralFedAvg(aggregation_config=self.aggregation_config)
+        elif self.aggregation_config["aggregation_scheme"] == 'min_loss':
+            return MinLoss(aggregation_config=self.aggregation_config)
         else:
             raise NotImplementedError
 
-    def aggregate_grads(self, clients: List[Client]) -> np.array:
+    def aggregate_grads(self, clients: List[Client], client_losses: List[float]) -> np.array:
         if len(clients) == 0:
             raise Exception('Client List is Empty')
         # create a stacked Gradient Matrix G = [G0 | G1 | .... | Gn]'

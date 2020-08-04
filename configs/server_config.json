@@ -14,10 +14,14 @@
   },
 
   "aggregation_config" : {
-    "aggregation_scheme": "fed_spectral_avg",
+    "aggregation_scheme": "min_loss",
     "rank": 50,
     "adaptive_rank_th": 0.95,
     "drop_top_comp": false,
-    "krum_frac": 0.7
+    "krum_frac": 0.7,
+
+    "weight_estimator_config": {
+      "strategy": "inverse_loss"
+    }
   }
 }

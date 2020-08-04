@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.utils.extmath import randomized_svd
+from typing import List
 
 
 class GAR:
@@ -10,7 +11,7 @@ class GAR:
         self.aggregation_config = aggregation_config
         self.Sigma_tracked = []
 
-    def aggregate(self, G: np.ndarray) -> np.ndarray:
+    def aggregate(self, G: np.ndarray, losses: List[float]) -> np.ndarray:
         pass
 
     @staticmethod
@@ -33,9 +34,18 @@ class FedAvg(GAR):
     def __init__(self, aggregation_config):
         GAR.__init__(self, aggregation_config=aggregation_config)
 
-    def aggregate(self, G: np.ndarray) -> np.ndarray:
+    def aggregate(self, G: np.ndarray, losses: List[float]) -> np.ndarray:
         agg_grad = self.weighted_average(stacked_grad=G, alphas=None)
         return agg_grad
+
+
+class MinLoss(GAR):
+    def __init__(self, aggregation_config):
+        GAR.__init__(self, aggregation_config=aggregation_config)
+
+    def aggregate(self, G: np.ndarray, losses: List[float]) -> np.ndarray:
+        min_loss_ix = losses.index(min(losses))
+        return G[min_loss_ix, :]
 
 
 class SpectralFedAvg(FedAvg):
@@ -45,7 +55,7 @@ class SpectralFedAvg(FedAvg):
         self.adaptive_rank_th = self.aggregation_config["adaptive_rank_th"]
         self.drop_top_comp = self.aggregation_config["drop_top_comp"]
 
-    def aggregate(self, G: np.ndarray) -> np.ndarray:
+    def aggregate(self, G: np.ndarray, losses: List[float]) -> np.ndarray:
         G_approx, S = self.fast_lr_decomposition(X=G)
         self.Sigma_tracked.append(S)
         agg_grad = self.weighted_average(stacked_grad=G_approx, alphas=None)
@@ -67,7 +77,7 @@ class SpectralFedAvg(FedAvg):
             explained_variance_ratio_ = explained_variance_ / total_var.sum()
             # print(explained_variance_ratio_)
             cum_var_explained = np.cumsum(explained_variance_ratio_)
-            print(cum_var_explained)
+            # print(cum_var_explained)
             adaptive_rank = np.searchsorted(cum_var_explained, v=self.adaptive_rank_th)
             if adaptive_rank == 0:
                 adaptive_rank += 1

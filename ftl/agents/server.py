@@ -78,7 +78,8 @@ class Server:
             print('Time to launch attack: {}'.format(time.time() - t0))
 
         t0 = time.time()
-        self.agg_grad = self.aggregator.aggregate_grads(clients=sampled_clients)
+        self.agg_grad = self.aggregator.aggregate_grads(clients=sampled_clients,
+                                                        client_losses=self.curr_client_losses)
         print('Time to run GAR: {}'.format(time.time() - t0))
 
     def update_global_model(self):

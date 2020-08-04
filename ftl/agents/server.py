@@ -47,8 +47,7 @@ class Server:
             dist_weights_to_model(weights=self.w_current, parameters=client.learner.parameters())
 
     def train_client_models(self, num_participating_client: int,
-                            attack_config: Dict = None,
-                            verbose:bool = True):
+                            attack_config: Dict = None):
         """
         Update each client model
         :param attack_config:
@@ -64,11 +63,9 @@ class Server:
             epoch_loss_clients.append(client.trainer.epoch_losses[-1].item())
             if client.mal:
                 mal_nodes.append(client)
-        if verbose:
-            print(epoch_loss_clients)
         train_loss = sum(epoch_loss_clients) / len(sampled_clients)
         self.train_loss.append(train_loss)
-
+        print("Max Lossy Client: {}, Min Loss Client{}". format(max(epoch_loss_clients), min(epoch_loss_clients)))
         # Modify the gradients of malicious nodes if attack is defined
         if len(mal_nodes) > 0:
             launch_attack(attack_mode=attack_config["attack_mode"], mal_nodes=mal_nodes)

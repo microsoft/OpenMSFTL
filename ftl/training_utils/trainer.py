@@ -16,7 +16,7 @@ class Trainer:
         x, y = next(self.train_iter)
         x, y = x.float(), y
         x, y = x.to(device), y.to(device)
-        for p in model.parameters:
+        for p in model.parameters():
             print(p.device)
         y_hat = model(x)
         self.optimizer.zero_grad()

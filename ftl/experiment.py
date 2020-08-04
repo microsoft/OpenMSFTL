@@ -96,5 +96,5 @@ def run_exp(args):
         print('Metrics :')
         print('--------------------------------')
         print('Average Epoch Loss = {}'.format(server.train_loss[-1]))
-        server.compute_metrics(curr_epoch=epoch)
+        server.compute_metrics(curr_epoch=epoch, stat_freq=server_config.get("verbose_freq", 5))
     return server.train_loss, server.test_acc, server.aggregator.gar.Sigma_tracked

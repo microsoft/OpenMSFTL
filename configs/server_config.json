@@ -1,4 +1,5 @@
 {
+  "verbose_freq": 1,
   "server_opt_config" :
   {
     "optimizer_scheme": "Adam",

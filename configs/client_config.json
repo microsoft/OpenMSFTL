@@ -6,7 +6,7 @@
   {
     "data_set": "mnist",
     "train_batch_size": 64,
-    "infer_batch_size": 256,
+    "infer_batch_size": 1,
     "dev_split": 0.1,
     "data_dist_strategy": "iid",
     "seed": 1,

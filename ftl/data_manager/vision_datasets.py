@@ -18,8 +18,10 @@ class FedMNIST(DataManager):
         std = (0.3081,)
         trans = transforms.Compose([transforms.ToTensor(),
                                     transforms.Normalize(mean=mean, std=std)])
-        _train_dataset = datasets.MNIST(root=root, download=self.download, train=True, transform=trans)
-        _test_dataset = datasets.MNIST(root=root, download=self.download, train=False, transform=trans)
+        _train_dataset = datasets.MNIST(root=root, download=self.data_config.get('download', True),
+                                        train=True, transform=trans)
+        _test_dataset = datasets.MNIST(root=root, download=self.data_config.get('download', True),
+                                       train=False, transform=trans)
         return _train_dataset, _test_dataset
 
 
@@ -37,8 +39,10 @@ class FedCIFAR10(DataManager):
         test_transform = transforms.Compose([transforms.ToTensor(),
                                              transforms.Normalize(mean=mean, std=std)])
 
-        _train_dataset = datasets.CIFAR10(root=root, download=self.download, train=True, transform=train_trans)
-        _test_dataset = datasets.CIFAR10(root=root, download=self.download, train=False, transform=test_transform)
+        _train_dataset = datasets.CIFAR10(root=root, download=self.data_config.get('download', True),
+                                          train=True, transform=train_trans)
+        _test_dataset = datasets.CIFAR10(root=root, download=self.data_config.get('download', True),
+                                         train=False, transform=test_transform)
         return _train_dataset, _test_dataset
 
 

@@ -84,10 +84,10 @@ class DataManager:
         if self.val_ix:
             val_dataset = Subset(dataset=_train_dataset, indices=self.val_ix)
             self.server.val_loader = DataLoader(val_dataset.dataset,
-                                                batch_size=self.num_dev,
+                                                batch_size=self.batch_size,
                                                 pin_memory=True)
         self.server.test_loader = DataLoader(_test_dataset,
-                                             batch_size=self.num_test,
+                                             batch_size=self.batch_size,
                                              pin_memory=True)
 
         # populate client data loader

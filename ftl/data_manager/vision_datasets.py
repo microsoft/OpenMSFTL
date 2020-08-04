@@ -31,8 +31,8 @@ class FedFashionMNIST(DataManager):
 
     def download_data(self) -> [datasets, datasets]:
         """ Downloads Data and Apply appropriate Transformations """
-        mean = (0.5, 0.5, 0.5)
-        std = (0.5, 0.5, 0.5)
+        mean = (0.5,)
+        std = (0.5,)
         trans = transforms.Compose([transforms.ToTensor(),
                                     transforms.Normalize(mean=mean, std=std)])
         _train_dataset = datasets.FashionMNIST(root=root, download=self.data_config.get('download', True),

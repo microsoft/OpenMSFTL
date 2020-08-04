@@ -17,7 +17,7 @@
   "learner_config":
   {
     "net": "mlp",
-    "dim_in": 2352,
+    "dim_in": 784,
     "dim_hidden1": 1024,
     "dim_hidden2": 512,
     "drop_p": 0.5,

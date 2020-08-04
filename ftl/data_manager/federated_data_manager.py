@@ -101,5 +101,5 @@ class DataManager:
                                                  shuffle=True,
                                                  batch_size=client.client_opt_config.get("batch_size", 256),
                                                  pin_memory=True,
-                                                 num_workers=4)
+                                                 num_workers=2)
             client.trainer.train_iter = iter(cycle(client.local_train_data))

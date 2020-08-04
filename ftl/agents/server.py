@@ -69,7 +69,7 @@ class Server:
         self.train_loss.append(train_loss)
         print("Max Lossy Client: {}, Min Loss Client: {}". format(max(self.curr_client_losses),
                                                                   min(self.curr_client_losses)))
-        print('Time to Train One Round: {}'.format(time.time()-t0))
+        print('Time to Train One Comm Round with {} Clients : {}s'.format(len(sampled_clients), time.time()-t0))
 
         # Modify the gradients of malicious nodes if attack is defined
         if len(mal_nodes) > 0:

@@ -8,7 +8,6 @@ class Trainer:
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.train_iter = None
-        self.reset_gradient_power()
 
     def train(self, model):
         model = model.to(device)
@@ -23,30 +22,8 @@ class Trainer:
         self.optimizer.step()
         if self.scheduler:
             self.scheduler.step()
-        self.__accumulate_gradient_power(model)
+            print('client LR = {}'.format(self.scheduler.get_lr()))
         self.epoch_losses.append(loss)
-
-    ############
-    def reset_gradient_power(self):
-        """
-        Reset the gradient stats
-        """
-        self.sum_grad = 0.0  # mean of gradient
-        self.sum_grad2 = 0.0  # power of gradient
-        self.counter = 0  # no. samples
-
-    def __accumulate_gradient_power(self, model):
-        """
-        Accumulate gradient stats for 1st and 2nd statistics
-        """
-        for p in model.parameters():
-            if p.grad is None:
-                continue
-            p1 = torch.sum(p.grad)
-            p2 = torch.sum(p.grad ** 2)
-            self.sum_grad += p1
-            self.sum_grad2 += p2
-            self.counter += len(p.grad)
 
 
 def infer(test_loader, model):
@@ -58,13 +35,13 @@ def infer(test_loader, model):
         for batch_ix, (data, target) in enumerate(test_loader):
             data, target = data.float().to(device), target.to(device)
             output = model(data)
-            test_loss += torch.nn.functional.cross_entropy(output, target).item()
+            # test_loss += torch.nn.functional.cross_entropy(output, target).item()
             pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
             correct += pred.eq(target.view_as(pred)).sum().item()
 
-    test_loss /= len(test_loader.dataset)
+    # test_loss /= len(test_loader.dataset)
     accuracy = 100. * correct / len(test_loader.dataset)
-    return accuracy, test_loss
+    return accuracy
 
 
 def cycle(iterable):

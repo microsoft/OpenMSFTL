@@ -7,6 +7,8 @@ import copy
 import random
 import json
 import numpy as np
+import torch
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def run_exp(args):
@@ -49,7 +51,7 @@ def run_exp(args):
         client = Client(client_id=client_id,
                         client_opt_config=client_opt_config,
                         client_lrs_config=client_lrs_config,
-                        learner=copy.deepcopy(model_net),
+                        learner=copy.deepcopy(model_net).to(device=device),
                         C=Compression(compression_config=client_compression_config))
         client.populate_optimizer()
         if client_id in sampled_adv_client_ix:

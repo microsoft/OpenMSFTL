@@ -5,7 +5,7 @@
   "data_config":
   {
     "data_set": "mnist",
-    "batch_size": 64,
+    "batch_size": 256,
     "dev_split": 0.1,
     "data_dist_strategy": "iid",
     "seed": 999,
@@ -27,8 +27,8 @@
     "lr0": 0.005,
     "weight_decay": 0.05,
     "momentum": 0.9,
-    "batch_size": 512,
-    "num_batches": 20
+    "batch_size": 100,
+    "num_batches": 1
   },
 
   "client_lrs_config":

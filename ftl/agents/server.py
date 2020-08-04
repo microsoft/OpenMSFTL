@@ -10,10 +10,7 @@ from ftl.models.model_helper import dist_weights_to_model, dist_grads_to_model
 from ftl.training_utils import infer
 from ftl.training_utils.optimization import SchedulingOptimization
 from .client import Client
-from joblib import Parallel, delayed
-import multiprocessing
 
-num_cores = multiprocessing.cpu_count()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
@@ -50,7 +47,8 @@ class Server:
             dist_weights_to_model(weights=self.w_current, parameters=client.learner.parameters())
 
     def train_client_models(self, num_participating_client: int,
-                            attack_config: Dict = None):
+                            attack_config: Dict = None,
+                            verbose:bool = True):
         """
         Update each client model
         :param attack_config:
@@ -59,30 +57,22 @@ class Server:
         """
         # Sample Clients to Train this round
         sampled_clients = random.sample(population=self.clients, k=num_participating_client)
-        epoch_loss = 0.0
+        epoch_loss_clients = []
         mal_nodes = []
-
-        # for ix, client in enumerate(sampled_clients):
-        #     client.client_step()
-        #     epoch_loss += client.trainer.epoch_losses[-1]
-        #     if client.mal:
-        #         mal_nodes.append(client)
-        epoch_losses = Parallel(n_jobs=2)(delayed(self.parallel_client_step)(client)
-                                                  for client in sampled_clients)
-        train_loss = sum(epoch_losses) / len(sampled_clients)
-        # train_loss = epoch_loss / len(sampled_clients)
+        for ix, client in enumerate(sampled_clients):
+            client.client_step()
+            epoch_loss_clients.append(client.trainer.epoch_losses[-1].item())
+            if client.mal:
+                mal_nodes.append(client)
+        if verbose:
+            print(epoch_loss_clients)
+        train_loss = sum(epoch_loss_clients) / len(sampled_clients)
         self.train_loss.append(train_loss)
 
         # Modify the gradients of malicious nodes if attack is defined
         if len(mal_nodes) > 0:
             launch_attack(attack_mode=attack_config["attack_mode"], mal_nodes=mal_nodes)
-
         self.agg_grad = self.aggregator.aggregate_grads(clients=sampled_clients, alphas=None)
-
-    @staticmethod
-    def parallel_client_step(client):
-        client.client_step()
-        return client.trainer.epoch_losses[-1].item()
 
     def update_global_model(self):
         print('server lr = {}'.format(self.lrs.get_lr()))

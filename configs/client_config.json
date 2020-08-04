@@ -4,9 +4,9 @@
 
   "data_config":
   {
-    "data_set": "mnist",
-    "train_batch_size": 128,
-    "infer_batch_size": 1000,
+    "data_set": "cifar10",
+    "train_batch_size": 64,
+    "infer_batch_size": 500,
     "dev_split": 0.1,
     "data_dist_strategy": "iid",
     "seed": 1,
@@ -17,7 +17,7 @@
   "learner_config":
   {
     "net": "mlp",
-    "dim_in": 784,
+    "dim_in": 3072,
     "dim_hidden1": 1024,
     "dim_hidden2": 512,
     "drop_p": 0.5,
@@ -30,7 +30,7 @@
     "lr0": 0.002,
     "weight_decay": 0.005,
     "momentum": 0.9,
-    "num_batches": 5
+    "num_batches": 25
   },
 
   "client_lrs_config":

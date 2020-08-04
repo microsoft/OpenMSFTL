@@ -18,11 +18,7 @@ class DataManager:
                  server: Server):
 
         torch.random.manual_seed(data_config["seed"])
-        self.download = data_config["download"]
-        self.batch_size = data_config["batch_size"]
-        self.dev_split = data_config["dev_split"]
-        self.data_distribution_strategy = data_config["data_dist_strategy"]
-
+        self.data_config = data_config
         # keep track of data distribution among clients
         self.clients = clients
         self.server = server
@@ -33,11 +29,12 @@ class DataManager:
         self.num_test = 0
         self.val_ix = None
         self.data_distribution_map = {}
-        self.no_of_labels = data_config["num_labels"]
+        self.no_of_labels = data_config.get("num_labels", 10)
 
     def _populate_data_partition_map(self):
         """ wrapper to Sampling data for client, server """
-        if self.data_distribution_strategy == 'iid':
+        data_distribution_strategy = self.data_config.get("data_distribution_strategy", 'iid')
+        if data_distribution_strategy == 'iid':
             self._iid_dist()
         else:
             raise NotImplemented
@@ -72,7 +69,7 @@ class DataManager:
 
         # update data set stats
         total_train_samples = _train_dataset.data.shape[0]
-        self.num_dev = int(self.dev_split * total_train_samples)
+        self.num_dev = int(self.data_config.get('dev_split', 0.1) * total_train_samples)
         self.num_train = total_train_samples - self.num_dev
         self.num_test = _test_dataset.data.shape[0]
         assert self.no_of_labels == len(_train_dataset.classes), 'Number of Labels of DataSet and Model Mismatch, ' \
@@ -84,12 +81,12 @@ class DataManager:
         if self.val_ix:
             val_dataset = Subset(dataset=_train_dataset, indices=self.val_ix)
             self.server.val_loader = DataLoader(val_dataset.dataset,
-                                                batch_size=self.batch_size,
+                                                batch_size=self.data_config.get("infer_batch_size", 1),
                                                 pin_memory=True,
-                                                num_workers=2)
+                                                num_workers=4)
 
         self.server.test_loader = DataLoader(_test_dataset,
-                                             batch_size=self.batch_size,
+                                             batch_size=self.data_config.get("infer_batch_size", 1),
                                              pin_memory=True,
                                              num_workers=2)
 
@@ -99,7 +96,7 @@ class DataManager:
                                    indices=self.data_distribution_map[client.client_id])
             client.local_train_data = DataLoader(local_dataset.dataset,
                                                  shuffle=True,
-                                                 batch_size=client.client_opt_config.get("batch_size", 256),
+                                                 batch_size=client.client_opt_config.get("train_batch_size", 256),
                                                  pin_memory=True,
                                                  num_workers=2)
             client.trainer.train_iter = iter(cycle(client.local_train_data))

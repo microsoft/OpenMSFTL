@@ -1,7 +1,6 @@
 from ftl.training_utils.trainer import Trainer
 from ftl.training_utils.optimization import SchedulingOptimization
 from ftl.compression.compression import Compression
-from torch.utils.data import DataLoader
 import numpy as np
 
 

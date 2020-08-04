@@ -5,7 +5,8 @@
   "data_config":
   {
     "data_set": "mnist",
-    "batch_size": 256,
+    "train_batch_size": 64,
+    "infer_batch_size": 256,
     "dev_split": 0.1,
     "data_dist_strategy": "iid",
     "seed": 1,
@@ -29,7 +30,6 @@
     "lr0": 0.002,
     "weight_decay": 0.005,
     "momentum": 0.9,
-    "batch_size": 64,
     "num_batches": 25
   },
 

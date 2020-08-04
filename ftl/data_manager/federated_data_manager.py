@@ -86,12 +86,12 @@ class DataManager:
             self.server.val_loader = DataLoader(val_dataset.dataset,
                                                 batch_size=self.batch_size,
                                                 pin_memory=True,
-                                                num_workers=4)
+                                                num_workers=2)
 
         self.server.test_loader = DataLoader(_test_dataset,
                                              batch_size=self.batch_size,
                                              pin_memory=True,
-                                             num_workers=4)
+                                             num_workers=2)
 
         # populate client data loader
         for client in self.clients:

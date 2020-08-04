@@ -80,23 +80,25 @@ class Server:
         self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.learner.to('cpu').parameters()])
         dist_weights_to_model(weights=self.w_current, parameters=self.learner.to('cpu').parameters())
 
-    def compute_metrics(self, verbose: bool = True):
+    def compute_metrics(self, curr_epoch: int, stat_freq: int = 5, verbose: bool = True):
         if verbose:
             print('Metrics :')
             print('--------------------------------')
             print('Average Epoch Loss = {}'.format(self.train_loss[-1]))
-        if self.val_loader:
-            curr_val_acc, _ = infer(test_loader=self.val_loader, model=self.learner)
-            self.val_acc.append(curr_val_acc)
-            if curr_val_acc > self.best_val_acc:
-                self.best_val_acc = curr_val_acc
-            if verbose:
-                print('Validation Acc: Curr: {} (Best: {})'.format(curr_val_acc, self.best_val_acc))
-        if self.test_loader:
-            curr_test_acc, _ = infer(test_loader=self.test_loader, model=self.learner)
-            self.test_acc.append(curr_test_acc)
-            if curr_test_acc > self.best_test_acc:
-                self.best_test_acc = curr_test_acc
-            if verbose:
-                print('Test Acc: Curr: {} (Best: {})'.format(curr_test_acc, self.best_test_acc))
+
+        if curr_epoch % stat_freq == 0:
+            if self.val_loader:
+                curr_val_acc, _ = infer(test_loader=self.val_loader, model=self.learner)
+                self.val_acc.append(curr_val_acc)
+                if curr_val_acc > self.best_val_acc:
+                    self.best_val_acc = curr_val_acc
+                if verbose:
+                    print('Validation Acc: Curr: {} (Best: {})'.format(curr_val_acc, self.best_val_acc))
+            if self.test_loader:
+                curr_test_acc, _ = infer(test_loader=self.test_loader, model=self.learner)
+                self.test_acc.append(curr_test_acc)
+                if curr_test_acc > self.best_test_acc:
+                    self.best_test_acc = curr_test_acc
+                if verbose:
+                    print('Test Acc: Curr: {} (Best: {})'.format(curr_test_acc, self.best_test_acc))
         print(' ')

@@ -90,5 +90,5 @@ def run_exp(args):
                                    attack_config=attack_config)
         # Now Aggregate Gradients and Update the global model using server step
         server.update_global_model()
-        server.compute_metrics(verbose=True)
+        server.compute_metrics(verbose=True, curr_epoch=epoch)
     return server.train_loss, server.test_acc, server.aggregator.gar.Sigma_tracked

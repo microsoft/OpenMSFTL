@@ -14,8 +14,8 @@
   },
 
   "aggregation_config" : {
-    "aggregation_scheme": "fed_avg",
-    "rank": null,
+    "aggregation_scheme": "fed_spectral_avg",
+    "rank": 50,
     "adaptive_rank_th": 0.9,
     "drop_top_comp": false,
     "krum_frac": 0.7

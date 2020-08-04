@@ -16,12 +16,12 @@ class Aggregator:
     def __get_gar(self):
         if self.aggregation_config["aggregation_scheme"] == 'fed_avg':
             return FedAvg(aggregation_config=self.aggregation_config)
-        elif self.aggregation_config["aggregation_scheme"] == 'fed_lr_avg':
+        elif self.aggregation_config["aggregation_scheme"] == 'fed_spectral_avg':
             return SpectralFedAvg(aggregation_config=self.aggregation_config)
         else:
             raise NotImplementedError
 
-    def aggregate_grads(self, clients: List[Client], alphas: np.ndarray = None) -> np.array:
+    def aggregate_grads(self, clients: List[Client]) -> np.array:
         if len(clients) == 0:
             raise Exception('Client List is Empty')
         # create a stacked Gradient Matrix G = [G0 | G1 | .... | Gn]'
@@ -29,6 +29,6 @@ class Aggregator:
         G = np.zeros((len(clients), len(clients[0].grad)), dtype=clients[0].grad.dtype)
         for ix, client in enumerate(clients):
             G[ix, :] = client.C.compress(client.grad)
-        agg_grad = self.gar.aggregate(G=G, alphas=alphas)
+        agg_grad = self.gar.aggregate(G=G)
         return agg_grad
 

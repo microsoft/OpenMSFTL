@@ -85,14 +85,14 @@ def run_exp(args):
     print('# ------------------------------------------------- #')
     num_sampled_clients = int(client_config["fraction_participant_clients"] * num_client_nodes)
     for epoch in range(1, learner_config["comm_rounds"] + 1):
+        print(' ------------------------------------------ ')
+        print('         Communication Round {}             '.format(epoch))
+        print(' -------------------------------------------')
         server.init_client_models()
         server.train_client_models(num_participating_client=num_sampled_clients,
                                    attack_config=attack_config)
         # Now Aggregate Gradients and Update the global model using server step
         server.update_global_model()
-        print(' ------------------------------------------ ')
-        print('         Communication Round {}             '.format(epoch))
-        print(' -------------------------------------------')
         print('Metrics :')
         print('--------------------------------')
         print('Average Epoch Loss = {}'.format(server.train_loss[-1]))

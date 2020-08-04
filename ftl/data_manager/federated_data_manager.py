@@ -86,12 +86,12 @@ class DataManager:
             self.server.val_loader = DataLoader(val_dataset.dataset,
                                                 batch_size=self.batch_size,
                                                 pin_memory=True,
-                                                num_workers=2)
+                                                num_workers=4)
 
         self.server.test_loader = DataLoader(_test_dataset,
                                              batch_size=self.batch_size,
                                              pin_memory=True,
-                                             num_workers=2)
+                                             num_workers=4)
 
         # populate client data loader
         for client in self.clients:
@@ -101,5 +101,5 @@ class DataManager:
                                                  shuffle=True,
                                                  batch_size=client.client_opt_config.get("batch_size", 256),
                                                  pin_memory=True,
-                                                 num_workers=2)
+                                                 num_workers=4)
             client.trainer.train_iter = iter(cycle(client.local_train_data))

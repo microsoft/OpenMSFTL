@@ -22,7 +22,7 @@ class Trainer:
         self.optimizer.step()
         if self.scheduler:
             self.scheduler.step()
-            print('client LR = {}'.format(self.scheduler.get_lr()))
+            # print('client LR = {}'.format(self.scheduler.get_lr()))
         self.epoch_losses.append(loss)
 
 

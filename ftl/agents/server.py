@@ -101,3 +101,5 @@ class Server:
                     self.best_test_acc = curr_test_acc
                 print('Test Acc: Curr: {} (Best: {})'.format(curr_test_acc, self.best_test_acc))
             print(' ')
+        else:
+            print('skipping val, test inference to save time')

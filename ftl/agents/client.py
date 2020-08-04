@@ -37,7 +37,8 @@ class Client:
         self.trainer.optimizer = opt.optimizer
         self.trainer.scheduler = opt.lr_scheduler
 
-    def client_step(self, num_batches=1):
+    def client_step(self):
+        num_batches = self.client_opt_config.get("num_batches", 1)
         src_model_weights = np.concatenate([w.data.cpu().numpy().flatten() for w in self.learner.parameters()])
         local_train_loader = DataLoader(self.local_train_data.dataset,
                                         shuffle=True,

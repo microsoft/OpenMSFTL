@@ -87,7 +87,6 @@ def run_exp(args):
         print(' -------------------------------------------')
         server.init_client_models()
         server.train_client_models(num_participating_client=num_sampled_clients,
-                                   client_config=client_opt_config,
                                    attack_config=attack_config)
         # Now Aggregate Gradients and Update the global model using server step
         server.update_global_model()

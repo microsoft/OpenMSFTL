@@ -10,7 +10,10 @@ from ftl.models.model_helper import dist_weights_to_model, dist_grads_to_model
 from ftl.training_utils import infer
 from ftl.training_utils.optimization import SchedulingOptimization
 from .client import Client
+from joblib import Parallel, delayed
+import multiprocessing
 
+num_cores = multiprocessing.cpu_count()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
@@ -47,7 +50,6 @@ class Server:
             dist_weights_to_model(weights=self.w_current, parameters=client.learner.parameters())
 
     def train_client_models(self, num_participating_client: int,
-                            client_config: Dict = None,
                             attack_config: Dict = None):
         """
         Update each client model
@@ -59,12 +61,16 @@ class Server:
         sampled_clients = random.sample(population=self.clients, k=num_participating_client)
         epoch_loss = 0.0
         mal_nodes = []
-        for ix, client in enumerate(sampled_clients):
-            client.client_step(num_batches=client_config['num_batches'])
-            epoch_loss += client.trainer.epoch_losses[-1]
-            if client.mal:
-                mal_nodes.append(client)
-        train_loss = epoch_loss / len(sampled_clients)
+
+        # for ix, client in enumerate(sampled_clients):
+        #     client.client_step()
+        #     epoch_loss += client.trainer.epoch_losses[-1]
+        #     if client.mal:
+        #         mal_nodes.append(client)
+        epoch_losses = Parallel(n_jobs=num_cores)(delayed(self.parallel_client_step)(client)
+                                                  for client in sampled_clients)
+        train_loss = sum(epoch_losses) / len(sampled_clients)
+        # train_loss = epoch_loss / len(sampled_clients)
         self.train_loss.append(train_loss.item())
 
         # Modify the gradients of malicious nodes if attack is defined
@@ -72,6 +78,11 @@ class Server:
             launch_attack(attack_mode=attack_config["attack_mode"], mal_nodes=mal_nodes)
 
         self.agg_grad = self.aggregator.aggregate_grads(clients=sampled_clients, alphas=None)
+
+    @staticmethod
+    def parallel_client_step(client):
+        client.client_step()
+        return client.trainer.epoch_losses[-1]
 
     def update_global_model(self):
         print('server lr = {}'.format(self.lrs.get_lr()))

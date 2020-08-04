@@ -67,7 +67,7 @@ class Server:
         #     epoch_loss += client.trainer.epoch_losses[-1]
         #     if client.mal:
         #         mal_nodes.append(client)
-        epoch_losses = Parallel(n_jobs=num_cores)(delayed(self.parallel_client_step)(client)
+        epoch_losses = Parallel(n_jobs=2)(delayed(self.parallel_client_step)(client)
                                                   for client in sampled_clients)
         train_loss = sum(epoch_losses) / len(sampled_clients)
         # train_loss = epoch_loss / len(sampled_clients)

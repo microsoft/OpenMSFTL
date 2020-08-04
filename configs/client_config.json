@@ -1,6 +1,6 @@
 {
-  "num_client_nodes": 100,
-  "fraction_participant_clients": 0.5,
+  "num_client_nodes": 10,
+  "fraction_participant_clients": 1,
 
   "data_config":
   {
@@ -30,7 +30,7 @@
     "lr0": 0.1,
     "weight_decay": 1e-4,
     "momentum": 0.9,
-    "num_batches": 25
+    "num_batches": 50
   },
 
   "client_lrs_config":

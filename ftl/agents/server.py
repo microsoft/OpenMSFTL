@@ -93,13 +93,11 @@ class Server:
                 self.val_acc.append(curr_val_acc)
                 if curr_val_acc > self.best_val_acc:
                     self.best_val_acc = curr_val_acc
-                if verbose:
-                    print('Validation Acc: Curr: {} (Best: {})'.format(curr_val_acc, self.best_val_acc))
+                print('Validation Acc: Curr: {} (Best: {})'.format(curr_val_acc, self.best_val_acc))
             if self.test_loader:
                 curr_test_acc, _ = infer(test_loader=self.test_loader, model=self.learner)
                 self.test_acc.append(curr_test_acc)
                 if curr_test_acc > self.best_test_acc:
                     self.best_test_acc = curr_test_acc
-                if verbose:
-                    print('Test Acc: Curr: {} (Best: {})'.format(curr_test_acc, self.best_test_acc))
-        print(' ')
+                print('Test Acc: Curr: {} (Best: {})'.format(curr_test_acc, self.best_test_acc))
+            print(' ')

@@ -47,15 +47,17 @@ def get_model(learner_config: Dict, data_config: Dict):
                     drop_p=learner_config["drop_p"])
     elif net == 'alexnet':
         if data_set not in ['cifar10']:
-            model = AlexNet(num_classes=data_config.get("num_labels", 10),
-                            num_channels=data_config.get("num_channels", 3))
+            raise Exception('{} is not yet supported for {}'.format(net, data_set))
+        model = AlexNet(num_classes=data_config.get("num_labels", 10),
+                        num_channels=data_config.get("num_channels", 3))
     elif net == 'lenet':
+        if data_set not in ['mnist', 'fashion_mnist']:
+            raise Exception('{} is not yet supported for {}'.format(net, data_set))
         model = LeNet(num_classes=data_config.get("num_labels", 10),
                       num_channels=data_config.get("num_channels", 1))
     elif net == 'resnet32':
         if data_set not in ['cifar10']:
-            print('Resnet is not yet supported for {}'.format(data_set))
-            raise NotImplementedError
+            raise Exception('{} is not yet supported for {}'.format(net, data_set))
         model = resnet32()
     else:
         raise NotImplementedError

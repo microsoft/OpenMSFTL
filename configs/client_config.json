@@ -5,7 +5,7 @@
   "data_config":
   {
     "data_set": "cifar10",
-    "train_batch_size": 128,
+    "train_batch_size": 256,
     "infer_batch_size": 500,
     "dev_split": 0.1,
     "data_dist_strategy": "iid",

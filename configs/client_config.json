@@ -1,6 +1,6 @@
 {
-  "num_client_nodes": 10,
-  "fraction_participant_clients": 1,
+  "num_client_nodes": 50,
+  "fraction_participant_clients": 0.5,
 
   "data_config":
   {
@@ -16,7 +16,7 @@
 
   "learner_config":
   {
-    "net": "mlp",
+    "net": "lenet",
     "dim_in": 784,
     "dim_hidden1": 100,
     "dim_hidden2": 50,

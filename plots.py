@@ -1,7 +1,6 @@
 from ftl.training_utils.misc_utils import unpickle_dir
 import numpy as np
 import matplotlib.pyplot as plt
-from typing import Dict
 from matplotlib.ticker import MaxNLocator
 import matplotlib.ticker as ticker
 import json

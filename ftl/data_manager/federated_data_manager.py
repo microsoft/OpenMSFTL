@@ -41,12 +41,7 @@ class DataManager:
             mean = _train_dataset.data.mean(axis=(0, 1, 2)) / 255
             std = _train_dataset.data.std(axis=(0, 1, 2)) / 255
 
-        train_trans = transforms.Compose([transforms.RandomCrop(_train_dataset.data.shape[1], 4),
-                                          transforms.RandomHorizontalFlip(0.5),
-                                          transforms.ToTensor(),
-                                          transforms.Normalize(mean=mean, std=std)])
-        test_trans = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=mean, std=std)])
-        return train_trans, test_trans
+        return mean, std
 
     def _populate_data_partition_map(self):
         """ wrapper to Sampling data for client, server """

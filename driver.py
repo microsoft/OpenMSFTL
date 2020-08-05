@@ -45,7 +45,7 @@ def run_main():
         results["acc"] = acc
         results["sv"] = sv
 
-    with open(directory + args.o, 'w+') as f:
+    with open(directory + args.o, 'x') as f:
         json.dump(results, f, indent=4, ensure_ascii=False, cls=NumpyEncoder)
 
 

@@ -5,7 +5,7 @@
   "data_config":
   {
     "data_set": "cifar10",
-    "train_batch_size": 64,
+    "train_batch_size": 128,
     "infer_batch_size": 500,
     "dev_split": 0.1,
     "data_dist_strategy": "iid",
@@ -17,12 +17,12 @@
 
   "learner_config":
   {
-    "net": "alexnet",
+    "net": "resnet18",
     "dim_in": 784,
     "dim_hidden1": 1024,
     "dim_hidden2": 512,
     "drop_p": 0.5,
-    "comm_rounds": 20
+    "comm_rounds": 2000
   },
 
   "client_opt_config":
@@ -31,7 +31,7 @@
     "lr0": 0.001,
     "weight_decay": 0.0,
     "momentum": 0.9,
-    "num_batches": 5
+    "num_batches": 1
   },
 
   "client_lrs_config":

@@ -9,7 +9,6 @@
     "infer_batch_size": 500,
     "dev_split": 0.1,
     "data_dist_strategy": "iid",
-    "seed": 1,
     "download": true,
     "num_labels": 10,
     "num_channels": 1

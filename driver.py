@@ -8,26 +8,15 @@ import numpy as np
 def _parse_args():
     parser = argparse.ArgumentParser(description='driver.py')
 
-    # Model Params
-    parser.add_argument('--m', type=str, default='mlp',
-                        help='specify the network architecture you want to use')
-    parser.add_argument('--dim_in', type=int, default=28*28,
-                        help='in dim needed only for mlp')
-
     # Client Opt Params
     parser.add_argument('--server_config', type=str, default='./configs/server_config.json')
     parser.add_argument('--client_config', type=str, default='./configs/client_config.json')
     parser.add_argument('--dga_json', type=str, default=None,
                         help='JSON config file path for dynamic gradient aggregation; '
                              'see configs/dga/rl.json for an example')
-    # Training params
-    parser.add_argument('--num_comm_round', type=int, default=100,
-                        help='Number of Server Client Communication Round')
-
     # Results Related Params
     parser.add_argument('--o', type=str, default=None, help='Pass results location')
     parser.add_argument('--n_repeat', type=int, default=1, help='Specify number of repeat runs')
-    parser.add_argument('--seed', type=int, default=1)
 
     args = parser.parse_args()
     return args

@@ -17,6 +17,7 @@ def run_exp(args):
     server_config = json.load(open(args.server_config))
 
     data_config = client_config["data_config"]
+    data_config["seed"] = args.seed
     learner_config = client_config["learner_config"]
     client_opt_config = client_config["client_opt_config"]
     client_lrs_config = client_config["client_lrs_config"]
@@ -26,7 +27,6 @@ def run_exp(args):
     server_opt_config = server_config["server_opt_config"]
     server_lrs_config = server_config["server_lrs_config"]
     aggregation_config = server_config["aggregation_config"]
-    np.random.seed(data_config["seed"])
 
     print('# ------------------------------------------------- #')
     print('#               Initializing Network                #')

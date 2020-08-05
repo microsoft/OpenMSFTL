@@ -2,7 +2,6 @@ from ftl.training_utils.trainer import Trainer
 from ftl.training_utils.optimization import SchedulingOptimization
 from ftl.compression.compression import Compression
 from ftl.models.model_helper import flatten_params
-import numpy as np
 
 
 class Client:
@@ -12,7 +11,6 @@ class Client:
                  attack_model=None,
                  C: Compression = None,
                  mal: bool = False,
-                 T: float = 1.0,
                  client_opt_config=None,
                  client_lrs_config=None):
 
@@ -20,7 +18,6 @@ class Client:
         self.mal = mal  # is it a malicious node ?
         self.attack_model = attack_model  # pass the attack model
         self.C = C
-        self.T = T
         self.local_train_data = None
         self.grad = None
         self.current_weights = None
@@ -30,6 +27,7 @@ class Client:
         self.trainer = Trainer()
 
     def populate_optimizer(self):
+        """ initialize optimizer """
         if not self.learner:
             raise Exception("You need to populate client model before initializing optimizer")
         opt = SchedulingOptimization(model=self.learner,
@@ -39,6 +37,7 @@ class Client:
         self.trainer.scheduler = opt.lr_scheduler
 
     def client_step(self):
+        """ Run Client Train (opt step) for num_batches iterations """
         num_batches = self.client_opt_config.get("num_batches", 1)
         if not self.current_weights:
             self.current_weights = flatten_params(learner=self.learner)

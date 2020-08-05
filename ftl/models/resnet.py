@@ -68,6 +68,7 @@ class ResNet(nn.Module):
         self.linear = nn.Linear(64, num_classes)
 
         self.apply(_weights_init)
+        self.softmax = nn.Softmax(dim=1)
 
     def _make_layer(self, block, planes, num_blocks, stride):
         strides = [stride] + [1]*(num_blocks-1)
@@ -86,6 +87,8 @@ class ResNet(nn.Module):
         out = F.avg_pool2d(out, out.size()[3])
         out = out.view(out.size(0), -1)
         out = self.linear(out)
+        out = self.softmax(out)
+
         return out
 
 

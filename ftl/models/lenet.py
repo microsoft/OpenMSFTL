@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
-
+import torch
+torch.manual_seed(1)
 
 class LeNet(nn.Module):
     def __init__(self, num_channels=1, num_classes=10):

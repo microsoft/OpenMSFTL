@@ -4,7 +4,7 @@
 
   "data_config":
   {
-    "data_set": "mnist",
+    "data_set": "cifar10",
     "train_batch_size": 64,
     "infer_batch_size": 500,
     "dev_split": 0.1,
@@ -12,12 +12,12 @@
     "seed": 1,
     "download": true,
     "num_labels": 10,
-    "num_channels": 1
+    "num_channels": 3
   },
 
   "learner_config":
   {
-    "net": "lenet",
+    "net": "alexnet",
     "dim_in": 784,
     "dim_hidden1": 1024,
     "dim_hidden2": 512,

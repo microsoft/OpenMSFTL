@@ -17,7 +17,8 @@ class Trainer:
         x, y = x.to(device), y.to(device)
         y_hat = model(x)
         self.optimizer.zero_grad()
-        loss = torch.nn.functional.cross_entropy(y_hat, y)
+        # loss = torch.nn.functional.cross_entropy(y_hat, y)
+        loss = torch.nn.CrossEntropyLoss(y_hat, y)
         loss.backward()
         self.optimizer.step()
         if self.scheduler:

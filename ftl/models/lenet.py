@@ -20,6 +20,6 @@ class LeNet(nn.Module):
         x = F.relu(x)
         x = x.view(-1, 4 * 4 * 50)
         x = self.fc1(x)
-        x = self.fc_out(x)
-        z = self.softmax(x)
+        z = self.fc_out(x)
+        # z = self.softmax(x)
         return z

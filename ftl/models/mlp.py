@@ -18,7 +18,7 @@ class MLP(nn.Module):
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(p=drop_p)
         self.fc_out = nn.Linear(dim_hidden2, dim_out)
-        self.softmax = nn.Softmax(dim=1)
+        # self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
         x = x.reshape(x.shape[0], x.shape[1] * x.shape[2] * x.shape[3])
@@ -28,8 +28,8 @@ class MLP(nn.Module):
         x = self.fc_hidden(x)
         x = self.relu(x)
         x = self.dropout(x)
-        x = self.fc_out(x)
-        z = self.softmax(x)
+        z = self.fc_out(x)
+        # z = self.softmax(x)
 
         return z
 

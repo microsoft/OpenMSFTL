@@ -34,6 +34,6 @@ class AlexNet(nn.Module):
     def forward(self, x):
         x = self.features(x)
         h = x.view(x.shape[0], -1)
-        x = self.classifier(h)
-        z = self.softmax(x)
+        z = self.classifier(h)
+        # z = self.softmax(x)
         return z

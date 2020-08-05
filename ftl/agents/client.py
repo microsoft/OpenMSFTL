@@ -1,6 +1,7 @@
 from ftl.training_utils.trainer import Trainer
 from ftl.training_utils.optimization import SchedulingOptimization
 from ftl.compression.compression import Compression
+from ftl.models.model_helper import flatten_params
 import numpy as np
 
 
@@ -22,6 +23,7 @@ class Client:
         self.T = T
         self.local_train_data = None
         self.grad = None
+        self.current_weights = None
         self.learner = learner
         self.client_opt_config = client_opt_config
         self.client_lrs_config = client_lrs_config
@@ -38,14 +40,11 @@ class Client:
 
     def client_step(self):
         num_batches = self.client_opt_config.get("num_batches", 1)
-        src_model_weights = np.concatenate([w.data.cpu().numpy().flatten() for w in self.learner.parameters()])
-
-        # import time
-        # t0 = time.time()
+        if not self.current_weights:
+            self.current_weights = flatten_params(learner=self.learner)
         for batch_ix in range(0, num_batches):
             self.trainer.train(model=self.learner)
-        # print('Time to run 1 client step {}'.format(time.time()-t0))
-        # compute the local gradient
-        dst_model_weights = np.concatenate([w.data.cpu().numpy().flatten() for w in self.learner.parameters()])
-        self.grad = src_model_weights - dst_model_weights
+        updated_model_weights = flatten_params(learner=self.learner)
+        self.grad = self.current_weights - updated_model_weights
+        self.current_weights = updated_model_weights
 

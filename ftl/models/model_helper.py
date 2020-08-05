@@ -4,12 +4,17 @@ from .alexnet import AlexNet
 from .lenet import LeNet
 import torch
 import functools
+import numpy as np
 from typing import Dict
 
 
+def flatten_params(learner) -> np.ndarray:
+    """ Given a model flatten all params and return as np array """
+    return np.concatenate([w.data.cpu().numpy().flatten() for w in learner.parameters()])
+
+
 def dist_weights_to_model(weights, parameters):
-    """ Given Weights and a model architecture this method updates the model
-    parameters with the supplied weights """
+    """ Given Weights and a model architecture this method updates the model parameters with the supplied weights """
     offset = 0
     for param in parameters:
         new_size = functools.reduce(lambda x, y: x*y, param.shape)
@@ -19,8 +24,8 @@ def dist_weights_to_model(weights, parameters):
 
 
 def dist_grads_to_model(grads, parameters):
-    """ Given Gradients and a model architecture this method updates the model
-        gradients (Corresponding to each param) with the supplied grads """
+    """ Given Gradients and a model architecture this method updates the model gradients (Corresponding to each param)
+    with the supplied grads """
     offset = 0
 
     for param in parameters:
@@ -31,7 +36,7 @@ def dist_grads_to_model(grads, parameters):
 
 
 def get_model(learner_config: Dict, data_config: Dict):
-    # Load MLP
+    """ wrapper to return appropriate model class """
     net = learner_config["net"]
     data_set = data_config["data_set"]
 
@@ -46,13 +51,11 @@ def get_model(learner_config: Dict, data_config: Dict):
     elif net == 'lenet':
         model = LeNet(num_classes=data_config.get("num_labels", 10),
                       num_channels=data_config.get("num_channels", 1))
-    # Load ResNet 18
     elif net == 'resnet32':
         if data_set not in ['cifar10']:
             print('Resnet is not yet supported for {}'.format(data_set))
             raise NotImplementedError
         model = resnet32()
-    # If Not implemented yet throw error
     else:
         raise NotImplementedError
 

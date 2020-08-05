@@ -1,6 +1,7 @@
 from .mlp import MLP
 from .resnet import resnet32
 from .alexnet import AlexNet
+from .lenet import LeNet
 import torch
 import functools
 from typing import Dict
@@ -42,6 +43,9 @@ def get_model(learner_config: Dict, data_config: Dict):
     elif net == 'alexnet':
         model = AlexNet(num_classes=data_config.get("num_labels", 10),
                         num_channels=data_config.get("num_channels", 3))
+    elif net == 'lenet':
+        model = LeNet(num_classes=data_config.get("num_labels", 10),
+                      num_channels=data_config.get("num_channels", 1))
     # Load ResNet 18
     elif net == 'resnet32':
         if data_set not in ['cifar10']:

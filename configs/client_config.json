@@ -17,7 +17,7 @@
 
   "learner_config":
   {
-    "net": "resnet18",
+    "net": "resnet32",
     "dim_in": 784,
     "dim_hidden1": 1024,
     "dim_hidden2": 512,

@@ -9,7 +9,7 @@ class Trainer:
         self.scheduler = scheduler
         self.train_iter = None
 
-    def train(self, model, criterion):
+    def train(self, model):
         model = model.to(device)
         model.train()
         x, y = next(self.train_iter)

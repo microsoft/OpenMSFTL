@@ -5,7 +5,7 @@
   "data_config":
   {
     "data_set": "cifar10",
-    "train_batch_size": 128,
+    "train_batch_size": 64,
     "infer_batch_size": 500,
     "dev_split": 0.1,
     "data_dist_strategy": "iid",
@@ -27,8 +27,8 @@
 
   "client_opt_config":
   {
-    "optimizer_scheme": "Adam",
-    "lr0": 1e-7,
+    "optimizer_scheme": "SGD",
+    "lr0": 0.002,
     "weight_decay": 1e-4,
     "momentum": 0.9,
     "num_batches": 50
@@ -39,7 +39,7 @@
     "lr_restart": 100,
     "lr_schedule": "StepLR",
     "step_size": 5,
-    "gamma": 1.1
+    "gamma": 0.99
   },
 
   "client_compression_config":

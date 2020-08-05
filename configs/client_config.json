@@ -11,7 +11,8 @@
     "data_dist_strategy": "iid",
     "seed": 1,
     "download": true,
-    "num_labels": 10
+    "num_labels": 10,
+    "num_channels": 1
   },
 
   "learner_config":

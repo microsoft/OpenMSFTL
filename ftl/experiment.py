@@ -39,7 +39,8 @@ def run_exp(args):
     # ** Set up model architecture (learner) **
     # -----------------------------------------
     print('initializing Learner')
-    model_net = get_model(learner_config=learner_config, data_set=data_config["data_set"])
+    model_net = get_model(learner_config=learner_config,
+                          data_config=data_config)
 
     print('Setting Up the Network')
     # *** Set up Client Nodes ****

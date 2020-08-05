@@ -3,6 +3,7 @@ from .resnet import resnet32
 from .alexnet import AlexNet
 import torch
 import functools
+from typing import Dict
 
 
 def dist_weights_to_model(weights, parameters):
@@ -28,16 +29,19 @@ def dist_grads_to_model(grads, parameters):
         offset += new_size
 
 
-def get_model(learner_config, data_set):
+def get_model(learner_config: Dict, data_config: Dict):
     # Load MLP
     net = learner_config["net"]
+    data_set = data_config["data_set"]
+
     if net == 'mlp':
         model = MLP(dim_in=learner_config.get("dim_in", 784),
                     dim_hidden1=learner_config.get("dim_hidden1", 300),
                     dim_hidden2=learner_config.get("dim_hidden2", 150),
                     drop_p=learner_config["drop_p"])
     elif net == 'alexnet':
-        model = AlexNet(num_classes=learner_config.get("num_labels", 10))
+        model = AlexNet(num_classes=data_config.get("num_labels", 10),
+                        num_channels=data_config.get("num_channels", 3))
     # Load ResNet 18
     elif net == 'resnet32':
         if data_set not in ['cifar10']:

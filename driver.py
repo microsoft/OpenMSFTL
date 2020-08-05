@@ -40,10 +40,13 @@ def run_main():
         client_config["data_config"]["seed"] = random_seed
         results["client_config"] = client_config
         results["server_config"] = server_config
-        loss, acc, sv = run_exp(client_config=client_config, server_config=server_config)
+        loss, val_acc, test_acc, sv, best_val, best_test = run_exp(client_config=client_config, server_config=server_config)
         results["loss"] = loss
-        results["acc"] = acc
+        results["val_acc"] = val_acc
+        results["test_acc"] = test_acc
         results["sv"] = sv
+        results["best_val_acc"] = best_val
+        results["best_test_acc"] = best_test
 
     with open(directory + args.o, 'x') as f:
         json.dump(results, f, indent=4, ensure_ascii=False, cls=NumpyEncoder)

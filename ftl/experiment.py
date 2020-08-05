@@ -6,6 +6,7 @@ from ftl.data_manager import process_data
 import copy
 import random
 import torch
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
@@ -87,4 +88,5 @@ def run_exp(server_config, client_config):
         print('--------------------------------')
         print('Average Epoch Loss = {}'.format(server.train_loss[-1]))
         server.compute_metrics(curr_epoch=epoch, stat_freq=server_config.get("verbose_freq", 5))
-    return server.train_loss, server.test_acc, server.aggregator.gar.Sigma_tracked
+    return server.train_loss, server.val_acc, server.test_acc, server.aggregator.gar.Sigma_tracked, \
+           server.best_val_acc, server.best_test_acc

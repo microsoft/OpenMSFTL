@@ -4,7 +4,7 @@
 
   "data_config":
   {
-    "data_set": "fashion_mnist",
+    "data_set": "cifar10",
     "train_batch_size": 128,
     "infer_batch_size": 500,
     "dev_split": 0.1,
@@ -12,7 +12,7 @@
     "seed": 1,
     "download": true,
     "num_labels": 10,
-    "num_channels": 1
+    "num_channels": 3
   },
 
   "learner_config":
@@ -22,8 +22,7 @@
     "dim_hidden1": 1024,
     "dim_hidden2": 512,
     "drop_p": 0.5,
-    "comm_rounds": 20,
-    "num_labels": 10
+    "comm_rounds": 20
   },
 
   "client_opt_config":

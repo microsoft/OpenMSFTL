@@ -29,7 +29,6 @@ class DataManager:
         self.num_test = 0
         self.val_ix = None
         self.data_distribution_map = {}
-        self.no_of_labels = data_config.get("num_labels", 10)
 
     def _populate_data_partition_map(self):
         """ wrapper to Sampling data for client, server """
@@ -72,8 +71,14 @@ class DataManager:
         self.num_dev = int(self.data_config.get('dev_split', 0.1) * total_train_samples)
         self.num_train = total_train_samples - self.num_dev
         self.num_test = _test_dataset.data.shape[0]
-        assert self.no_of_labels == len(_train_dataset.classes), 'Number of Labels of DataSet and Model Mismatch, ' \
-                                                                 'fix passed arguments to change softmax dim'
+
+        assert self.data_config.get('num_labels') == len(_train_dataset.classes), \
+            'Number of Labels of DataSet and Model output shape Mismatch, ' \
+            'fix num_labels in client.config.data_config to change model output shape'
+        assert self.data_config.get('num_channels') == _train_dataset.data.shape[-1], \
+            'Number of channels of DataSet and Model in channel shape Mismatch, ' \
+            'fix num_channels in client.config.data_config to change model input shape'
+
         # partition data
         self._populate_data_partition_map()
 

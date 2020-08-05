@@ -1,6 +1,6 @@
 from ftl.agents import Client, Server
 from ftl.training_utils import cycle
-from torchvision import datasets
+from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Subset
 import torch
 import numpy as np
@@ -29,6 +29,27 @@ class DataManager:
         self.num_test = 0
         self.val_ix = None
         self.data_distribution_map = {}
+        self.download = self.data_config.get('download', True)
+
+    @staticmethod
+    def _compute_stats(train_dataset):
+        try:
+            mean = train_dataset.data.float().mean(axis=(0, 1, 2)) / 255
+            std = train_dataset.data.float().std(axis=(0, 1, 2)) / 255
+        except:
+            mean = train_dataset.data.mean(axis=(0, 1, 2)) / 255
+            std = train_dataset.data.std(axis=(0, 1, 2)) / 255
+        return mean, std
+
+    def _get_common_trans(self, _train_dataset):
+        mean, std = self._compute_stats(_train_dataset)
+        train_trans = transforms.Compose([transforms.RandomRotation(5),
+                                          transforms.RandomHorizontalFlip(0.5),
+                                          transforms.RandomCrop(_train_dataset.data.shape[1], 4),
+                                          transforms.ToTensor(),
+                                          transforms.Normalize(mean=mean, std=std)])
+        test_trans = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=mean, std=std)])
+        return train_trans, test_trans
 
     def _populate_data_partition_map(self):
         """ wrapper to Sampling data for client, server """

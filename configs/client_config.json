@@ -27,7 +27,7 @@
   "client_opt_config":
   {
     "optimizer_scheme": "Adam",
-    "lr0": 0.002,
+    "lr0": 0.005,
     "weight_decay": 0.0,
     "momentum": 0.9,
     "num_batches": 50

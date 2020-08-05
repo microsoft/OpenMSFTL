@@ -3,7 +3,7 @@
   "server_opt_config" :
   {
     "optimizer_scheme": "Adam",
-    "lr0": 0.02
+    "lr0": 0.002
   },
 
   "server_lrs_config": {

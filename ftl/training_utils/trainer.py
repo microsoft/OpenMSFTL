@@ -9,7 +9,7 @@ class Trainer:
         self.scheduler = scheduler
         self.train_iter = None
 
-    def train(self, model):
+    def train(self, model, criterion):
         model = model.to(device)
         model.train()
         x, y = next(self.train_iter)
@@ -29,17 +29,15 @@ class Trainer:
 def infer(test_loader, model):
     model.eval()
     model.to(device)
-    test_loss = 0
+
     correct = 0
     with torch.no_grad():
         for batch_ix, (data, target) in enumerate(test_loader):
             data, target = data.float().to(device), target.to(device)
             output = model(data)
-            # test_loss += torch.nn.functional.cross_entropy(output, target).item()
             pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
             correct += pred.eq(target.view_as(pred)).sum().item()
 
-    # test_loss /= len(test_loader.dataset)
     accuracy = 100. * correct / len(test_loader.dataset)
     return accuracy
 

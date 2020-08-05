@@ -29,9 +29,11 @@ class AlexNet(nn.Module):
             nn.ReLU(inplace=True),
             nn.Linear(4096, num_classes),
         )
+        self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
         x = self.features(x)
         h = x.view(x.shape[0], -1)
-        z = self.classifier(h)
+        x = self.classifier(h)
+        z = self.softmax(x)
         return z

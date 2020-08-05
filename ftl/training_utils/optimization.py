@@ -43,7 +43,7 @@ class SchedulingOptimization:
                              lr=self.opt_group.get('lr0', 0.001),
                              momentum=self.opt_group.get('momentum', 0.9),
                              weight_decay=self.opt_group.get('weight_decay', 0.05),
-                             nesterov=self.opt_group.get('nesterov', False),
+                             nesterov=self.opt_group.get('nesterov', True),
                              dampening=self.opt_group.get('dampening', 0.0)
                             )
         elif self.opt_alg == "Adam":
@@ -51,7 +51,7 @@ class SchedulingOptimization:
                               lr=self.opt_group.get('lr0', 0.001),
                               betas=self.opt_group.get('betas', (0.9, 0.999)),
                               eps=self.opt_group.get('eps', 1e-08),
-                              weight_decay=self.opt_group.get('weight_decay', 0.0),
+                              weight_decay=self.opt_group.get('weight_decay', 0.05),
                               amsgrad=self.opt_group.get('amsgrad', True)  # default to False in pytorch
                             )
         else:

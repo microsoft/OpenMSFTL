@@ -3,7 +3,8 @@
   "server_opt_config" :
   {
     "optimizer_scheme": "Adam",
-    "lr0": 0.002
+    "lr0": 0.001,
+    "weight_decay": 0.05
   },
 
   "server_lrs_config": {

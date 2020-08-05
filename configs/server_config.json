@@ -11,7 +11,7 @@
     "lr_restart": 100,
     "lr_schedule": "StepLR",
     "step_size": 1,
-    "gamma": 0.9
+    "gamma": 0.99
   },
 
   "aggregation_config" : {

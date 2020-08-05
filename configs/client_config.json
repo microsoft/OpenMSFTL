@@ -29,9 +29,9 @@
   {
     "optimizer_scheme": "SGD",
     "lr0": 0.002,
-    "weight_decay": 1e-4,
+    "weight_decay": 0.05,
     "momentum": 0.9,
-    "num_batches": 50
+    "num_batches": 5
   },
 
   "client_lrs_config":

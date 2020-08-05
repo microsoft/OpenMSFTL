@@ -5,8 +5,6 @@ from ftl.attacks import get_attack
 from ftl.data_manager import process_data
 import copy
 import random
-import json
-import numpy as np
 import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -26,10 +24,6 @@ def run_exp(server_config, client_config):
     print('# ------------------------------------------------- #')
     print('#               Initializing Network                #')
     print('# ------------------------------------------------- #')
-    # print("Attack config:\n{}\n".format(json.dumps(attack_config, indent=4)))
-    # print("Server config:\n{}\n".format(json.dumps(server_opt_config, indent=4)))
-    # print("Client config:\n{}\n".format(json.dumps(client_opt_config, indent=4)))
-    # print("Aggregation config:\n{}\n".format(json.dumps(aggregation_config, indent=4)))
 
     # ** Set up model architecture (learner) **
     # -----------------------------------------

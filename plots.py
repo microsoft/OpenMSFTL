@@ -7,22 +7,12 @@ import matplotlib.ticker as ticker
 import json
 
 
-def plot_driver(label: str, result_file: str, line_width=2,
-                plot_type: str = 'loss', ix: int = 0, marker=None, line_style=None):
-    with open(result_file, 'rb') as f:
+def plot_driver(label: str, res_file: str, plt_type: str = 'loss',
+                line_width=2, marker=None, line_style=None):
+
+    with open(res_file, 'rb') as f:
         result = json.load(f)
-    if plot_type is 'loss':
-        res = result[0][0]
-    elif plot_type is 'acc':
-        res = result[0][1]
-    elif plot_type is 'spectral':
-        res = result[0][2]
-        res = res[ix]
-        # Normalize singular values
-        # res = res / res[0]
-        # res = res / sum(res)
-    else:
-        raise NotImplementedError
+    res = result[plt_type]
     x = np.arange(len(res)) + np.ones(len(res))
     plt.plot(x, res, label=label, linewidth=line_width, marker=marker, linestyle=line_style)
 
@@ -36,11 +26,11 @@ if __name__ == '__main__':
 
     data_set = 'mnist'
     results_dir = '/mlp/'
-    o = ['result_default.pickle']
+    o = ['fedavg.baseline']
     plot_type = 'loss'
     for op in o:
         result_file = './result_dumps/' + data_set + results_dir + op
-        plot_driver(label="test", result_file=result_file, plot_type=plot_type)
+        plot_driver(label="test", res_file=result_file, plt_type=plot_type)
 
     # -------------------------------
     # ** Usually No Need to Modify **

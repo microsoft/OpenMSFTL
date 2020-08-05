@@ -1,9 +1,9 @@
 from ftl.experiment import run_exp
-from ftl.training_utils.misc_utils import pickle_it
 import argparse
 import os
 import numpy as np
 import json
+from numpyencoder import NumpyEncoder
 
 
 def _parse_args():
@@ -41,16 +41,12 @@ def run_main():
         results["client_config"] = client_config
         results["server_config"] = server_config
         loss, acc, sv = run_exp(client_config=client_config, server_config=server_config)
-        results["losses"] = loss
+        results["loss"] = loss
         results["acc"] = acc
         results["sv"] = sv
-    # Commenting for now
-    # Dumps the results in appropriate files
-    # pickle_it(args, 'parameters.' + result_file, directory)
-    # pickle_it(results, args.o, directory)
-    # print('results saved in "{}"'.format(directory))
-    with open(directory + args.o) as f:
-        json.dump(results, f, indent=4)
+
+    with open(directory + args.o, 'w+') as f:
+        json.dump(results, f, indent=4, ensure_ascii=False, cls=NumpyEncoder)
 
 
 if __name__ == '__main__':

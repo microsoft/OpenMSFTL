@@ -32,17 +32,15 @@ class DataManager:
         self.download = self.data_config.get('download', True)
 
     @staticmethod
-    def _compute_stats(train_dataset):
+    def _get_common_data_trans(_train_dataset):
+        """ Implements a simple way to compute train and test transform that usually works """
         try:
-            mean = train_dataset.data.float().mean(axis=(0, 1, 2)) / 255
-            std = train_dataset.data.float().std(axis=(0, 1, 2)) / 255
+            mean = _train_dataset.data.float().mean(axis=(0, 1, 2)) / 255
+            std = _train_dataset.data.float().std(axis=(0, 1, 2)) / 255
         except:
-            mean = train_dataset.data.mean(axis=(0, 1, 2)) / 255
-            std = train_dataset.data.std(axis=(0, 1, 2)) / 255
-        return mean, std
+            mean = _train_dataset.data.mean(axis=(0, 1, 2)) / 255
+            std = _train_dataset.data.std(axis=(0, 1, 2)) / 255
 
-    def _get_common_trans(self, _train_dataset):
-        mean, std = self._compute_stats(_train_dataset)
         train_trans = transforms.Compose([transforms.RandomRotation(5),
                                           transforms.RandomHorizontalFlip(0.5),
                                           transforms.RandomCrop(_train_dataset.data.shape[1], 4),

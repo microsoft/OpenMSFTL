@@ -1,6 +1,6 @@
 from .federated_data_manager import DataManager
 from ftl.agents import Client, Server
-from torchvision import datasets, transforms
+from torchvision import datasets
 from typing import Dict, List
 import os
 
@@ -13,9 +13,8 @@ class FedMNIST(DataManager):
         DataManager.__init__(self, data_config=data_config, clients=clients, server=server)
 
     def download_data(self) -> [datasets, datasets]:
-        """ Downloads Data and Apply appropriate Transformations """
         _train_dataset = datasets.MNIST(root=root, download=self.download, train=True)
-        train_trans, test_trans = self._get_common_trans(_train_dataset)
+        train_trans, test_trans = self._get_common_data_trans(_train_dataset)
         _train_dataset = datasets.MNIST(root=root, download=self.download, train=True, transform=train_trans)
         _test_dataset = datasets.MNIST(root=root, download=self.download, train=False, transform=test_trans)
 
@@ -27,9 +26,8 @@ class FedFashionMNIST(DataManager):
         DataManager.__init__(self, data_config=data_config, clients=clients, server=server)
 
     def download_data(self) -> [datasets, datasets]:
-        """ Downloads Data and Apply appropriate Transformations """
         _train_dataset = datasets.FashionMNIST(root=root, download=self.download, train=True)
-        train_trans, test_trans = self._get_common_trans(_train_dataset)
+        train_trans, test_trans = self._get_common_data_trans(_train_dataset)
         _train_dataset = datasets.FashionMNIST(root=root, download=self.download, train=True, transform=train_trans)
         _test_dataset = datasets.FashionMNIST(root=root, download=self.download, train=False, transform=test_trans)
 
@@ -42,7 +40,7 @@ class FedCIFAR10(DataManager):
 
     def download_data(self) -> [datasets, datasets]:
         _train_dataset = datasets.CIFAR10(root=root, download=self.download, train=True)
-        train_trans, test_trans = self._get_common_trans(_train_dataset)
+        train_trans, test_trans = self._get_common_data_trans(_train_dataset)
         _train_dataset = datasets.CIFAR10(root=root, download=self.download, train=True, transform=train_trans)
         _test_dataset = datasets.CIFAR10(root=root, download=self.download, train=False, transform=test_trans)
 

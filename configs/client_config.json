@@ -4,15 +4,15 @@
 
   "data_config":
   {
-    "data_set": "cifar10",
-    "train_batch_size": 256,
+    "data_set": "mnist",
+    "train_batch_size": 128,
     "infer_batch_size": 500,
     "dev_split": 0.1,
     "data_dist_strategy": "iid",
     "seed": 1,
     "download": true,
     "num_labels": 10,
-    "num_channels": 3
+    "num_channels": 1
   },
 
   "learner_config":

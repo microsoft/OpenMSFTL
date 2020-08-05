@@ -1,0 +1,141 @@
+{
+    "client_config": {
+        "num_client_nodes": 50,
+        "fraction_participant_clients": 0.5,
+        "data_config": {
+            "data_set": "mnist",
+            "train_batch_size": 128,
+            "infer_batch_size": 500,
+            "dev_split": 0.1,
+            "data_dist_strategy": "iid",
+            "download": true,
+            "num_labels": 10,
+            "num_channels": 1,
+            "seed": 1
+        },
+        "learner_config": {
+            "net": "lenet",
+            "dim_in": 784,
+            "dim_hidden1": 100,
+            "dim_hidden2": 50,
+            "drop_p": 0.5,
+            "comm_rounds": 30
+        },
+        "client_opt_config": {
+            "optimizer_scheme": "Adam",
+            "lr0": 0.002,
+            "weight_decay": 0.0,
+            "momentum": 0.9,
+            "num_batches": 50
+        },
+        "client_lrs_config": {
+            "lr_restart": 100,
+            "lr_schedule": "StepLR",
+            "step_size": 100,
+            "gamma": 0.99
+        },
+        "client_compression_config": {
+            "num_bits": 2,
+            "compression_function": "full",
+            "dropout_p": 0.1,
+            "fraction_coordinate": 0.1
+        },
+        "attack_config": {
+            "frac_adv": 0,
+            "attack_mode": "coordinated",
+            "attack_model": "random_gaussian",
+            "attack_n_std": 1.5,
+            "noise_scale": 1,
+            "attack_std": 1
+        }
+    },
+    "server_config": {
+        "verbose_freq": 1,
+        "server_opt_config": {
+            "optimizer_scheme": "Adam",
+            "lr0": 0.0015,
+            "weight_decay": 0.0
+        },
+        "server_lrs_config": {
+            "lr_restart": 100,
+            "lr_schedule": "StepLR",
+            "step_size": 100,
+            "gamma": 0.999
+        },
+        "aggregation_config": {
+            "aggregation_scheme": "fed_avg",
+            "rank": 50,
+            "adaptive_rank_th": 0.95,
+            "drop_top_comp": false,
+            "krum_frac": 0.7,
+            "weight_estimator_config": {
+                "strategy": "inverse_loss"
+            }
+        }
+    },
+    "loss": [
+        0.1423453438282013,
+        0.12726404249668122,
+        0.13387392163276673,
+        0.11599755704402924,
+        0.10345370255410671,
+        0.09330726444721221,
+        0.0951906369626522,
+        0.08768468454480172,
+        0.08617232128977775,
+        0.09599072813987732,
+        0.0837143486738205,
+        0.09445693403482437,
+        0.083138258010149,
+        0.07488323107361794,
+        0.07824634343385696,
+        0.08630452692508697,
+        0.08256910935044288,
+        0.08450451791286469,
+        0.06928703472018242,
+        0.07669954001903534,
+        0.08158281818032265,
+        0.07083852514624596,
+        0.06734874531626701,
+        0.0662802542001009,
+        0.08325312860310077,
+        0.07632167518138885,
+        0.06723137989640236,
+        0.0696296912431717,
+        0.06800429537892341,
+        0.06537373803555965
+    ],
+    "acc": [
+        50.41,
+        73.94,
+        84.26,
+        88.48,
+        91.25,
+        92.88,
+        93.87,
+        94.56,
+        95.1,
+        95.52,
+        95.9,
+        96.19,
+        96.37,
+        96.57,
+        96.77,
+        96.92,
+        97.04,
+        97.17,
+        97.25,
+        97.34,
+        97.41,
+        97.44,
+        97.46,
+        97.49,
+        97.55,
+        97.58,
+        97.64,
+        97.67,
+        97.67,
+        97.72
+    ],
+    "sv": []
+}

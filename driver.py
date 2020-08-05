@@ -3,7 +3,7 @@ from ftl.training_utils.misc_utils import pickle_it
 import argparse
 import os
 import numpy as np
-
+import json
 
 def _parse_args():
     parser = argparse.ArgumentParser(description='driver.py')
@@ -20,7 +20,6 @@ def _parse_args():
 
     args = parser.parse_args()
     return args
-# TODO: Put configs in different config.json files grouped
 
 
 def run_main():
@@ -37,17 +36,18 @@ def run_main():
     #               '.frac_cd_' + str(args.frac_coordinates) + '.p_' + str(args.dropout_p) + \
     #               '.c_opt_' + args.opt + '.s_opt_' + args.server_opt
     #
-    # if not args.o:
-    #     directory = "results/" + args.data_set + "/" + args.m + "/"
-    # else:
-    #     directory = "results/" + args.o + '/'
-    # if not os.path.exists(directory):
-    #     os.makedirs(directory)
+
+    directory = "results_dumps/" + args.data_set + "/" + args.m + "/"
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    client_config = json.load(open(args.client_config))
+    server_config = json.load(open(args.server_config))
 
     results = []
     for random_seed in np.arange(1, args.n_repeat + 1):
-        args.seed = random_seed
-        results.append(run_exp(args=args))
+        client_config["data_config"]["seed"] = random_seed
+        results.append(run_exp(client_config=client_config, server_config=server_config))
 
     # Commenting for now
     # Dumps the results in appropriate files

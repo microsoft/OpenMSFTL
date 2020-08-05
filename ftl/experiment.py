@@ -11,13 +11,8 @@ import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def run_exp(args):
-    np.random.seed(args.seed)
-    client_config = json.load(open(args.client_config))
-    server_config = json.load(open(args.server_config))
-
+def run_exp(server_config, client_config):
     data_config = client_config["data_config"]
-    data_config["seed"] = args.seed
     learner_config = client_config["learner_config"]
     client_opt_config = client_config["client_opt_config"]
     client_lrs_config = client_config["client_lrs_config"]

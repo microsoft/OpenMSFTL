@@ -6,17 +6,8 @@ from matplotlib.ticker import MaxNLocator
 import matplotlib.ticker as ticker
 
 
-def plot_driver(data, params: Dict, label: str, line_width=2,
+def plot_driver(data, label: str, result_file: str, line_width=2,
                 plot_type: str = 'loss', ix: int = 0, marker=None, line_style=None):
-    result_file = 'num_clients_' + str(args["num_clients"]) + \
-                  '.frac_adv_' + str(args["frac_adv"]) + '.attack_mode_' + args["attack_mode"] +\
-                  '.attack_model_' + args["attack_model"] + '.attack_n_std_' + str(args["attack_n_std"]) + \
-                  '.attack_std_' + str(args["attack_std"]) + '.noise_scale' + str(args["noise_scale"]) +\
-                  '.agg_' + args["agg"] + '.rank_' + str(args["rank"]) +\
-                  '.compression_' + args["compression_operator"] + '.bits_' + str(args["num_bits"]) +\
-                  '.frac_cd_' + str(args["frac_coordinates"]) + '.p_' + str(args["dropout_p"]) + \
-                  '.c_opt_' + args["c_opt"] + '.s_opt_' + args["server_opt"]
-
     result = data[result_file]
     if plot_type is 'loss':
         res = result[0][0]
@@ -49,21 +40,21 @@ if __name__ == '__main__':
     data = unpickle_dir(d='./results/' + data_set + results_dir)
 
     # Baseline args
-    args = {"num_clients": 100,
-            "frac_adv": 0.0,
-            "attack_mode": 'un_coordinated',
-            "attack_model": 'random_gaussian',
-            "attack_std": 1.0,
-            "noise_scale": 1.0,
-            "attack_n_std": 1.0,
-            "agg": 'fed_avg',
-            "rank": 20,
-            "compression_operator": 'full',
-            "num_bits": 2,
-            "frac_coordinates": 0.1,
-            "dropout_p": 0.1,
-            "c_opt": 'SGD',
-            "server_opt": 'Adam'}
+    # args = {"num_clients": 100,
+    #         "frac_adv": 0.0,
+    #         "attack_mode": 'un_coordinated',
+    #         "attack_model": 'random_gaussian',
+    #         "attack_std": 1.0,
+    #         "noise_scale": 1.0,
+    #         "attack_n_std": 1.0,
+    #         "agg": 'fed_avg',
+    #         "rank": 20,
+    #         "compression_operator": 'full',
+    #         "num_bits": 2,
+    #         "frac_coordinates": 0.1,
+    #         "dropout_p": 0.1,
+    #         "c_opt": 'SGD',
+    #         "server_opt": 'Adam'}
 
     # -----------------------------------------------
 
@@ -73,18 +64,18 @@ if __name__ == '__main__':
     # ---------------------------------------
     # # Baseline No Attack
     # Specify Plot Type
-    plot_type = 'acc'
-    plot_driver(data=data, params=args, label='No Attack', plot_type=plot_type)
-    # # Other
-    args["frac_adv"] = 0.4
-    args["attack_model"] = 'random_gaussian'
-    args["attack_mode"] = 'un_coordinated'
-    noise_scales = [1.0, 1.5, 2.0, 2.5, 3.0]
-    labels = ["scale = 1", "scale = 1.5", "scale = 2", "scale = 2.5", "scale = 3"]
-    for noise_scale, label in zip(noise_scales, labels):
-         args["noise_scale"] = noise_scale
-         plot_driver(data=data, params=args, label=label, plot_type=plot_type)
-    plt.title('40% Uncoordinated random Gaussian Byz Noise', fontsize=14)
+    # plot_type = 'acc'
+    # plot_driver(data=data, params=args, label='No Attack', plot_type=plot_type)
+    # # # Other
+    # args["frac_adv"] = 0.4
+    # args["attack_model"] = 'random_gaussian'
+    # args["attack_mode"] = 'un_coordinated'
+    # noise_scales = [1.0, 1.5, 2.0, 2.5, 3.0]
+    # labels = ["scale = 1", "scale = 1.5", "scale = 2", "scale = 2.5", "scale = 3"]
+    # for noise_scale, label in zip(noise_scales, labels):
+    #      args["noise_scale"] = noise_scale
+    #      plot_driver(data=data, params=args, label=label, plot_type=plot_type)
+    # plt.title('40% Uncoordinated random Gaussian Byz Noise', fontsize=14)
     # ----------------------------------------------------------------------------------
 
     # Example Usage :::

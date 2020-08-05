@@ -75,10 +75,15 @@ class DataManager:
         assert self.data_config.get('num_labels') == len(_train_dataset.classes), \
             'Number of Labels of DataSet and Model output shape Mismatch, ' \
             'fix num_labels in client.config.data_config to change model output shape'
-        assert self.data_config.get('num_channels') == _train_dataset.data.shape[-1], \
-            'Number of channels of DataSet and Model in channel shape Mismatch, ' \
-            'fix num_channels in client.config.data_config to change model input shape'
 
+        if len(_train_dataset.data.shape) > 3:
+            assert self.data_config.get('num_channels') == _train_dataset.data.shape[-1], \
+                'Number of channels of DataSet and Model in channel shape Mismatch, ' \
+                'fix num_channels in client.config.data_config to change model input shape'
+        else:
+            assert self.data_config.get('num_channels') == 1, \
+                'Number of channels of DataSet and Model in channel shape Mismatch, ' \
+                'fix num_channels in client.config.data_config to change model input shape'
         # partition data
         self._populate_data_partition_map()
 

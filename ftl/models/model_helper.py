@@ -46,8 +46,9 @@ def get_model(learner_config: Dict, data_config: Dict):
                     dim_hidden2=learner_config.get("dim_hidden2", 150),
                     drop_p=learner_config["drop_p"])
     elif net == 'alexnet':
-        model = AlexNet(num_classes=data_config.get("num_labels", 10),
-                        num_channels=data_config.get("num_channels", 3))
+        if data_set not in ['cifar10']:
+            model = AlexNet(num_classes=data_config.get("num_labels", 10),
+                            num_channels=data_config.get("num_channels", 3))
     elif net == 'lenet':
         model = LeNet(num_classes=data_config.get("num_labels", 10),
                       num_channels=data_config.get("num_channels", 1))

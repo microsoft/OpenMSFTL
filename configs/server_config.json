@@ -3,7 +3,7 @@
   "server_opt_config" :
   {
     "optimizer_scheme": "Adam",
-    "lr0": 0.002,
+    "lr0": 0.005,
     "weight_decay": 0.0,
     "momentum": 0.9,
     "nesterov": true,
@@ -13,7 +13,7 @@
   "server_lrs_config": {
     "lr_restart": 100,
     "lr_schedule": "StepLR",
-    "step_size": 5,
+    "step_size": 10,
     "gamma": 0.9
   },
 

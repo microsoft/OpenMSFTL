@@ -36,9 +36,9 @@
   "client_lrs_config":
   {
     "lr_restart": 200,
-    "lr_schedule": "expLR",
+    "lr_schedule": "StepLR",
     "step_size": 50,
-    "gamma": 0.9
+    "gamma": 0.8
   },
 
   "client_compression_config":

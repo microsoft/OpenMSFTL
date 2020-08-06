@@ -26,7 +26,7 @@
 
   "client_opt_config":
   {
-    "optimizer_scheme": "SGD",
+    "optimizer_scheme": "Adam",
     "lr0": 0.002,
     "weight_decay": 0.0,
     "momentum": 0.9,

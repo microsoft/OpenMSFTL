@@ -4,7 +4,10 @@
   {
     "optimizer_scheme": "Adam",
     "lr0": 0.002,
-    "weight_decay": 0.0
+    "weight_decay": 0.0,
+    "momentum": 0.9,
+    "nesterov": true,
+    "dampening": 0.1
   },
 
   "server_lrs_config": {

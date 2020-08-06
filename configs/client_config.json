@@ -30,6 +30,8 @@
     "lr0": 0.002,
     "weight_decay": 0.0,
     "momentum": 0.9,
+    "nesterov": true,
+    "dampening": 0.1,
     "num_batches": 50
   },
 

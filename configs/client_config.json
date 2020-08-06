@@ -21,7 +21,7 @@
     "dim_hidden1": 100,
     "dim_hidden2": 50,
     "drop_p": 0.5,
-    "comm_rounds": 500
+    "comm_rounds": 200
   },
 
   "client_opt_config":

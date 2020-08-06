@@ -1,5 +1,5 @@
 {
-  "verbose_freq": 1,
+  "verbose_freq": 5,
   "server_opt_config" :
   {
     "optimizer_scheme": "Adam",
@@ -10,8 +10,8 @@
   "server_lrs_config": {
     "lr_restart": 100,
     "lr_schedule": "expLR",
-    "step_size": 10,
-    "gamma": 0.8
+    "step_size": 1,
+    "gamma": 0.9
   },
 
   "aggregation_config" : {

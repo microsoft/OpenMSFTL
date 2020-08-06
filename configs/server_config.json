@@ -4,14 +4,14 @@
   {
     "optimizer_scheme": "Adam",
     "lr0": 0.005,
-    "weight_decay": 0.0
+    "weight_decay": 5e-4
   },
 
   "server_lrs_config": {
     "lr_restart": 100,
     "lr_schedule": "StepLR",
     "step_size": 1,
-    "gamma": 0.8
+    "gamma": 0.7
   },
 
   "aggregation_config" : {

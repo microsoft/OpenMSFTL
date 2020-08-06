@@ -18,7 +18,7 @@
   },
 
   "aggregation_config" : {
-    "aggregation_scheme": "fed_avg",
+    "aggregation_scheme": "fed_lr_avg",
     "rank": 50,
     "adaptive_rank_th": 0.95,
     "drop_top_comp": false,

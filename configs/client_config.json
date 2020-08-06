@@ -29,7 +29,7 @@
     "optimizer_scheme": "Adam",
     "lr0": 0.001,
     "weight_decay": 5e-4,
-    "momentum": 0.9,
+    "momentum": 0,
     "nesterov": true,
     "dampening": 0,
     "num_batches": 25

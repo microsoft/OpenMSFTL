@@ -48,7 +48,7 @@ def run_main():
         results["best_val_acc"] = best_val
         results["best_test_acc"] = best_test
 
-    with open(directory + args.o, 'x') as f:
+    with open(directory + args.o, 'w+') as f:
         json.dump(results, f, indent=4, ensure_ascii=False, cls=NumpyEncoder)
 
 

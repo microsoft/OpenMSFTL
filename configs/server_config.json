@@ -12,9 +12,10 @@
 
   "server_lrs_config": {
     "lr_restart": 100,
-    "lr_schedule": "StepLR",
+    "lr_schedule": "MultiStepLR",
+    "milestones": [10, 20, 50, 100],
     "step_size": 10,
-    "gamma": 0.9
+    "gamma": 0.5
   },
 
   "aggregation_config" : {

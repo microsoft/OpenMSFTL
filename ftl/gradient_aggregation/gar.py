@@ -1,17 +1,21 @@
 import numpy as np
 from sklearn.utils.extmath import randomized_svd
 from typing import List
+import torch
+from ftl.gradient_aggregation.robust_pca import RobustPCAEstimator
+import math
 
 
 class GAR:
     """
     This is the base class for all the implement GAR
     """
+
     def __init__(self, aggregation_config):
         self.aggregation_config = aggregation_config
         self.Sigma_tracked = []
 
-    def aggregate(self, G: np.ndarray, losses: List[float]) -> np.ndarray:
+    def aggregate(self, G: np.ndarray, client_ids: np.ndarray, losses: List[float]) -> np.ndarray:
         pass
 
     @staticmethod
@@ -34,7 +38,7 @@ class FedAvg(GAR):
     def __init__(self, aggregation_config):
         GAR.__init__(self, aggregation_config=aggregation_config)
 
-    def aggregate(self, G: np.ndarray, losses: List[float]) -> np.ndarray:
+    def aggregate(self, G: np.ndarray, client_ids: np.ndarray, losses: List[float]) -> np.ndarray:
         agg_grad = self.weighted_average(stacked_grad=G, alphas=None)
         return agg_grad
 
@@ -43,7 +47,7 @@ class MinLoss(GAR):
     def __init__(self, aggregation_config):
         GAR.__init__(self, aggregation_config=aggregation_config)
 
-    def aggregate(self, G: np.ndarray, losses: List[float]) -> np.ndarray:
+    def aggregate(self, G: np.ndarray, client_ids: np.ndarray, losses: List[float]) -> np.ndarray:
         min_loss_ix = losses.index(min(losses))
         return G[min_loss_ix, :]
 
@@ -55,7 +59,7 @@ class SpectralFedAvg(FedAvg):
         self.adaptive_rank_th = self.aggregation_config["adaptive_rank_th"]
         self.drop_top_comp = self.aggregation_config["drop_top_comp"]
 
-    def aggregate(self, G: np.ndarray, losses: List[float]) -> np.ndarray:
+    def aggregate(self, G: np.ndarray, client_ids: np.ndarray, losses: List[float]) -> np.ndarray:
         G_approx, S = self.fast_lr_decomposition(X=G)
         self.Sigma_tracked.append(S)
         agg_grad = self.weighted_average(stacked_grad=G_approx, alphas=None)
@@ -134,3 +138,29 @@ class SpectralFedAvg(FedAvg):
     #     return dist
 
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
+class RobustSpectralFedAvg(FedAvg):
+    def __init__(self, aggregation_config):
+        GAR.__init__(self, aggregation_config=aggregation_config)
+        self.rank = self.aggregation_config["rank"]
+        self.adaptive_rank_th = self.aggregation_config["adaptive_rank_th"]
+        self.drop_top_comp = self.aggregation_config["drop_top_comp"]
+        self.num_clients = self.aggregation_config["num_client_nodes"]
+        self.pca = None
+
+    def aggregate(self, G: np.ndarray, client_ids: np.ndarray, losses:  List[float]) -> np.ndarray:
+        G = torch.from_numpy(G).to(device)
+
+        if self.pca is None:
+            self.pca = RobustPCAEstimator(self.num_clients, G.shape[1], self.rank, device)
+            self.pca.fit(G, client_ids)
+        else:
+            self.pca.fine_tune(G, client_ids)
+
+        G_approx, scales = self.pca.transform(G, client_ids)
+        k = int(np.ceil(.25 * scales.shape[0]))  # Drop most noisy 25%
+        cutoff = torch.min(torch.topk(scales, k)[0])
+        alphas = torch.ones_like(scales) * (scales < cutoff).to(torch.float32)
+        return torch.einsum("nf,n->f", G_approx, alphas).detach().cpu().numpy()

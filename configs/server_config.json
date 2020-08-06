@@ -1,5 +1,6 @@
 {
-  "verbose_freq": 10,
+  "verbose_freq": 1,
+  "summary_path": "logs/test3_rlr",
   "server_opt_config" :
   {
     "optimizer_scheme": "Adam",
@@ -19,8 +20,8 @@
   },
 
   "aggregation_config" : {
-    "aggregation_scheme": "fed_avg",
-    "rank": 50,
+    "aggregation_scheme": "fed_robust_spectral_avg",
+    "rank": 20,
     "adaptive_rank_th": 0.95,
     "drop_top_comp": false,
     "krum_frac": 0.7,

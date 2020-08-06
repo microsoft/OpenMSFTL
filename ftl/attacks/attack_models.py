@@ -74,6 +74,29 @@ class AdditiveGaussian(ByzAttack):
         for client in byz_clients:
             client.grad = byz_grad
 
+class RandomFixedGaussian(ByzAttack):
+    """
+    Return a single random gradient that does not change over training
+    """
+
+    def __init__(self, attack_config: Dict):
+        ByzAttack.__init__(self, attack_config=attack_config)
+        self.attack_algorithm = 'random fixed gaussian'
+        self.attack_std = attack_config["attack_std"]
+
+    def attack(self, byz_clients: List[Client]):
+        if len(byz_clients) == 0:
+            return
+        clients_grad = []
+        for client in byz_clients:
+            clients_grad.append(client.grad)
+        grad_mean = np.mean(clients_grad, axis=0)
+        # apply gaussian noise (scaled appropriately)
+        np.random.seed(0)
+        noise = np.random.normal(loc=0.0, scale=self.attack_std,
+                                 size=grad_mean.shape).astype(dtype=grad_mean.dtype)
+        for client in byz_clients:
+            client.grad = noise
 
 class RandomGaussian(ByzAttack):
     """

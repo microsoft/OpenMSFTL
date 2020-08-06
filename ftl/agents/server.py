@@ -30,6 +30,7 @@ class Server:
         self.val_loader = val_loader
         self.test_loader = test_loader
         self.clients = clients
+        aggregator_config["num_client_nodes"] = len(clients)
         self.aggregator = Aggregator(aggregation_config=aggregator_config)
         opt_obj = SchedulingOptimization(model=self.learner,
                                          opt_group=server_opt_config,
@@ -81,7 +82,7 @@ class Server:
         self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.learner.to('cpu').parameters()])
         dist_weights_to_model(weights=self.w_current, parameters=self.learner.to('cpu').parameters())
 
-    def compute_metrics(self, curr_epoch: int, stat_freq: int = 5):
+    def compute_metrics(self, writer, curr_epoch: int, stat_freq: int = 5):
         if curr_epoch % stat_freq == 0:
             t0 = time.time()
             if self.val_loader:
@@ -90,13 +91,15 @@ class Server:
                 if curr_val_acc > self.best_val_acc:
                     self.best_val_acc = curr_val_acc
                 print('Validation Acc: Curr: {} (Best: {})'.format(curr_val_acc, self.best_val_acc))
+                writer.add_scalar("val_acc", curr_val_acc, curr_epoch)
+
             if self.test_loader:
                 curr_test_acc = infer(test_loader=self.test_loader, model=self.learner)
                 self.test_acc.append(curr_test_acc)
                 if curr_test_acc > self.best_test_acc:
                     self.best_test_acc = curr_test_acc
                 print('Test Acc: Curr: {} (Best: {})'.format(curr_test_acc, self.best_test_acc))
-
+                writer.add_scalar("test_acc", curr_test_acc, curr_epoch)
             print('Time to run inference {}s'.format(time.time() - t0))
             print(' ')
         else:

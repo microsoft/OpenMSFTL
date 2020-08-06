@@ -128,5 +128,6 @@
     ],
     "sv": [],
     "best_val_acc": 95.685,
-    "best_test_acc": 96.11
+    "best_test_acc": 96.11,
+    "lowest_epoch_loss": 0.0828852492570877
 }

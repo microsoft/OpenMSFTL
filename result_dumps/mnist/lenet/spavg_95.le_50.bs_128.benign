@@ -939,5 +939,6 @@
         ]
     ],
     "best_val_acc": 95.90333333333334,
-    "best_test_acc": 96.3
+    "best_test_acc": 96.3,
+    "lowest_epoch_loss": 0.07846726901829243
 }

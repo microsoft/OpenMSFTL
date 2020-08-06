@@ -86,7 +86,9 @@ def run_exp(server_config, client_config):
         server.update_global_model()
         print('Metrics :')
         print('--------------------------------')
-        print('Average Epoch Loss = {}'.format(server.train_loss[-1]))
+        print("Max Lossy Client: {}, Min Loss Client: {}".format(max(server.curr_client_losses),
+                                                                 min(server.curr_client_losses)))
+        print('Average Epoch Loss = {} (Best: {})'.format(server.train_loss[-1], server.lowest_epoch_loss))
         server.compute_metrics(curr_epoch=epoch, stat_freq=server_config.get("verbose_freq", 5))
     return server.train_loss, server.val_acc, server.test_acc, server.aggregator.gar.Sigma_tracked, \
            server.best_val_acc, server.best_test_acc

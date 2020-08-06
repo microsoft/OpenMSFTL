@@ -65,9 +65,9 @@ class Server:
             if client.mal:
                 mal_nodes.append(client)
         train_loss = sum(self.curr_client_losses) / len(sampled_clients)
+        if train_loss < self.lowest_epoch_loss:
+            self.lowest_epoch_loss = train_loss
         self.train_loss.append(train_loss)
-        print("Max Lossy Client: {}, Min Loss Client: {}". format(max(self.curr_client_losses),
-                                                                  min(self.curr_client_losses)))
         if len(mal_nodes) > 0:
             launch_attack(attack_mode=attack_config["attack_mode"], mal_nodes=mal_nodes)
         self.agg_grad = self.aggregator.aggregate_grads(clients=sampled_clients,

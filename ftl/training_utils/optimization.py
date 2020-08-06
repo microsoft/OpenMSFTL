@@ -67,10 +67,8 @@ class SchedulingOptimization:
                                                   milestones=self.lrs_group.get('milestones', [100]),
                                                   gamma=self.lrs_group.get('gamma', 0.5),
                                                   last_epoch=self.lrs_group.get('last_epoch', -1))
-        elif self.lrs is None or self.lrs == 'None':
-            return None
         else:
-            raise NotImplementedError
+            return None
 
 
 def get_lr(optimizer):

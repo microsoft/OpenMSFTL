@@ -41,6 +41,7 @@ class Server:
         self.train_loss = []
         self.best_val_acc = 0.0
         self.best_test_acc = 0.0
+        self.lowest_epoch_loss = float('inf')
         self.curr_client_losses = None
         self.agg_grad = None
 
@@ -55,8 +56,6 @@ class Server:
         :param attack_config:
         :param num_participating_client: number of clients to be selected
         """
-        # Sample Clients to Train this round
-        t0 = time.time()
         sampled_clients = random.sample(population=self.clients, k=num_participating_client)
         self.curr_client_losses = []
         mal_nodes = []
@@ -66,21 +65,13 @@ class Server:
             if client.mal:
                 mal_nodes.append(client)
         train_loss = sum(self.curr_client_losses) / len(sampled_clients)
+        if train_loss < self.lowest_epoch_loss:
+            self.lowest_epoch_loss = train_loss
         self.train_loss.append(train_loss)
-        print("Max Lossy Client: {}, Min Loss Client: {}". format(max(self.curr_client_losses),
-                                                                  min(self.curr_client_losses)))
-        print('Time to Train One Comm Round with {} Clients : {}s'.format(len(sampled_clients), time.time()-t0))
-
-        # Modify the gradients of malicious nodes if attack is defined
         if len(mal_nodes) > 0:
-            t0 = time.time()
             launch_attack(attack_mode=attack_config["attack_mode"], mal_nodes=mal_nodes)
-            print('Time to launch attack: {}'.format(time.time() - t0))
-
-        t0 = time.time()
         self.agg_grad = self.aggregator.aggregate_grads(clients=sampled_clients,
                                                         client_losses=self.curr_client_losses)
-        print('Time to run GAR: {}'.format(time.time() - t0))
 
     def update_global_model(self):
         print('server lr = {}'.format(self.lrs.get_lr()))

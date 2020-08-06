@@ -35,12 +35,11 @@ class Client:
                                      lrs_group=self.client_lrs_config)
         self.trainer.optimizer = opt.optimizer
         self.trainer.scheduler = opt.lr_scheduler
+        self.current_weights = flatten_params(learner=self.learner)
 
     def client_step(self):
         """ Run Client Train (opt step) for num_batches iterations """
         num_batches = self.client_opt_config.get("num_batches", 1)
-        if not self.current_weights:
-            self.current_weights = flatten_params(learner=self.learner)
         for batch_ix in range(0, num_batches):
             self.trainer.train(model=self.learner)
         updated_model_weights = flatten_params(learner=self.learner)

@@ -1,9 +1,10 @@
 from ftl.experiment import run_exp
-from ftl.training_utils.misc_utils import pickle_it
 import argparse
 import os
 import numpy as np
 import json
+from numpyencoder import NumpyEncoder
+
 
 def _parse_args():
     parser = argparse.ArgumentParser(description='driver.py')
@@ -15,7 +16,7 @@ def _parse_args():
                         help='JSON config file path for dynamic gradient aggregation; '
                              'see configs/dga/rl.json for an example')
     # Results Related Params
-    parser.add_argument('--o', type=str, default=None, help='Pass results location')
+    parser.add_argument('--o', type=str, default='result_default', help='Pass results location')
     parser.add_argument('--n_repeat', type=int, default=1, help='Specify number of repeat runs')
 
     args = parser.parse_args()
@@ -26,34 +27,31 @@ def run_main():
     args = _parse_args()
     print(args)
 
-    # TODO: Commenting FOr now
-    # result_file = 'num_clients_' + str(args.num_clients) + \
-    #               '.frac_adv_' + str(args.frac_adv) + '.attack_mode_' + args.attack_mode +\
-    #               '.attack_model_' + args.attack_model + '.attack_n_std_' + str(args.attack_n_std) + \
-    #               '.attack_std_' + str(args.attack_std) + '.noise_scale' + str(args.noise_scale) +\
-    #               '.agg_' + args.agg + '.rank_' + str(args.rank) +\
-    #               '.compression_' + args.compression_operator + '.bits_' + str(args.num_bits) +\
-    #               '.frac_cd_' + str(args.frac_coordinates) + '.p_' + str(args.dropout_p) + \
-    #               '.c_opt_' + args.opt + '.s_opt_' + args.server_opt
-    #
-
-    directory = "results_dumps/" + args.data_set + "/" + args.m + "/"
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
     client_config = json.load(open(args.client_config))
     server_config = json.load(open(args.server_config))
 
-    results = []
+    directory = "result_dumps/" + client_config["data_config"]["data_set"] + "/" + \
+                client_config["learner_config"]["net"] + "/"
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    results = {}
     for random_seed in np.arange(1, args.n_repeat + 1):
         client_config["data_config"]["seed"] = random_seed
-        results.append(run_exp(client_config=client_config, server_config=server_config))
+        results["client_config"] = client_config
+        results["server_config"] = server_config
+        loss, val_acc, test_acc, sv, best_val, best_test, lowest_loss = \
+            run_exp(client_config=client_config, server_config=server_config)
+        results["loss"] = loss
+        results["val_acc"] = val_acc
+        results["test_acc"] = test_acc
+        results["sv"] = sv
+        results["best_val_acc"] = best_val
+        results["best_test_acc"] = best_test
+        results["lowest_epoch_loss"] = lowest_loss
 
-    # Commenting for now
-    # Dumps the results in appropriate files
-    # pickle_it(args, 'parameters.' + result_file, directory)
-    # pickle_it(results, result_file, directory)
-    # print('results saved in "{}"'.format(directory))
+    with open(directory + args.o, 'w+') as f:
+        json.dump(results, f, indent=4, ensure_ascii=False, cls=NumpyEncoder)
 
 
 if __name__ == '__main__':

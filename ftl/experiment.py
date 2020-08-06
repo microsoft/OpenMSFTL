@@ -5,9 +5,8 @@ from ftl.attacks import get_attack
 from ftl.data_manager import process_data
 import copy
 import random
-import json
-import numpy as np
 import torch
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
@@ -26,10 +25,6 @@ def run_exp(server_config, client_config):
     print('# ------------------------------------------------- #')
     print('#               Initializing Network                #')
     print('# ------------------------------------------------- #')
-    # print("Attack config:\n{}\n".format(json.dumps(attack_config, indent=4)))
-    # print("Server config:\n{}\n".format(json.dumps(server_opt_config, indent=4)))
-    # print("Client config:\n{}\n".format(json.dumps(client_opt_config, indent=4)))
-    # print("Aggregation config:\n{}\n".format(json.dumps(aggregation_config, indent=4)))
 
     # ** Set up model architecture (learner) **
     # -----------------------------------------
@@ -91,6 +86,9 @@ def run_exp(server_config, client_config):
         server.update_global_model()
         print('Metrics :')
         print('--------------------------------')
-        print('Average Epoch Loss = {}'.format(server.train_loss[-1]))
+        print("Max Lossy Client: {}, Min Loss Client: {}".format(max(server.curr_client_losses),
+                                                                 min(server.curr_client_losses)))
+        print('Average Epoch Loss = {} (Best: {})'.format(server.train_loss[-1], server.lowest_epoch_loss))
         server.compute_metrics(curr_epoch=epoch, stat_freq=server_config.get("verbose_freq", 5))
-    return server.train_loss, server.test_acc, server.aggregator.gar.Sigma_tracked
+    return server.train_loss, server.val_acc, server.test_acc, server.aggregator.gar.Sigma_tracked, \
+           server.best_val_acc, server.best_test_acc, server.lowest_epoch_loss

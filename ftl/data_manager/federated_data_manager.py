@@ -35,19 +35,13 @@ class DataManager:
     def _get_common_data_trans(_train_dataset):
         """ Implements a simple way to compute train and test transform that usually works """
         try:
-            mean = _train_dataset.data.float().mean(axis=(0, 1, 2)) / 255
-            std = _train_dataset.data.float().std(axis=(0, 1, 2)) / 255
+            mean = [_train_dataset.data.float().mean(axis=(0, 1, 2)) / 255]
+            std = [_train_dataset.data.float().std(axis=(0, 1, 2)) / 255]
         except:
             mean = _train_dataset.data.mean(axis=(0, 1, 2)) / 255
             std = _train_dataset.data.std(axis=(0, 1, 2)) / 255
 
-        train_trans = transforms.Compose([transforms.RandomRotation(5),
-                                          transforms.RandomHorizontalFlip(0.5),
-                                          transforms.RandomCrop(_train_dataset.data.shape[1], 4),
-                                          transforms.ToTensor(),
-                                          transforms.Normalize(mean=mean, std=std)])
-        test_trans = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=mean, std=std)])
-        return train_trans, test_trans
+        return mean, std
 
     def _populate_data_partition_map(self):
         """ wrapper to Sampling data for client, server """

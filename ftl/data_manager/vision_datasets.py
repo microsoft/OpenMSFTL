@@ -1,6 +1,6 @@
 from .federated_data_manager import DataManager
 from ftl.agents import Client, Server
-from torchvision import datasets
+from torchvision import datasets, transforms
 from typing import Dict, List
 import os
 
@@ -14,7 +14,9 @@ class FedMNIST(DataManager):
 
     def download_data(self) -> [datasets, datasets]:
         _train_dataset = datasets.MNIST(root=root, download=self.download, train=True)
-        train_trans, test_trans = self._get_common_data_trans(_train_dataset)
+        mean, std = self._get_common_data_trans(_train_dataset)
+        train_trans = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=mean, std=std)])
+        test_trans = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=mean, std=std)])
         _train_dataset = datasets.MNIST(root=root, download=self.download, train=True, transform=train_trans)
         _test_dataset = datasets.MNIST(root=root, download=self.download, train=False, transform=test_trans)
 
@@ -27,7 +29,9 @@ class FedFashionMNIST(DataManager):
 
     def download_data(self) -> [datasets, datasets]:
         _train_dataset = datasets.FashionMNIST(root=root, download=self.download, train=True)
-        train_trans, test_trans = self._get_common_data_trans(_train_dataset)
+        mean, std = self._get_common_data_trans(_train_dataset)
+        train_trans = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=mean, std=std)])
+        test_trans = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=mean, std=std)])
         _train_dataset = datasets.FashionMNIST(root=root, download=self.download, train=True, transform=train_trans)
         _test_dataset = datasets.FashionMNIST(root=root, download=self.download, train=False, transform=test_trans)
 
@@ -40,7 +44,9 @@ class FedCIFAR10(DataManager):
 
     def download_data(self) -> [datasets, datasets]:
         _train_dataset = datasets.CIFAR10(root=root, download=self.download, train=True)
-        train_trans, test_trans = self._get_common_data_trans(_train_dataset)
+        mean, std = self._get_common_data_trans(_train_dataset)
+        train_trans = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=mean, std=std)])
+        test_trans = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=mean, std=std)])
         _train_dataset = datasets.CIFAR10(root=root, download=self.download, train=True, transform=train_trans)
         _test_dataset = datasets.CIFAR10(root=root, download=self.download, train=False, transform=test_trans)
 

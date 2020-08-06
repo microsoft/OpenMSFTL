@@ -3,15 +3,19 @@
   "server_opt_config" :
   {
     "optimizer_scheme": "Adam",
-    "lr0": 0.0015,
-    "weight_decay": 0.0
+    "lr0": 0.002,
+    "weight_decay": 0.0,
+    "momentum": 0,
+    "nesterov": true,
+    "dampening": 0
   },
 
   "server_lrs_config": {
     "lr_restart": 100,
-    "lr_schedule": "StepLR",
-    "step_size": 100,
-    "gamma": 0.999
+    "lr_schedule": "MultiStepLR",
+    "milestones": [10, 20, 50, 100],
+    "step_size": 10,
+    "gamma": 0.5
   },
 
   "aggregation_config" : {

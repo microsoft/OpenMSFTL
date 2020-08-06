@@ -26,8 +26,6 @@ class Aggregator:
     def aggregate_grads(self, clients: List[Client], client_losses: List[float]) -> np.array:
         if len(clients) == 0:
             raise Exception('Client List is Empty')
-        # create a stacked Gradient Matrix G = [G0 | G1 | .... | Gn]'
-        # each row corresponds to gradient (compressed) vector for each client
         G = np.zeros((len(clients), len(clients[0].grad)), dtype=clients[0].grad.dtype)
         for ix, client in enumerate(clients):
             G[ix, :] = client.C.compress(client.grad)

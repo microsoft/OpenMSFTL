@@ -1,4 +1,3 @@
-from ftl.training_utils.misc_utils import unpickle_dir
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
@@ -23,13 +22,12 @@ if __name__ == '__main__':
     ax = plt.figure().gca()
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
-    data_set = 'mnist'
-    results_dir = '/mlp/'
-    o = ['fedavg.baseline']
+    o = ['fedavg.le_50.bs_128.benign', 'spavg_95.le_50.bs_128.benign']
+    labels = ['FedAvg', 'SpectralAvg']
     plot_type = 'loss'
-    for op in o:
-        result_file = './result_dumps/' + data_set + results_dir + op
-        plot_driver(label="test", res_file=result_file, plt_type=plot_type)
+    for op, label in zip(o, labels):
+        result_file = './result_dumps/mnist/lenet/' + op
+        plot_driver(label=label, res_file=result_file, plt_type=plot_type)
 
     # -------------------------------
     # ** Usually No Need to Modify **
@@ -43,11 +41,12 @@ if __name__ == '__main__':
         ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
     else:
         plt.xlabel('Communication Rounds', fontsize=14)
-        plt.xlim(-1, 501)
+        plt.xlim(-1, 31)
         ax.xaxis.set_major_locator(ticker.MultipleLocator(100))
 
     if plot_type is 'loss':
         plt.ylabel('Training Loss', fontsize=14)
+        plt.yscale('log')
     elif plot_type is 'acc':
         plt.ylabel('Test Accuracy', fontsize=14)
     elif plot_type is 'spectral':

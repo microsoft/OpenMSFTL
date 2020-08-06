@@ -5,7 +5,7 @@
   "data_config":
   {
     "data_set": "mnist",
-    "train_batch_size": 100,
+    "train_batch_size": 128,
     "infer_batch_size": 500,
     "dev_split": 0.1,
     "data_dist_strategy": "iid",
@@ -28,7 +28,7 @@
   {
     "optimizer_scheme": "Adam",
     "lr0": 0.001,
-    "weight_decay": 5e-4,
+    "weight_decay": 0,
     "momentum": 0,
     "nesterov": true,
     "dampening": 0,

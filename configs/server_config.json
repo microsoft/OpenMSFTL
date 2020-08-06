@@ -3,7 +3,7 @@
   "server_opt_config" :
   {
     "optimizer_scheme": "Adam",
-    "lr0": 0.005,
+    "lr0": 0.002,
     "weight_decay": 0.0,
     "momentum": 0,
     "nesterov": true,

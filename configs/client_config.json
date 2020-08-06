@@ -1,5 +1,5 @@
 {
-  "num_client_nodes": 1,
+  "num_client_nodes": 10,
   "fraction_participant_clients": 1,
 
   "data_config":

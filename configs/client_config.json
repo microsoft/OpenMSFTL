@@ -1,5 +1,5 @@
 {
-  "num_client_nodes": 10,
+  "num_client_nodes": 50,
   "fraction_participant_clients": 1,
 
   "data_config":
@@ -16,7 +16,7 @@
 
   "learner_config":
   {
-    "net": "lenet",
+    "net": "mlp",
     "dim_in": 784,
     "dim_hidden1": 100,
     "dim_hidden2": 50,
@@ -53,9 +53,9 @@
 
   "attack_config" :
   {
-    "frac_adv": 0,
+    "frac_adv": 0.2,
     "attack_mode": "coordinated",
-    "attack_model": "random_gaussian",
+    "attack_model": "random_fixed_gaussian",
     "attack_n_std": 1.5,
     "noise_scale": 1,
     "attack_std": 1

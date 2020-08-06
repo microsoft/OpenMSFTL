@@ -6,6 +6,7 @@ from ftl.data_manager import process_data
 import copy
 import random
 import torch
+from torch.utils.tensorboard import SummaryWriter
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -22,6 +23,7 @@ def run_exp(server_config, client_config):
     server_lrs_config = server_config["server_lrs_config"]
     aggregation_config = server_config["aggregation_config"]
 
+    writer = SummaryWriter(server_config["summary_path"])
     print('# ------------------------------------------------- #')
     print('#               Initializing Network                #')
     print('# ------------------------------------------------- #')
@@ -89,6 +91,9 @@ def run_exp(server_config, client_config):
         print("Max Lossy Client: {}, Min Loss Client: {}".format(max(server.curr_client_losses),
                                                                  min(server.curr_client_losses)))
         print('Average Epoch Loss = {} (Best: {})'.format(server.train_loss[-1], server.lowest_epoch_loss))
-        server.compute_metrics(curr_epoch=epoch, stat_freq=server_config.get("verbose_freq", 5))
+        server.compute_metrics(writer, curr_epoch=epoch, stat_freq=server_config.get("verbose_freq", 5))
+        writer.add_scalar("train_loss", server.train_loss[-1], epoch)
+        writer.flush()
+
     return server.train_loss, server.val_acc, server.test_acc, server.aggregator.gar.Sigma_tracked, \
            server.best_val_acc, server.best_test_acc, server.lowest_epoch_loss

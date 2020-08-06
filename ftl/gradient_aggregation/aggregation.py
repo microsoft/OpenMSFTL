@@ -1,7 +1,7 @@
 from typing import Dict, List
 import numpy as np
 from ftl.agents.client import Client
-from .gar import FedAvg, SpectralFedAvg, MinLoss
+from .gar import FedAvg, SpectralFedAvg, MinLoss, RobustSpectralFedAvg
 
 
 class Aggregator:
@@ -18,6 +18,8 @@ class Aggregator:
             return FedAvg(aggregation_config=self.aggregation_config)
         elif self.aggregation_config["aggregation_scheme"] == 'fed_spectral_avg':
             return SpectralFedAvg(aggregation_config=self.aggregation_config)
+        elif self.aggregation_config["aggregation_scheme"] == 'fed_robust_spectral_avg':
+            return RobustSpectralFedAvg(aggregation_config=self.aggregation_config)
         elif self.aggregation_config["aggregation_scheme"] == 'min_loss':
             return MinLoss(aggregation_config=self.aggregation_config)
         else:
@@ -29,6 +31,7 @@ class Aggregator:
         G = np.zeros((len(clients), len(clients[0].grad)), dtype=clients[0].grad.dtype)
         for ix, client in enumerate(clients):
             G[ix, :] = client.C.compress(client.grad)
-        agg_grad = self.gar.aggregate(G=G, losses=client_losses)
+        client_ids = np.array([c.client_id for c in clients])
+        agg_grad = self.gar.aggregate(G=G, client_ids=client_ids, losses=client_losses)
         return agg_grad
 

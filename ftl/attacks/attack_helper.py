@@ -1,4 +1,4 @@
-from .attack_models import (DriftAttack, AdditiveGaussian, RandomGaussian,
+from .attack_models import (DriftAttack, AdditiveGaussian, RandomGaussian, RandomFixedGaussian,
                             BitFlipAttack, RandomSignFlipAttack)
 from typing import Dict
 
@@ -10,6 +10,8 @@ def get_attack(attack_config: Dict):
         return AdditiveGaussian(attack_config=attack_config)
     elif attack_config["attack_model"] == 'random_gaussian':
         return RandomGaussian(attack_config=attack_config)
+    elif attack_config["attack_model"] == 'random_fixed_gaussian':
+        return RandomFixedGaussian(attack_config=attack_config)
     elif attack_config["attack_model"] == 'bit_flip':
         return BitFlipAttack(attack_config=attack_config)
     elif attack_config["attack_model"] == 'random_sign_flip':

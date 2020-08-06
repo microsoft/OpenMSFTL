@@ -26,7 +26,7 @@
 
   "client_opt_config":
   {
-    "optimizer_scheme": "Adam",
+    "optimizer_scheme": "SGD",
     "lr0": 0.002,
     "weight_decay": 0.0,
     "momentum": 0.9,
@@ -37,7 +37,7 @@
   {
     "lr_restart": 200,
     "lr_schedule": "StepLR",
-    "step_size": 100,
+    "step_size": 25,
     "gamma": 0.9
   },
 

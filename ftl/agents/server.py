@@ -93,7 +93,8 @@ class Server:
                 if curr_val_acc > self.best_val_acc:
                     self.best_val_acc = curr_val_acc
                 print('Validation Acc: Curr: {} (Best: {})'.format(curr_val_acc, self.best_val_acc))
-                writer.add_scalar("val_acc", curr_val_acc, curr_epoch)
+                if writer is not None:
+                    writer.add_scalar("val_acc", curr_val_acc, curr_epoch)
 
             if self.test_loader:
                 curr_test_acc = infer(test_loader=self.test_loader, model=self.learner)
@@ -101,7 +102,8 @@ class Server:
                 if curr_test_acc > self.best_test_acc:
                     self.best_test_acc = curr_test_acc
                 print('Test Acc: Curr: {} (Best: {})'.format(curr_test_acc, self.best_test_acc))
-                writer.add_scalar("test_acc", curr_test_acc, curr_epoch)
+                if writer is not None:
+                    writer.add_scalar("test_acc", curr_test_acc, curr_epoch)
             print('Time to run inference {}s'.format(time.time() - t0))
             print(' ')
         else:

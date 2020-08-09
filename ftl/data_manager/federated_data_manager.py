@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
 from ftl.agents import Client, Server
 from ftl.training_utils import cycle
 from torchvision import datasets, transforms

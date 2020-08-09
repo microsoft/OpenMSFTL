@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
 from ftl.experiment import run_exp
 import argparse
 import os

@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
 from ftl.agents import Client, Server
 from ftl.models import get_model
 from ftl.compression import Compression

@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
 import numpy as np
 from ftl.gradient_aggregation.reinforcement_learner import RL
 

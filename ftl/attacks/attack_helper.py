@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
 from .attack_models import (DriftAttack, AdditiveGaussian, RandomGaussian, RandomFixedGaussian,
                             BitFlipAttack, RandomSignFlipAttack)
 from typing import Dict

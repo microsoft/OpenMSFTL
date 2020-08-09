@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
 from torch import nn
 import torch
 torch.manual_seed(1)

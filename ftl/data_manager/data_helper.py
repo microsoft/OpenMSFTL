@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 from typing import Dict, List
 from ftl.agents import Client, Server
 from .vision_datasets import FedMNIST, FedCIFAR10, FedFashionMNIST

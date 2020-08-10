@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 from ftl.agents.client import Client
 import numpy as np
 from typing import List, Dict

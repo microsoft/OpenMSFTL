@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 from .mlp import MLP
 from .resnet import resnet32
 from .alexnet import AlexNet

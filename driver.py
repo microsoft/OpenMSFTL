@@ -1,5 +1,5 @@
 # Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Licensed under the MIT License
 
 from ftl.experiment import run_exp
 import argparse
@@ -43,15 +43,17 @@ def run_main():
         client_config["data_config"]["seed"] = random_seed
         results["client_config"] = client_config
         results["server_config"] = server_config
-        loss, val_acc, test_acc, sv, best_val, best_test, lowest_loss = \
+        loss, val_acc, test_acc, sv, alpha, best_val, best_test, lowest_loss, grad_kl_div = \
             run_exp(client_config=client_config, server_config=server_config)
         results["loss"] = loss
         results["val_acc"] = val_acc
         results["test_acc"] = test_acc
         results["sv"] = sv
+        results["sv_wt"] = alpha
         results["best_val_acc"] = best_val
         results["best_test_acc"] = best_test
         results["lowest_epoch_loss"] = lowest_loss
+        results["grad_kl_div"] = grad_kl_div
 
     with open(directory + args.o, 'w+') as f:
         json.dump(results, f, indent=4, ensure_ascii=False, cls=NumpyEncoder)

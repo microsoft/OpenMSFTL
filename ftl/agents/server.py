@@ -1,6 +1,5 @@
 # Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
-
+# Licensed under the MIT License
 import random
 from typing import Dict
 from typing import List
@@ -16,6 +15,7 @@ from .client import Client
 import time
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+torch.manual_seed(1)
 
 
 class Server:
@@ -38,6 +38,7 @@ class Server:
         opt_obj = SchedulingOptimization(model=self.learner,
                                          opt_group=server_opt_config,
                                          lrs_group=server_lrs_config)
+        self.clip_val = server_opt_config["clip_val"]
         self.opt = opt_obj.optimizer
         self.lrs = opt_obj.lr_scheduler
         self.test_acc = []
@@ -61,6 +62,9 @@ class Server:
         :param num_participating_client: number of clients to be selected
         """
         sampled_clients = random.sample(population=self.clients, k=num_participating_client)
+        if sampled_clients[0].trainer.scheduler:
+            print("Client {} lr = {}".format(sampled_clients[0].client_id,
+                                             sampled_clients[0].trainer.scheduler.get_lr()))
         self.curr_client_losses = []
         mal_nodes = []
         for ix, client in enumerate(sampled_clients):
@@ -78,10 +82,13 @@ class Server:
                                                         client_losses=self.curr_client_losses)
 
     def update_global_model(self):
-        print('server lr = {}'.format(self.lrs.get_lr()))
         dist_grads_to_model(grads=self.agg_grad, parameters=self.learner.to('cpu').parameters())
+        if self.clip_val:
+            torch.nn.utils.clip_grad_norm_(self.learner.parameters(), max_norm=self.clip_val, norm_type=1)
         self.opt.step()
-        self.lrs.step()
+        if self.lrs:
+            print('server lr = {}'.format(self.lrs.get_lr()))
+            self.lrs.step()
         self.w_current = np.concatenate([w.data.numpy().flatten() for w in self.learner.to('cpu').parameters()])
         dist_weights_to_model(weights=self.w_current, parameters=self.learner.to('cpu').parameters())
 
@@ -105,5 +112,3 @@ class Server:
                 writer.add_scalar("test_acc", curr_test_acc, curr_epoch)
             print('Time to run inference {}s'.format(time.time() - t0))
             print(' ')
-        else:
-            print('skipping val, test inference to save time')

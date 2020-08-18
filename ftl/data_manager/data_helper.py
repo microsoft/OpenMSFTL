@@ -1,5 +1,5 @@
 # Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Licensed under the MIT License
 
 from typing import Dict, List
 from ftl.agents import Client, Server

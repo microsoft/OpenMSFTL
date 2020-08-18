@@ -1,5 +1,5 @@
 # Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Licensed under the MIT License
 
 import torch.optim as optim
 import json
@@ -37,7 +37,6 @@ class SchedulingOptimization:
         # print information
         if verbose > 0:
             print("Optimizer Info")
-            print("Type: {}".format(self.opt_alg))
             print("Params: {}".format(json.dumps(self.opt_group, indent=4)))
 
     def _get_optimizer(self):
@@ -54,7 +53,7 @@ class SchedulingOptimization:
                               betas=self.opt_group.get('betas', (0.9, 0.999)),
                               eps=self.opt_group.get('eps', 1e-08),
                               weight_decay=self.opt_group.get('weight_decay', 0.05),
-                              amsgrad=self.opt_group.get('amsgrad', True))
+                              amsgrad=self.opt_group.get('amsgrad', False))
         else:
             raise NotImplementedError("Not supported opt_alg: {}".format(self.opt_alg))
 

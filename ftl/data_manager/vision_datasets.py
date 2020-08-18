@@ -1,5 +1,5 @@
 # Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Licensed under the MIT License
 
 from .federated_data_manager import DataManager
 from ftl.agents import Client, Server

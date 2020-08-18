@@ -1,5 +1,5 @@
 # Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Licensed under the MIT License
 
 from ftl.agents import Client, Server
 from ftl.models import get_model
@@ -10,6 +10,10 @@ import copy
 import random
 import torch
 from torch.utils.tensorboard import SummaryWriter
+from matplotlib.pyplot import ion, show, pause, draw
+from sklearn.manifold import TSNE
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -35,7 +39,7 @@ def run_exp(server_config, client_config):
     # -----------------------------------------
     print('initializing Learner')
     model_net = get_model(learner_config=learner_config,
-                          data_config=data_config)
+                          data_config=data_config).to(device=device)
 
     print('Setting Up the Network')
     # *** Set up Client Nodes ****
@@ -80,23 +84,47 @@ def run_exp(server_config, client_config):
     print('#            Launching Federated Training           #')
     print('# ------------------------------------------------- #')
     num_sampled_clients = int(client_config["fraction_participant_clients"] * num_client_nodes)
+    grad_kl_div = []
     for epoch in range(1, learner_config["comm_rounds"] + 1):
+        print(" ")
         print(' ------------------------------------------ ')
         print('         Communication Round {}             '.format(epoch))
         print(' -------------------------------------------')
         server.init_client_models()
-        server.train_client_models(num_participating_client=num_sampled_clients,
-                                   attack_config=attack_config)
-        # Now Aggregate Gradients and Update the global model using server step
+        server.train_client_models(num_participating_client=num_sampled_clients, attack_config=attack_config)
         server.update_global_model()
-        print('Metrics :')
+
+        print('Metrics')
         print('--------------------------------')
         print("Max Lossy Client: {}, Min Loss Client: {}".format(max(server.curr_client_losses),
                                                                  min(server.curr_client_losses)))
         print('Average Epoch Loss = {} (Best: {})'.format(server.train_loss[-1], server.lowest_epoch_loss))
-        server.compute_metrics(writer, curr_epoch=epoch, stat_freq=server_config.get("verbose_freq", 5))
-        writer.add_scalar("train_loss", server.train_loss[-1], epoch)
-        writer.flush()
 
     return server.train_loss, server.val_acc, server.test_acc, server.aggregator.gar.Sigma_tracked, \
-           server.best_val_acc, server.best_test_acc, server.lowest_epoch_loss
+           server.aggregator.gar.alpha_tracked, server.best_val_acc, server.best_test_acc, \
+           server.lowest_epoch_loss, grad_kl_div
+
+
+def plot_grads(clients, ep, G, kl_div=None, algo='tsne'):
+    ion()
+    show()
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    if algo == 'tsne':
+        tsne = TSNE(n_components=2, verbose=False, perplexity=(len(clients) / 10) + 1, n_iter=300)
+        proj_res = tsne.fit_transform(X=G)
+    elif algo == 'pca':
+        pca = PCA(n_components=3)
+        proj_res = pca.fit_transform(X=G)
+    else:
+        raise NotImplementedError
+    for ix in range(0, proj_res.shape[0]):
+        color = 'b'
+        if clients[ix].mal:
+            color = 'r'
+        ax.scatter(proj_res[ix, 0], proj_res[ix, 1], proj_res[ix, 2], c=color)
+    draw()
+    plt.savefig(str(ep)+'.png')
+    pause(0.01)
+    if kl_div:
+        kl_div.append(proj_res.kl_divergence_)

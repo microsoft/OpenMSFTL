@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Licensed under the MIT License
 
 from ftl.agents import Client, Server
 from ftl.training_utils import cycle
-from torchvision import datasets, transforms
+from torchvision import datasets
 from torch.utils.data import DataLoader, Subset
 import torch
 import numpy as np
@@ -109,12 +109,12 @@ class DataManager:
             self.server.val_loader = DataLoader(val_dataset.dataset,
                                                 batch_size=self.data_config.get("infer_batch_size", 1),
                                                 pin_memory=True,
-                                                num_workers=1)
+                                                num_workers=2)
 
         self.server.test_loader = DataLoader(_test_dataset,
                                              batch_size=self.data_config.get("infer_batch_size", 1),
                                              pin_memory=True,
-                                             num_workers=1)
+                                             num_workers=2)
 
         # populate client data loader
         for client in self.clients:

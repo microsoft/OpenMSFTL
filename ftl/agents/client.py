@@ -1,6 +1,5 @@
 # Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
-
+# Licensed under the MIT License
 from ftl.training_utils.trainer import Trainer
 from ftl.training_utils.optimization import SchedulingOptimization
 from ftl.compression.compression import Compression
@@ -38,6 +37,7 @@ class Client:
                                      lrs_group=self.client_lrs_config)
         self.trainer.optimizer = opt.optimizer
         self.trainer.scheduler = opt.lr_scheduler
+        self.trainer.clip_val = self.client_opt_config["clip_val"]
         self.current_weights = flatten_params(learner=self.learner)
 
     def client_step(self):

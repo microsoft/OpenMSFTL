@@ -1,5 +1,5 @@
 # Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Licensed under the MIT License
 
 from ftl.agents.client import Client
 import numpy as np
@@ -61,6 +61,8 @@ class AdditiveGaussian(ByzAttack):
         self.attack_algorithm = 'additive gaussian'
         self.attack_std = attack_config["attack_std"]
         self.noise_scale = attack_config["noise_scale"]
+        self.fixed = attack_config["fixed"]
+        self.to_scale = attack_config["to_scale"]
 
     def attack(self, byz_clients: List[Client]):
         if len(byz_clients) == 0:
@@ -70,36 +72,15 @@ class AdditiveGaussian(ByzAttack):
             clients_grad.append(client.grad)
         grad_mean = np.mean(clients_grad, axis=0)
         # apply gaussian noise (scaled appropriately)
-        noise = np.random.normal(loc=0.0, scale=self.attack_std,
+        if self.fixed:
+            np.random.seed(999)
+        noise = np.random.normal(loc=self.noise_scale*grad_mean if self.to_scale else self.noise_scale,
+                                 scale=self.attack_std,
                                  size=grad_mean.shape).astype(dtype=grad_mean.dtype)
-        noise *= self.noise_scale * grad_mean
         byz_grad = grad_mean[:] + noise
         for client in byz_clients:
             client.grad = byz_grad
 
-class RandomFixedGaussian(ByzAttack):
-    """
-    Return a single random gradient that does not change over training
-    """
-
-    def __init__(self, attack_config: Dict):
-        ByzAttack.__init__(self, attack_config=attack_config)
-        self.attack_algorithm = 'random fixed gaussian'
-        self.attack_std = attack_config["attack_std"]
-
-    def attack(self, byz_clients: List[Client]):
-        if len(byz_clients) == 0:
-            return
-        clients_grad = []
-        for client in byz_clients:
-            clients_grad.append(client.grad)
-        grad_mean = np.mean(clients_grad, axis=0)
-        # apply gaussian noise (scaled appropriately)
-        np.random.seed(0)
-        noise = np.random.normal(loc=0.0, scale=self.attack_std,
-                                 size=grad_mean.shape).astype(dtype=grad_mean.dtype)
-        for client in byz_clients:
-            client.grad = noise
 
 class RandomGaussian(ByzAttack):
     """
@@ -115,6 +96,8 @@ class RandomGaussian(ByzAttack):
         self.attack_algorithm = 'random gaussian'
         self.attack_std = attack_config["attack_std"]
         self.noise_scale = attack_config["noise_scale"]
+        self.fixed = attack_config["fixed"]
+        self.to_scale = attack_config["to_scale"]
 
     def attack(self, byz_clients: List[Client]):
         if len(byz_clients) == 0:
@@ -124,9 +107,11 @@ class RandomGaussian(ByzAttack):
             clients_grad.append(client.grad)
         grad_mean = np.mean(clients_grad, axis=0)
         # apply gaussian noise (scaled appropriately)
-        noise = np.random.normal(loc=0.0, scale=self.attack_std,
+        if self.fixed:
+            np.random.seed(999)
+        noise = np.random.normal(loc=self.noise_scale*grad_mean if self.to_scale else self.noise_scale,
+                                 scale=self.attack_std,
                                  size=grad_mean.shape).astype(dtype=grad_mean.dtype)
-        noise *= self.noise_scale * grad_mean
         for client in byz_clients:
             client.grad = noise
 
@@ -167,7 +152,7 @@ class RandomSignFlipAttack(ByzAttack):
 
     def __init__(self, attack_config: Dict):
         ByzAttack.__init__(self, attack_config=attack_config)
-        self.attack_algorithm = 'bit flip attack'
+        self.attack_algorithm = 'sign flip attack'
 
     def attack(self, byz_clients: List[Client]):
         if len(byz_clients) == 0:
@@ -178,6 +163,6 @@ class RandomSignFlipAttack(ByzAttack):
         grad_mean = np.mean(clients_grad, axis=0)
         faulty_grad = np.zeros_like(grad_mean)
         for i in range(0, len(grad_mean)):
-            faulty_grad[i] = [grad_mean[i] if np.random.random() < 0.5 else -grad_mean[i]]
+            faulty_grad[i] = grad_mean[i] if np.random.random() < 0.5 else -grad_mean[i]
         for client in byz_clients:
             client.grad = faulty_grad

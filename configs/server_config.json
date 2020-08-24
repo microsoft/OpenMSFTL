@@ -1,32 +1,43 @@
 {
-  "verbose_freq": 1,
+  "verbose_freq": 10,
   "summary_path": "logs/test3_rlr",
   "server_opt_config" :
   {
     "optimizer_scheme": "Adam",
     "lr0": 0.002,
-    "weight_decay": 0.0,
+    "weight_decay": 0.005,
     "momentum": 0,
     "nesterov": true,
-    "dampening": 0
+    "amsgrad": false,
+    "dampening": 0,
+    "clip_val": null
   },
 
-  "server_lrs_config": {
+  "server_lrs_config":
+  {
     "lr_restart": 100,
     "lr_schedule": "MultiStepLR",
-    "milestones": [10, 20, 50, 100],
+    "milestones": [15, 25, 50, 100],
     "step_size": 10,
     "gamma": 0.5
   },
 
-  "aggregation_config" : {
+  "aggregation_config" :
+  {
     "aggregation_scheme": "fed_robust_spectral_avg",
-    "rank": 20,
+    "plot_grad": false,
+    "plot_grad_algo": "pca",
+    "auto_encoder_loss": "mse",
+    "rank": 5,
+    "analytic": false,
+    "num_encoder_init_epochs": 2000,
+    "num_encoder_ft_epochs": 500,
     "adaptive_rank_th": 0.95,
-    "drop_top_comp": false,
+    "drop_top_comp": true,
     "krum_frac": 0.7,
 
-    "weight_estimator_config": {
+    "weight_estimator_config":
+    {
       "strategy": "inverse_loss"
     }
   }

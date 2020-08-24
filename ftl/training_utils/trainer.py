@@ -1,5 +1,5 @@
 # Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Licensed under the MIT License
 
 import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -7,11 +7,12 @@ torch.manual_seed(1)
 
 
 class Trainer:
-    def __init__(self, optimizer=None, scheduler=None):
+    def __init__(self, optimizer=None, scheduler=None, clip_val=None):
         self.epoch_losses = []
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.train_iter = None
+        self.clip_val = clip_val
 
     def train(self, model):
         model = model.to(device)
@@ -24,6 +25,8 @@ class Trainer:
         loss = torch.nn.functional.cross_entropy(y_hat, y)
         # loss = torch.nn.CrossEntropyLoss(y_hat, y)
         loss.backward()
+        # if self.clip_val:
+        #     torch.nn.utils.clip_grad_norm_(model.parameters(), self.clip_val)
         self.optimizer.step()
         if self.scheduler:
             self.scheduler.step()
@@ -32,9 +35,8 @@ class Trainer:
 
 
 def infer(test_loader, model):
-    model.eval()
     model.to(device)
-
+    model.eval()
     correct = 0
     with torch.no_grad():
         for batch_ix, (data, target) in enumerate(test_loader):

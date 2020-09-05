@@ -1,0 +1,68 @@
+{
+  "verbose_freq": 10,
+  "val_freq": 5,
+  "summary_path": "logs/test3_rlr",
+  "server_opt_config" :
+  {
+    "optimizer_scheme": "Adam",
+    "lr0": 0.002,
+    "weight_decay": 0.005,
+    "momentum": 0,
+    "nesterov": true,
+    "amsgrad": false,
+    "dampening": 0,
+    "clip_val": null
+  },
+
+  "server_lrs_config":
+  {
+    "lr_restart": 100,
+    "lr_schedule": "MultiStepLR",
+    "milestones": [15, 25, 50, 100],
+    "step_size": 10,
+    "gamma": 0.5
+  },
+
+  "aggregation_config" :
+  {
+    "aggregation_scheme": "fed_avg",
+    "pc_analysis": false,
+    "plot_grad": false,
+    "plot_grad_algo": "pca",
+    "auto_encoder_loss": "mse",
+    "analytic": false,
+    "num_encoder_init_epochs": 2000,
+    "num_encoder_ft_epochs": 500,
+
+    "dga_config":
+    {
+      "type": "RL",
+      "marginal_update_RL": true,
+      "num_warmup_steps": 15,
+      "delta_threshold": 0.001,
+      "verbose_level": 1,
+      "RL_path": "net/rl_dga",
+      "network_params": [30,32,32,32,64,16,32,10],
+      "model_descriptor_RL": "Default",
+      "initial_epsilon": 0.5,
+      "final_epsilon": 0.0001,
+      "epsilon_gamma": 0.90,
+      "max_replay_memory_size": 1000,
+      "minibatch_size": 16,
+      "optimizer_config":
+      {
+          "optimizer_scheme": "Adam",
+          "lrs": "StepLR",
+          "lr": 0.001,
+          "amsgrad": true
+      },
+      "annealing_config":
+      {
+          "lr_schedule": "StepLR",
+          "step_interval": "epoch",
+          "step_size": 1,
+          "gamma": 0.95
+      }
+    }
+  }
+}

@@ -55,5 +55,15 @@
     "fraction_coordinate": 0.1
   },
 
-  "attack_config" : {}
+  "attack_config" :
+  {
+    "frac_adv": 0.2,
+    "attack_mode": "un_coordinated",
+    "attack_model": "additive_gaussian",
+    "fixed": true,
+    "to_scale": false,
+    "attack_n_std": 1,
+    "attack_std": 3,
+    "noise_scale": 5
+  }
 }

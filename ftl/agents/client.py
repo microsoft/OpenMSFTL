@@ -1,5 +1,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License
+import numpy as np
 from ftl.training_utils.trainer import Trainer
 from ftl.training_utils.optimization import SchedulingOptimization
 from ftl.compression.compression import Compression
@@ -43,9 +44,21 @@ class Client:
     def client_step(self):
         """ Run Client Train (opt step) for num_batches iterations """
         num_batches = self.client_opt_config.get("num_batches", 1)
+        self.trainer.reset_gradient_power()
         for batch_ix in range(0, num_batches):
             self.trainer.train(model=self.learner)
         updated_model_weights = flatten_params(learner=self.learner)
         self.grad = self.current_weights - updated_model_weights
         self.current_weights = updated_model_weights
 
+    def get_stats(self):
+        """
+        Return (non-privacy) stats for aggregation:
+          1. Sum of negative training losses over batches
+          2. Gradient mean
+          3. Graident variance
+        """
+
+        sum_loss = sum(self.trainer.epoch_losses).detach().numpy()
+        vN = self.trainer.sum_grad2 - (self.trainer.sum_grad / self.trainer.counter) * self.trainer.sum_grad
+        return (-sum_loss, self.trainer.sum_grad / self.trainer.counter, vN / self.trainer.counter)

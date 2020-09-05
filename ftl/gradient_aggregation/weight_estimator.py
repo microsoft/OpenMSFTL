@@ -1,31 +1,102 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License
 
+from typing import Dict, List
 import numpy as np
 from ftl.gradient_aggregation.reinforcement_learner import RL
+
+def softmax(X, theta = 1.0, axis = None):
+    """
+    Compute the softmax of each element along an axis of X.
+    Have our own implementation since scipy.special.softmax sometimes causes issues for installation
+
+    params:
+    X: ND-Array. Probably should be floats.
+    theta (optional): float parameter, used as a multiplier prior to exponentiation. Default = 1.0
+    axis (optional): axis to compute values along. Default is the first non-singleton axis.
+
+    return: softmax output, the same size as X. The sum will be unity along the specified axis.
+    """
+    # make X at least 2d
+    y = np.atleast_2d(X)
+
+    # find axis
+    if axis is None:
+        axis = next(j[0] for j in enumerate(y.shape) if j[1] > 1)
+
+    # multiply y against the theta parameter,
+    y = y * float(theta)
+
+    # subtract the max for numerical stability
+    y = y - np.expand_dims(np.max(y, axis = axis), axis)
+
+    # exponentiate y
+    y = np.exp(y)
+
+    # take the sum along the specified axis
+    ax_sum = np.expand_dims(np.sum(y, axis = axis), axis)
+
+    # finally: divide elementwise
+    p = y / ax_sum
+
+    # flatten if X was 1D
+    if len(X.shape) == 1: p = p.flatten()
+
+    return p
 
 
 class WeightEstimatorBase:
     """
     Base class for gradient weight estimator
     """
-    def __init__(self, estimator_type, weights):
+    def __init__(self, estimator_type: str, weights: "array-like list"):
         self.estimator_type = estimator_type
         self.weights = weights
         self.steps = 0
 
-    def compute_weights(self):
+    def compute_weights(self, input_feature):
          raise NotImplementedError
 
     def update_model(self):
         raise NotImplementedError
 
 
+class SoftmaxLWeightEstimator(WeightEstimatorBase):
+    """
+    Use Softmax output as a weight vector
+    """
+    def __init__(self, softmax_config: Dict):
+        super(SoftmaxLWeightEstimator, self).__init__(estimator_type='softmax', weights=[])
+        self.T = softmax_config.get("T", 1.0)  # Temperature value for softmax
+        # set the index of the feature vector (softmax input vector)
+        if softmax_config.get("feat_type", "loss"):
+            self.offset = 0
+        elif softmax_config["feat_type"] == "mean":
+            self.offset = 1
+        elif softmax_config["feat_type"] == "var":
+            self.offset = 2
+        else:
+            raise ValueError("SoftmaxLWeightEstimator: unsupported feature type {}".format(softmax_config["feat_type"]))
+
+    def compute_weights(self, input_feature: "array-like list", num_clients: int):
+        """
+        Compute the softmax.
+        The component of the input_feature is, for example, orgnized as
+        input_feature[0:no_clients] = negative loss
+        input_feature[no_clients:2*no_clients] = mean
+        input_feature[2*no_clients:3*no_clients] = var
+        """
+        return softmax(input_feature[self.offset*num_clients:(self.offset+1)*num_clients:1], theta=1.0/self.T)
+
+    def update_model(self):
+        pass
+
+
 class RLWeightEstimator(WeightEstimatorBase):
     """
     This class estimates weights with a reinforcement learner
     """
-    def __init__(self, rl_config):
+    def __init__(self, rl_config: Dict):
         """
         :param rl_config: dict specifying parameters for RL-based gradient weight estimator
 
@@ -46,7 +117,7 @@ class RLWeightEstimator(WeightEstimatorBase):
         self.delta_th = rl_config.get('delta_threshold', 0.001)
         self.verbose = rl_config.get('verbose_level', 1)
 
-    def _post_process_weights(self, rl_weights):
+    def _post_process_weights(self, rl_weights: "array-like list"):
         if rl_weights.ndim > 1:
             rl_weights = rl_weights[-1, :]
 
@@ -61,7 +132,7 @@ class RLWeightEstimator(WeightEstimatorBase):
             print('RL Weights AFTER filtering: {}'.format(rl_weights))
         return rl_weights
 
-    def compute_weights(self, input_feature):
+    def compute_weights(self, input_feature: "array-like list"):
         """
         Compute a weight for client's gradient
 
@@ -81,7 +152,9 @@ class RLWeightEstimator(WeightEstimatorBase):
 
         return self.weights
 
-    def update_model(self, input_feature, rl_error_rate, org_error_rate):
+    def update_model(self, input_feature: "array-like list",
+                           rl_error_rate: float,
+                           org_error_rate: float):
         """
         Update the RL model and return an indicator whether the RL weight should be used or not
 

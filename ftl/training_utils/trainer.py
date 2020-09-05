@@ -13,6 +13,7 @@ class Trainer:
         self.scheduler = scheduler
         self.train_iter = None
         self.clip_val = clip_val
+        self.reset_gradient_power()
 
     def train(self, model):
         model = model.to(device)
@@ -25,6 +26,7 @@ class Trainer:
         loss = torch.nn.functional.cross_entropy(y_hat, y)
         # loss = torch.nn.CrossEntropyLoss(y_hat, y)
         loss.backward()
+        self.__accumulate_gradient_power(model)
         # if self.clip_val:
         #     torch.nn.utils.clip_grad_norm_(model.parameters(), self.clip_val)
         self.optimizer.step()
@@ -33,6 +35,26 @@ class Trainer:
             # print('client LR = {}'.format(self.scheduler.get_lr()))
         self.epoch_losses.append(loss)
 
+    def reset_gradient_power(self):
+        """
+        Reset the gradient stats
+        """
+        self.sum_grad = 0.0  # mean of gradient
+        self.sum_grad2 = 0.0  # power of gradient
+        self.counter = 0  # no. samples
+
+    def __accumulate_gradient_power(self, model):
+        """
+        Accumulate gradient stats for 1st and 2nd statistics
+        """
+        for p in model.parameters():
+            if p.grad is None:
+                continue
+            p1 = torch.sum(p.grad)
+            p2 = torch.sum(p.grad ** 2)
+            self.sum_grad += p1
+            self.sum_grad2 += p2
+            self.counter += len(p.grad)
 
 def infer(test_loader, model):
     model.to(device)

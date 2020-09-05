@@ -292,7 +292,6 @@ class RL:
 
         # make optimizer
         soptimizer = SchedulingOptimization(model=self.model,
-                                            opt_alg=self.rl_config['optimizer_config']['optimizer_scheme'],
                                             opt_group=self.rl_config['optimizer_config'],
                                             lrs_group=self.rl_config['annealing_config'])
         # make optimizer
@@ -314,7 +313,7 @@ class RL:
                 self.runningLoss = elems["weight"]
 
     def load(self):
-        print("Loading checkpoint: {}".format(self.model_name))
+        print("Loading RL checkpoint: {}".format(self.model_name))
         checkpoint = torch.load(self.model_name)
 
     def save(self, i, val_loss, val_cer, lr_weight=None):
@@ -331,7 +330,7 @@ class RL:
         if os.path.exists(outputdir) is False:
             os.makedirs(outputdir, exist_ok=True)
 
-        print("Saving model to: {}".format(self.model_name))
+        print("Saving RL model to: {}".format(self.model_name))
         try:
             torch.save(save_state, self.model_name)
         except:

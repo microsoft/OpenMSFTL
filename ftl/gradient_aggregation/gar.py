@@ -2,7 +2,7 @@
 # Licensed under the MIT License
 
 import numpy as np
-from typing import List
+from typing import List, Dict
 import torch
 from ftl.gradient_aggregation.spectral_aggregation import RobustPCAEstimator, fast_lr_decomposition
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -13,8 +13,9 @@ class GAR:
     This is the base class for all the implement GAR
     """
 
-    def __init__(self, aggregation_config):
+    def __init__(self, aggregation_config: Dict):
         self.aggregation_config = aggregation_config
+        self.gradient_weights = None  # weight on gradient on each client
         self.Sigma_tracked = []
         self.alpha_tracked = []
 
@@ -23,19 +24,20 @@ class GAR:
                   losses: List[float]) -> np.ndarray:
         pass
 
-    @staticmethod
-    def weighted_average(stacked_grad: np.ndarray, alphas=None):
+    def weighted_average(self, stacked_grad: np.ndarray):
         """
         Implements weighted average of client grads i.e. rows of G
         If no weights are supplied then its equivalent to simple average / Fed Avg
         """
-        if alphas is None:
-            alphas = [1.0 / stacked_grad.shape[0]] * stacked_grad.shape[0]
+        if self.gradient_weights is None:
+            self.gradient_weights = np.full(stacked_grad.shape[0],
+                                            fill_value=1.0 / stacked_grad.shape[0],
+                                            dtype=stacked_grad.dtype)
         else:
-            assert len(alphas) == stacked_grad.shape[0]
-        agg_grad = np.zeros_like(stacked_grad[0, :])
-        for ix in range(0, stacked_grad.shape[0]):
-            agg_grad += alphas[ix] * stacked_grad[ix, :]
+            assert len(self.gradient_weights) == stacked_grad.shape[0]
+        # row-wise multiplication with the weight vector and sum the weighted row vectors
+        agg_grad = np.sum(np.multiply(stacked_grad, self.gradient_weights[:, np.newaxis]), axis=0)
+
         return agg_grad
 
 
@@ -46,7 +48,7 @@ class FedAvg(GAR):
     def aggregate(self, G: np.ndarray,
                   client_ids: np.ndarray = None,
                   losses: List[float] = None) -> np.ndarray:
-        agg_grad = self.weighted_average(stacked_grad=G, alphas=None)
+        agg_grad = self.weighted_average(stacked_grad=G)
         return agg_grad
 
 
@@ -86,7 +88,7 @@ class SpectralFedAvg(GAR):
                                                 adaptive_rank_th=self.adaptive_rank_th,
                                                 drop_top_comp=self.drop_top_comp)
             self.Sigma_tracked.append(S)
-            agg_grad = self.weighted_average(stacked_grad=G_approx, alphas=None)
+            agg_grad = self.weighted_average(stacked_grad=G_approx)
             return agg_grad
 
         else:

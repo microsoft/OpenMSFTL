@@ -23,8 +23,8 @@ def run_exp(server_config, client_config):
     learner_config = client_config["learner_config"]
     client_opt_config = client_config["client_opt_config"]
     client_lrs_config = client_config["client_lrs_config"]
-    attack_config = client_config["attack_config"]
-    client_compression_config = client_config["client_compression_config"]
+    attack_config = client_config.get("attack_config", {})
+    client_compression_config = client_config.get("client_compression_config", {})
 
     server_opt_config = server_config["server_opt_config"]
     server_lrs_config = server_config["server_lrs_config"]
@@ -46,7 +46,7 @@ def run_exp(server_config, client_config):
     # -----------------------------
     clients = []
     num_client_nodes = client_config["num_client_nodes"]
-    num_mal_clients = int(attack_config["frac_adv"] * num_client_nodes)
+    num_mal_clients = int(attack_config.get("frac_adv", 0) * num_client_nodes)
     sampled_adv_client_ix = random.sample(population=set(range(0, num_client_nodes)), k=num_mal_clients)
     for client_id in range(num_client_nodes):
         client = Client(client_id=client_id,
@@ -99,6 +99,7 @@ def run_exp(server_config, client_config):
         print("Max Lossy Client: {}, Min Loss Client: {}".format(max(server.curr_client_losses),
                                                                  min(server.curr_client_losses)))
         print('Average Epoch Loss = {} (Best: {})'.format(server.train_loss[-1], server.lowest_epoch_loss))
+        server.compute_metrics(writer=None, curr_epoch=epoch, stat_freq=server_config.get('val_freq', 5))
 
     return server.train_loss, server.val_acc, server.test_acc, server.aggregator.gar.Sigma_tracked, \
            server.aggregator.gar.alpha_tracked, server.best_val_acc, server.best_test_acc, \

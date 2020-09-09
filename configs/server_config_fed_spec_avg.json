@@ -1,6 +1,5 @@
 {
   "verbose_freq": 10,
-  "val_freq": 5,
   "summary_path": "logs/test3_rlr",
   "server_opt_config" :
   {
@@ -25,14 +24,17 @@
 
   "aggregation_config" :
   {
-    "aggregation_scheme": "fed_avg",
-    "pc_analysis": false,
+    "aggregation_scheme": "fed_spectral_avg",
     "plot_grad": false,
     "plot_grad_algo": "pca",
     "auto_encoder_loss": "mse",
+    "rank": 5,
     "analytic": false,
     "num_encoder_init_epochs": 2000,
     "num_encoder_ft_epochs": 500,
+    "adaptive_rank_th": 0.95,
+    "drop_top_comp": true,
+    "krum_frac": 0.7,
 
     "weight_estimator_config":
     {

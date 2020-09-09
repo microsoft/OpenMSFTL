@@ -1,7 +1,7 @@
 {
   "verbose_freq": 10,
   "val_freq": 5,
-  "summary_path": "logs/test3_rlr",
+  "summary_path": "logs/sm_dga",
   "server_opt_config" :
   {
     "optimizer_scheme": "Adam",
@@ -34,9 +34,12 @@
     "num_encoder_init_epochs": 2000,
     "num_encoder_ft_epochs": 500,
 
-    "weight_estimator_config":
+    "dga_config":
     {
-      "strategy": "inverse_loss"
+      "type": "softmax",
+      "_COMMENT_": "# feat_type can be 'loss' or 'var'",
+      "feat_type": "loss",
+      "T": 1
     }
   }
 }

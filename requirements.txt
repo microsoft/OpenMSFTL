@@ -1,0 +1,7 @@
+TensorBoard
+tqdm
+numpyencoder
+sklearn
+matplotlib
+
+

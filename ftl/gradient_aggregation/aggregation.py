@@ -12,7 +12,7 @@ from ftl.agents.client import Client
 from ftl.training_utils import infer
 from ftl.models.model_helper import dist_weights_to_model, dist_grads_to_model
 from ftl.gradient_aggregation.weight_estimator import RLWeightEstimator, SoftmaxLWeightEstimator
-from .gar import FedAvg, SpectralFedAvg, MinLoss
+from .gar import FedAvg, SpectralFedAvg
 from sklearn.utils.extmath import randomized_svd
 
 
@@ -45,12 +45,10 @@ class Aggregator:
             return FedAvg(aggregation_config=self.aggregation_config)
         elif self.aggregation_config["aggregation_scheme"] == 'fed_spectral_avg':
             return SpectralFedAvg(aggregation_config=self.aggregation_config)
-        elif self.aggregation_config["aggregation_scheme"] == 'min_loss':
-            return MinLoss(aggregation_config=self.aggregation_config)
         else:
             raise NotImplementedError
 
-    def aggregate_grads(self, clients: List[Client], client_losses: List[float], input_feature: np.ndarray=None, val_loader: DataLoader=None) -> np.array:
+    def aggregate_grads(self, clients: List[Client], input_feature: np.ndarray=None, val_loader: DataLoader=None) -> np.array:
         """
         Aggregate gradient information from clients
         """
@@ -65,7 +63,7 @@ class Aggregator:
             self.gar.Sigma_tracked.append(S)
         self.curr_G = G
         client_ids = np.array([c.client_id for c in clients])
-        self.agg_grad = self.gar.aggregate(G=G, client_ids=client_ids, losses=client_losses)
+        self.agg_grad = self.gar.aggregate(G=G, client_ids=client_ids)
 
     def update_model(self):
         """
@@ -147,7 +145,6 @@ class DGAggregator(Aggregator):
 
 
     def aggregate_grads(self, clients: List[Client],
-                              client_losses: List[float],
                               input_feature: np.ndarray,
                               val_loader: DataLoader):
         """
@@ -155,13 +152,13 @@ class DGAggregator(Aggregator):
         """
         if self.weight_estimator.estimator_type == 'softmax':
             self.gar.gradient_weights = self.weight_estimator.compute_weights(input_feature, len(clients))
-            Aggregator.aggregate_grads(self, clients=clients, client_losses=client_losses)
+            Aggregator.aggregate_grads(self, clients=clients)
             self.update_model()
         elif self.weight_estimator.estimator_type == 'RL':
             org_aggregator_state = copy.deepcopy(self.state_dict())
             # run RL-based weight estimator and update a model with weighted aggregation
             self.gar.gradient_weights = self.weight_estimator.compute_weights(input_feature)  # set the weight vector for each gradient
-            Aggregator.aggregate_grads(self, clients=clients, client_losses=client_losses)
+            Aggregator.aggregate_grads(self, clients=clients)
             self.update_model()
             rl_aggregator_state = self.state_dict()
             val_wi_rl = infer(test_loader=val_loader, model=self.model)
@@ -172,7 +169,7 @@ class DGAggregator(Aggregator):
                 # perform softmax-weighting
                 self.load_state_dict(org_aggregator_state)  # revert to the original state
                 self.gar.gradient_weights = self.sub_weight_estimator.compute_weights(input_feature, len(clients))
-                Aggregator.aggregate_grads(self, clients=clients, client_losses=client_losses)
+                Aggregator.aggregate_grads(self, clients=clients)
                 self.update_model()
                 val_wo_rl = infer(test_loader=val_loader, model=self.model)
                 print('Acc with Softmax DGA: {}'.format(val_wo_rl))
@@ -180,7 +177,7 @@ class DGAggregator(Aggregator):
                 # aggregate without the weight
                 self.load_state_dict(org_aggregator_state)  # revert to the original state
                 self.gar.gradient_weights = None  # will use a uniform weight
-                Aggregator.aggregate_grads(self, clients=clients, client_losses=client_losses)
+                Aggregator.aggregate_grads(self, clients=clients)
                 self.update_model()
                 val_wo_rl = infer(test_loader=val_loader, model=self.model)
                 print('Acc wo DGA: {}'.format(val_wo_rl))

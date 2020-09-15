@@ -96,14 +96,14 @@ def run_exp(server_config, client_config):
 
         print('Metrics')
         print('--------------------------------')
-        print("Max Lossy Client: {}, Min Loss Client: {}".format(max(server.curr_client_losses),
-                                                                 min(server.curr_client_losses)))
-        print('Average Epoch Loss = {} (Best: {})'.format(server.train_loss[-1], server.lowest_epoch_loss))
+        print("Max Lossy Client: {}, Min Loss Client: {}".format(server.max_epoch_loss,
+                                                                 server.min_epoch_loss))
+        print('Average Epoch Loss = {} (Best: {})'.format(server.train_loss[-1], server.min_epoch_loss))
         server.compute_metrics(writer=None, curr_epoch=epoch, stat_freq=server_config.get('val_freq', 5))
 
     return server.train_loss, server.val_acc, server.test_acc, server.aggregator.gar.Sigma_tracked, \
            server.aggregator.gar.alpha_tracked, server.best_val_acc, server.best_test_acc, \
-           server.lowest_epoch_loss, grad_kl_div
+           server.min_epoch_loss, grad_kl_div
 
 
 def plot_grads(clients, ep, G, kl_div=None, algo='tsne'):

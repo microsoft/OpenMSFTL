@@ -20,8 +20,7 @@ class GAR:
         self.alpha_tracked = []
 
     def aggregate(self, G: np.ndarray,
-                  client_ids: np.ndarray,
-                  losses: List[float]) -> np.ndarray:
+                  client_ids: np.ndarray) -> np.ndarray:
         pass
 
     def weighted_average(self, stacked_grad: np.ndarray):
@@ -46,23 +45,9 @@ class FedAvg(GAR):
         GAR.__init__(self, aggregation_config=aggregation_config)
 
     def aggregate(self, G: np.ndarray,
-                  client_ids: np.ndarray = None,
-                  losses: List[float] = None) -> np.ndarray:
+                  client_ids: np.ndarray = None) -> np.ndarray:
         agg_grad = self.weighted_average(stacked_grad=G)
         return agg_grad
-
-
-class MinLoss(GAR):
-    def __init__(self, aggregation_config):
-        GAR.__init__(self, aggregation_config=aggregation_config)
-
-    def aggregate(self, G: np.ndarray,
-                  losses: List[float],
-                  client_ids: np.ndarray = None) -> np.ndarray:
-        if not losses:
-            raise Exception("To use MinLoss GAR , you must provide losses to aggregate call")
-        min_loss_ix = losses.index(min(losses))
-        return G[min_loss_ix, :]
 
 
 class SpectralFedAvg(GAR):
@@ -79,8 +64,7 @@ class SpectralFedAvg(GAR):
         self.auto_encoder_loss = self.aggregation_config.get("auto_encoder_loss", "scaled_mse")
 
     def aggregate(self, G: np.ndarray,
-                  client_ids: np.ndarray,
-                  losses:  List[float] = None) -> np.ndarray:
+                  client_ids: np.ndarray) -> np.ndarray:
         if self.analytic:
             # Perform Analytic Randomized PCA
             G_approx, S = fast_lr_decomposition(X=G,
@@ -116,8 +100,7 @@ class Krum(GAR):
         GAR.__init__(self, aggregation_config=aggregation_config)
 
     def aggregate(self, G: np.ndarray,
-                  client_ids: np.ndarray = None,
-                  losses: List[float] = None) -> np.ndarray:
+                  client_ids: np.ndarray = None) -> np.ndarray:
         dist = self.get_krum_dist(G=G)
         m = int(self.aggregation_config.get("krum_frac", 0.3) * G.shape[0])
         min_score = 1e10

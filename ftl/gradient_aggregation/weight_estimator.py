@@ -69,7 +69,7 @@ class SoftmaxLWeightEstimator(WeightEstimatorBase):
         super(SoftmaxLWeightEstimator, self).__init__(estimator_type='softmax', weights=[])
         self.T = softmax_config.get("T", 1.0)  # Temperature value for softmax
         # set the index of the feature vector (softmax input vector)
-        if softmax_config.get("feat_type", "loss"):
+        if softmax_config.get("feat_type", "loss") == "loss":
             self.offset = 0
         elif softmax_config["feat_type"] == "mean":
             self.offset = 1

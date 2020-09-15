@@ -15,9 +15,6 @@ def _parse_args():
     # Client Opt Params
     parser.add_argument('--server_config', type=str, default='./configs/server_config.json')
     parser.add_argument('--client_config', type=str, default='./configs/client_config.json')
-    parser.add_argument('--dga_json', type=str, default=None,
-                        help='JSON config file path for dynamic gradient aggregation; '
-                             'see configs/dga/rl.json for an example')
     # Results Related Params
     parser.add_argument('--o', type=str, default='result_default', help='Pass results location')
     parser.add_argument('--n_repeat', type=int, default=1, help='Specify number of repeat runs')

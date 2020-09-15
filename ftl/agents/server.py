@@ -48,8 +48,8 @@ class Server:
         self.train_loss = []
         self.best_val_acc = 0.0
         self.best_test_acc = 0.0
-        self.lowest_epoch_loss = float('inf')
-        self.curr_client_losses = None
+        self.min_epoch_loss = float('inf')
+        self.max_epoch_loss = -float('inf')
 
     def init_client_models(self):
         """
@@ -71,25 +71,27 @@ class Server:
         if sampled_clients[0].trainer.scheduler:
             print("Client {} lr = {}".format(sampled_clients[0].client_id,
                                              sampled_clients[0].trainer.scheduler.get_lr()))
-        self.curr_client_losses = []
+        curr_client_losses = []
         mal_nodes = []
         for ix, client in enumerate(sampled_clients):
             client.client_step()
-            self.curr_client_losses.append(client.trainer.epoch_losses[-1].item())
             if client.mal:
                 mal_nodes.append(client)
-            # collect client's stats (normalized loss, mean of grad, var of grad)
-            for sx, stat_val in enumerate(client.get_stats()):
-                input_feature[ix + sx * num_participating_client] = stat_val
+            # collect client's stats {"loss": normalized loss, "mean": mean of grad, "var": var of grad}
+            client_stats = client.get_stats()
+            curr_client_losses.append(client_stats["loss"])
+            for sx, feat_type in enumerate(client_stats.keys()): # "loss", "mean", "var"
+                input_feature[ix + sx * num_participating_client] = client_stats[feat_type]
 
-        train_loss = sum(self.curr_client_losses) / len(sampled_clients)
-        if train_loss < self.lowest_epoch_loss:
-            self.lowest_epoch_loss = train_loss
+        train_loss = sum(curr_client_losses) / len(sampled_clients)
+        if train_loss < self.min_epoch_loss:
+            self.min_epoch_loss = train_loss
+        if train_loss > self.max_epoch_loss:
+            self.max_epoch_loss = train_loss
         self.train_loss.append(train_loss)
         if len(mal_nodes) > 0:
             launch_attack(attack_mode=attack_config["attack_mode"], mal_nodes=mal_nodes)
         self.aggregator.aggregate_grads(clients=sampled_clients,
-                                        client_losses=self.curr_client_losses,
                                         input_feature=input_feature,
                                         val_loader=self.val_loader)
 

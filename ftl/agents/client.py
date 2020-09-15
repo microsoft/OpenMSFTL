@@ -1,5 +1,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License
+from collections import OrderedDict
 import numpy as np
 from ftl.training_utils.trainer import Trainer
 from ftl.training_utils.optimization import SchedulingOptimization
@@ -57,8 +58,12 @@ class Client:
           1. Sum of negative training losses over batches
           2. Gradient mean
           3. Graident variance
+        notes:
+        Be cautious for changing the order of the stat element
         """
 
         sum_loss = sum(self.trainer.epoch_losses).detach().numpy()
         vN = self.trainer.sum_grad2 - (self.trainer.sum_grad / self.trainer.counter) * self.trainer.sum_grad
-        return (-sum_loss, self.trainer.sum_grad / self.trainer.counter, vN / self.trainer.counter)
+        return OrderedDict([("loss", -sum_loss),
+                            ("mean", self.trainer.sum_grad / self.trainer.counter),
+                            ("var", vN / self.trainer.counter)])

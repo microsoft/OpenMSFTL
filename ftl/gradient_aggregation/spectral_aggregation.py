@@ -50,7 +50,7 @@ class RobustPCAEstimator:
         return torch.mean((x - x_hat) ** 2)
 
     def _train(self, x, indices, steps=100):
-        x_hat = - 999 * x
+        x_hat = x
         for i in tqdm(range(steps)):
             alphas = self.pca.get_scales(indices)
             x_hat = self.pca(x)

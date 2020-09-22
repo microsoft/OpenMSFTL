@@ -41,20 +41,20 @@ def get_model(learner_config: Dict, data_config: Dict):
     data_set = data_config["data_set"]
 
     if net == 'mlp':
-        model = MLP(dim_in=learner_config.get("dim_in", 784),
-                    dim_hidden1=learner_config.get("dim_hidden1", 300),
-                    dim_hidden2=learner_config.get("dim_hidden2", 150),
-                    drop_p=learner_config["drop_p"])
+        model = MLP(hidden_size_list = learner_config.get("hidden_size_list", [784, 300, 150]),
+                    num_classes=learner_config.get("num_labels", 10),
+                    drop_p=learner_config.get("drop_p", 0.2))
     elif net == 'alexnet':
         if data_set not in ['cifar10']:
             raise Exception('{} is not yet supported for {}'.format(net, data_set))
-        model = AlexNet(num_classes=data_config.get("num_labels", 10),
-                        num_channels=data_config.get("num_channels", 3))
+        model = AlexNet(num_classes=learner_config.get("num_labels", 10),
+                        num_channels=learner_config.get("num_channels", 3))
     elif net == 'lenet':
         if data_set not in ['mnist', 'fashion_mnist']:
             raise Exception('{} is not yet supported for {}'.format(net, data_set))
-        model = LeNet(num_classes=data_config.get("num_labels", 10),
-                      num_channels=data_config.get("num_channels", 1))
+        model = LeNet(num_classes=learner_config.get("num_labels", 10),
+                      num_channels=learner_config.get("num_channels", 1),
+                      dim_hidden1=learner_config.get("dim_hidden1", 500))
     elif net == 'resnet32':
         if data_set not in ['cifar10']:
             raise Exception('{} is not yet supported for {}'.format(net, data_set))

@@ -2,6 +2,7 @@
 # Licensed under the MIT License
 from collections import OrderedDict
 import numpy as np
+import gc
 from ftl.training_utils.trainer import Trainer
 from ftl.training_utils.optimization import SchedulingOptimization
 from ftl.compression.compression import Compression
@@ -11,29 +12,29 @@ from ftl.models.model_helper import flatten_params
 class Client:
     def __init__(self,
                  client_id: int,
-                 learner=None,
                  attack_model=None,
                  C: Compression = None,
                  mal: bool = False,
                  client_opt_config=None,
                  client_lrs_config=None):
-
         self.client_id = client_id
         self.mal = mal  # is it a malicious node ?
         self.attack_model = attack_model  # pass the attack model
         self.C = C
+        self.trainer = Trainer()
+        self.client_opt_config = client_opt_config
+        self.client_lrs_config = client_lrs_config
+        """
+        These clients parameters should not be accessed by anybody
+        """
         self.local_train_data = None
         self.grad = None
         self.current_weights = None
-        self.learner = learner
-        self.client_opt_config = client_opt_config
-        self.client_lrs_config = client_lrs_config
-        self.trainer = Trainer()
+        self.learner = None
 
-    def populate_optimizer(self):
-        """ initialize optimizer """
-        if not self.learner:
-            raise Exception("You need to populate client model before initializing optimizer")
+    def set_model(self, learner):
+        """ initialize model and optimizer """
+        self.learner = learner
         opt = SchedulingOptimization(model=self.learner,
                                      opt_group=self.client_opt_config,
                                      lrs_group=self.client_lrs_config)
@@ -52,6 +53,10 @@ class Client:
         self.grad = self.current_weights - updated_model_weights
         self.current_weights = updated_model_weights
 
+    def empty(self):
+        del self.learner, self.grad, self.current_weights
+        gc.collect()
+
     def get_stats(self):
         """
         Return (non-privacy) stats for aggregation:
@@ -62,7 +67,7 @@ class Client:
         Be cautious for changing the order of the stat element
         """
 
-        sum_loss = sum(self.trainer.epoch_losses).detach().numpy()
+        sum_loss = self.trainer.sum_loss
         vN = self.trainer.sum_grad2 - (self.trainer.sum_grad / self.trainer.counter) * self.trainer.sum_grad
         return OrderedDict([("loss", -sum_loss),
                             ("mean", self.trainer.sum_grad / self.trainer.counter),

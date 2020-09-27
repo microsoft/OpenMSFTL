@@ -35,10 +35,11 @@ class RobustPCALayer(torch.nn.Module):
 
 
 class RobustPCAEstimator:
-    def __init__(self, num_points, input_dim, hidden_dim, device, auto_encoder_loss):
+    def __init__(self, num_points, input_dim, hidden_dim, device, auto_encoder_loss, lr=1e-2):
+        print("Robust PCA: in_size={} hidden_size={}".format(input_dim, hidden_dim))
         self.num_points = num_points
         self.pca = RobustPCALayer(num_points, input_dim, hidden_dim).to(device)
-        self.optimizer = torch.optim.Adam(self.pca.parameters(), lr=1e-2)
+        self.optimizer = torch.optim.Adam(self.pca.parameters(), lr=lr)
         self.auto_encoder_loss = auto_encoder_loss
 
     @staticmethod

@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License
 import random
+import copy
 from typing import Dict
 from typing import List
 import numpy as np
@@ -13,6 +14,16 @@ from ftl.training_utils import infer
 from ftl.training_utils.optimization import SchedulingOptimization
 from .client import Client
 import time
+import gc
+
+"""
+from guppy import hpy
+hp = hpy()
+def _print_meminfo(lo):
+    print(lo, flush=True)
+    print("hp.heap()[0].byvia\n", hp.heap()[0].byvia, flush=True)
+    print("hp.heap()[0].referrers.byvia\n", hp.heap()[0].referrers.byvia, flush=True)
+"""
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.manual_seed(1)
@@ -51,14 +62,6 @@ class Server:
         self.min_epoch_loss = float('inf')
         self.max_epoch_loss = -float('inf')
 
-    def init_client_models(self):
-        """
-        Broadcast the master model to clients
-        """
-        w_current = np.concatenate([w.data.numpy().flatten() for w in self.learner.to('cpu').parameters()])
-        for client in self.clients:
-            dist_weights_to_model(weights=w_current, parameters=client.learner.parameters())
-
     def train_client_models(self, num_participating_client: int,
                             attack_config: Dict = None):
         """
@@ -66,14 +69,15 @@ class Server:
         :param attack_config:
         :param num_participating_client: number of clients to be selected
         """
+        #before = hp.heap()
         input_feature = np.zeros(CLIENT_STATS_SIZE * num_participating_client, np.float)  # non-private stats used for weight aggregation
         sampled_clients = random.sample(population=self.clients, k=num_participating_client)
-        if sampled_clients[0].trainer.scheduler:
-            print("Client {} lr = {}".format(sampled_clients[0].client_id,
-                                             sampled_clients[0].trainer.scheduler.get_lr()))
+        # TODO: quit accessing data of a client object
         curr_client_losses = []
         mal_nodes = []
         for ix, client in enumerate(sampled_clients):
+            # broadcast the master model to clients
+            client.set_model(learner=copy.deepcopy(self.learner).to(device=device))
             client.client_step()
             if client.mal:
                 mal_nodes.append(client)
@@ -94,6 +98,12 @@ class Server:
         self.aggregator.aggregate_grads(clients=sampled_clients,
                                         input_feature=input_feature,
                                         val_loader=self.val_loader)
+        for client in sampled_clients:
+            client.empty()
+        del sampled_clients, input_feature
+        gc.collect()
+        #after = hp.heap()
+        #_print_meminfo(after - before)
 
     def update_global_model(self):
         """
@@ -126,4 +136,4 @@ class Server:
                     writer.add_scalar("test_acc", curr_test_acc, curr_epoch)
 
             print('Time to run inference {}s'.format(time.time() - t0))
-            print(' ')
+            print(' ', flush=True)

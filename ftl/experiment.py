@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License
 
+import json
 from ftl.agents import Client, Server
 from ftl.models import get_model
 from ftl.compression import Compression
@@ -10,10 +11,8 @@ import copy
 import random
 import torch
 from torch.utils.tensorboard import SummaryWriter
-from matplotlib.pyplot import ion, show, pause, draw
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
-import matplotlib.pyplot as plt
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -47,14 +46,15 @@ def run_exp(server_config, client_config):
     clients = []
     num_client_nodes = client_config["num_client_nodes"]
     num_mal_clients = int(attack_config.get("frac_adv", 0) * num_client_nodes)
+    num_sampled_clients = int(client_config["fraction_participant_clients"] * num_client_nodes)
+    if aggregation_config.get("num_hierarchies", 0) > 0:
+        aggregation_config["num_sampled_clients"] = num_sampled_clients
     sampled_adv_client_ix = random.sample(population=set(range(0, num_client_nodes)), k=num_mal_clients)
     for client_id in range(num_client_nodes):
         client = Client(client_id=client_id,
                         client_opt_config=client_opt_config,
                         client_lrs_config=client_lrs_config,
-                        learner=copy.deepcopy(model_net).to(device=device),
                         C=Compression(compression_config=client_compression_config))
-        client.populate_optimizer()
         if client_id in sampled_adv_client_ix:
             client.mal = True
             client.attack_model = get_attack(attack_config=attack_config)
@@ -83,14 +83,12 @@ def run_exp(server_config, client_config):
     print('# ------------------------------------------------- #')
     print('#            Launching Federated Training           #')
     print('# ------------------------------------------------- #')
-    num_sampled_clients = int(client_config["fraction_participant_clients"] * num_client_nodes)
     grad_kl_div = []
     for epoch in range(1, learner_config["comm_rounds"] + 1):
         print(" ")
         print(' ------------------------------------------ ')
         print('         Communication Round {}             '.format(epoch))
         print(' -------------------------------------------')
-        server.init_client_models()
         server.train_client_models(num_participating_client=num_sampled_clients, attack_config=attack_config)
         server.update_global_model()
 
@@ -100,6 +98,7 @@ def run_exp(server_config, client_config):
                                                                  server.min_epoch_loss))
         print('Average Epoch Loss = {} (Best: {})'.format(server.train_loss[-1], server.min_epoch_loss))
         server.compute_metrics(writer=None, curr_epoch=epoch, stat_freq=server_config.get('val_freq', 5))
+        print('', flush=True)
 
     return server.train_loss, server.val_acc, server.test_acc, server.aggregator.gar.Sigma_tracked, \
            server.aggregator.gar.alpha_tracked, server.best_val_acc, server.best_test_acc, \
@@ -107,6 +106,9 @@ def run_exp(server_config, client_config):
 
 
 def plot_grads(clients, ep, G, kl_div=None, algo='tsne'):
+    from matplotlib.pyplot import ion, show, pause, draw
+    import matplotlib.pyplot as plt
+
     ion()
     show()
     fig = plt.figure()

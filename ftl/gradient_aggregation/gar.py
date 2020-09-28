@@ -21,6 +21,10 @@ class GAR:
 
     def aggregate(self, G: np.ndarray,
                   client_ids: np.ndarray) -> np.ndarray:
+        """
+        Method that implements gradient aggregation
+        :param G: M x N matrix where M is no. clients and N is the dimension of the gradient vector
+        """
         pass
 
     def weighted_average(self, stacked_grad: np.ndarray):
@@ -53,20 +57,24 @@ class FedAvg(GAR):
 class SpectralFedAvg(GAR):
     def __init__(self, aggregation_config):
         GAR.__init__(self, aggregation_config=aggregation_config)
+        self.num_clients = self.aggregation_config.get("num_sampled_clients",
+                                                       self.aggregation_config["num_client_nodes"])
         self.rank = self.aggregation_config["rank"]
         self.adaptive_rank_th = self.aggregation_config["adaptive_rank_th"]
-        self.drop_top_comp = self.aggregation_config["drop_top_comp"]
-        self.num_clients = self.aggregation_config["num_client_nodes"]
-        self.auto_encoder_init_steps = self.aggregation_config.get("num_encoder_init_epochs", 2000)
-        self.auto_encoder_fine_tune_steps = self.aggregation_config.get("num_encoder_ft_epochs", 1000)
-        self.pca = None
         self.analytic = self.aggregation_config.get("analytic", False)
-        self.auto_encoder_loss = self.aggregation_config.get("auto_encoder_loss", "scaled_mse")
+        if self.analytic is True:
+            self.drop_top_comp = self.aggregation_config["drop_top_comp"]
+        else:
+            self.auto_encoder_init_steps = self.aggregation_config.get("num_encoder_init_epochs", 2000)
+            self.auto_encoder_fine_tune_steps = self.aggregation_config.get("num_encoder_ft_epochs", 1000)
+            self.auto_encoder_loss = self.aggregation_config.get("auto_encoder_loss", "scaled_mse")
+        self.pca = None
 
     def aggregate(self, G: np.ndarray,
                   client_ids: np.ndarray) -> np.ndarray:
-        if self.analytic:
+        if self.analytic is True:
             # Perform Analytic Randomized PCA
+            print("Conventional PCA...")
             G_approx, S = fast_lr_decomposition(X=G,
                                                 rank=self.rank,
                                                 adaptive_rank_th=self.adaptive_rank_th,
@@ -77,9 +85,10 @@ class SpectralFedAvg(GAR):
 
         else:
             # Else: we train a linear auto-encoder
+            print("Mark Hamilton PCA...")
             G = torch.from_numpy(G).to(device)
             if self.pca is None:
-                self.pca = RobustPCAEstimator(self.num_clients, G.shape[1], self.rank, device,
+                self.pca = RobustPCAEstimator(self.num_clients, input_dim=G.shape[1], hidden_dim=self.rank, device=device,
                                               auto_encoder_loss=self.auto_encoder_loss)
                 self.pca.fit(G, client_ids, steps=self.auto_encoder_init_steps)
             else:

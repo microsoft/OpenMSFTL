@@ -14,7 +14,7 @@ from ftl.models.model_helper import dist_weights_to_model, dist_grads_to_model
 from ftl.gradient_aggregation.weight_estimator import RLWeightEstimator, SoftmaxLWeightEstimator
 from .gar import FedAvg, SpectralFedAvg
 from sklearn.utils.extmath import randomized_svd
-
+from math import factorial
 
 class Aggregator:
     """
@@ -36,6 +36,9 @@ class Aggregator:
         self.curr_G = None
         self.agg_grad = None
         self.analyze_pc = self.aggregation_config.get("pc_analysis", False)
+        self.num_hierarchies = self.aggregation_config.get("num_hierarchies", 0)
+        self.cluster_size_list = self.aggregation_config.get("cluster_size_list", [])
+        assert self.num_hierarchies == len(self.cluster_size_list), "Unmatched hierarchial and cluster size list length"
 
     def __get_gar(self):
         """
@@ -52,6 +55,7 @@ class Aggregator:
         """
         Aggregate gradient information from clients
         """
+        # TODO: quit directly accessing data of a client object, .grad and .client_id
         if len(clients) == 0:
             raise Exception('Client List is Empty')
         G = np.zeros((len(clients), len(clients[0].grad)), dtype=clients[0].grad.dtype)
@@ -61,9 +65,32 @@ class Aggregator:
             print("Randomized SVD of G for Spectral Analysis")
             U, S, V = randomized_svd(G, n_components=min(G.shape[0], G.shape[1]), flip_sign=True)
             self.gar.Sigma_tracked.append(S)
+        if self.num_hierarchies > 0:
+            # Do hierarchial aggregation
+            for n in range(self.num_hierarchies):
+                print("{}-stage gradient aggregation: cluster size={}".format(n, self.cluster_size_list[n]))
+                G = self.__merge_gradient(G, self.cluster_size_list[n])
+            client_ids = np.arange(G.shape[0])
+        else:
+            client_ids = np.array([c.client_id for c in clients])
+
         self.curr_G = G
-        client_ids = np.array([c.client_id for c in clients])
         self.agg_grad = self.gar.aggregate(G=G, client_ids=client_ids)
+
+    def __merge_gradient(self, G, cluster_size):
+        # TODO: add a secure aggregation method
+        num_merged_clients = G.shape[0] // cluster_size
+        assert num_merged_clients > 0, "Too small cluter size: {} // {} == 0".format(G.shape[0], cluster_size)
+        merged_G = np.zeros((num_merged_clients, G.shape[1]), dtype=G[0][0].dtype)
+        boundaries = [[i * cluster_size, (i + 1) * cluster_size] for i in range(num_merged_clients)]
+        if boundaries[-1][1] < G.shape[0]:
+            boundaries[-1][1] = G.shape[0]
+        print("#client clusters: {}".format(num_merged_clients))
+        for i, (s, e) in enumerate(boundaries):
+            print("Averaging gradient from the {}-th client to the {}=th".format(s, e))
+            merged_G[i] = np.mean(G[s:e, :], axis=0)
+
+        return merged_G
 
     def update_model(self):
         """

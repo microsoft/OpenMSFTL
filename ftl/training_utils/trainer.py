@@ -8,7 +8,6 @@ torch.manual_seed(1)
 
 class Trainer:
     def __init__(self, optimizer=None, scheduler=None, clip_val=None):
-        self.epoch_losses = []
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.train_iter = None
@@ -33,12 +32,13 @@ class Trainer:
         if self.scheduler:
             self.scheduler.step()
             # print('client LR = {}'.format(self.scheduler.get_lr()))
-        self.epoch_losses.append(loss)
+        self.sum_loss += loss.detach().numpy()
 
     def reset_gradient_power(self):
         """
         Reset the gradient stats
         """
+        self.sum_loss = 0.0
         self.sum_grad = 0.0  # mean of gradient
         self.sum_grad2 = 0.0  # power of gradient
         self.counter = 0  # no. samples

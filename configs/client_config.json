@@ -17,11 +17,6 @@
   "learner_config":
   {
     "net": "lenet",
-    "dim_in": 784,
-    "dim_hidden1": 100,
-    "dim_hidden2": 50,
-    "dim_hidden3": 10,
-    "drop_p": 0.5,
     "comm_rounds": 50
   },
 

@@ -7,7 +7,7 @@ import os
 import numpy as np
 import json
 from numpyencoder import NumpyEncoder
-
+import pickle
 
 def _parse_args():
     parser = argparse.ArgumentParser(description='driver.py')
@@ -29,6 +29,12 @@ def run_main():
 
     client_config = json.load(open(args.client_config))
     server_config = json.load(open(args.server_config))
+
+    print('# ------------------------------------------------- #')
+    print('#               Config                              #')
+    print('# ------------------------------------------------- #')
+    print('Server:\n{}'.format(json.dumps(server_config, indent=4)), flush=True)
+    print('Client:\n{}'.format(json.dumps(client_config, indent=4)), flush=True)
 
     directory = "result_dumps/" + client_config["data_config"]["data_set"] + "/" + \
                 client_config["learner_config"]["net"] + "/"
@@ -52,8 +58,10 @@ def run_main():
         results["lowest_epoch_loss"] = lowest_loss
         results["grad_kl_div"] = grad_kl_div
 
-    with open(directory + args.o, 'w+') as f:
-        json.dump(results, f, indent=4, ensure_ascii=False, cls=NumpyEncoder)
+    print(results)
+    with open(directory + args.o, 'wb') as f:
+        pickle.dump(results, f)
+    #    json.dump(results, f, indent=4, ensure_ascii=False, cls=NumpyEncoder)
 
 
 if __name__ == '__main__':

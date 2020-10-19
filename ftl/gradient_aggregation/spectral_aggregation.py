@@ -72,8 +72,7 @@ class RobustPCAEstimator:
         with torch.no_grad():
             # print("Learned STD: {}".format(learned_std.exp()))
             self.pca.scales.copy_(torch.ones(self.num_points) * learned_std)
-        self.pca.scales.requires_grad = True
-        self._train(x, indices, steps)
+        self.fine_tune(x=x, indices=indices, steps=steps)
         return self
 
     def fine_tune(self, x, indices, steps=400):

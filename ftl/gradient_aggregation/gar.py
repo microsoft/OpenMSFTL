@@ -18,6 +18,7 @@ class GAR:
         self.gradient_weights = None  # weight on gradient on each client
         self.Sigma_tracked = []
         self.alpha_tracked = []
+        self.num_updates = 0
 
     def aggregate(self, G: np.ndarray,
                   client_ids: np.ndarray) -> np.ndarray:
@@ -25,6 +26,7 @@ class GAR:
         Method that implements gradient aggregation
         :param G: M x N matrix where M is no. clients and N is the dimension of the gradient vector
         """
+        self.num_updates += 1
         pass
 
     def weighted_average(self, stacked_grad: np.ndarray):
@@ -60,7 +62,10 @@ class SpectralFedAvg(GAR):
         self.num_clients = self.aggregation_config.get("num_sampled_clients",
                                                        self.aggregation_config["num_client_nodes"])
         self.rank = self.aggregation_config["rank"]
-        self.adaptive_rank_th = self.aggregation_config["adaptive_rank_th"]
+        self.adaptive_rank_th = self.aggregation_config.get("adaptive_rank_th", -1)
+        # how do we create a subspace, filtering malicious clients or remove noisy gradient components?
+        # 0 if it is client filtering and 1 if dimensionality reduction
+        self.subspace_axis = self.aggregation_config.get("subspace_axis", 1)
         self.analytic = self.aggregation_config.get("analytic", False)
         if self.analytic is True:
             self.drop_top_comp = self.aggregation_config["drop_top_comp"]
@@ -68,40 +73,112 @@ class SpectralFedAvg(GAR):
             self.auto_encoder_init_steps = self.aggregation_config.get("num_encoder_init_epochs", 2000)
             self.auto_encoder_fine_tune_steps = self.aggregation_config.get("num_encoder_ft_epochs", 1000)
             self.auto_encoder_loss = self.aggregation_config.get("auto_encoder_loss", "scaled_mse")
+            self.auto_encoder_fit_freq = self.aggregation_config.get("auto_encoder_fit_freq", 64)  # how frequently a fitting process (full training) is peformanced
+
         self.pca = None
 
     def aggregate(self, G: np.ndarray,
                   client_ids: np.ndarray) -> np.ndarray:
+
         if self.analytic is True:
             # Perform Analytic Randomized PCA
-            print("Conventional PCA...")
-            G_approx, S = fast_lr_decomposition(X=G,
-                                                rank=self.rank,
-                                                adaptive_rank_th=self.adaptive_rank_th,
-                                                drop_top_comp=self.drop_top_comp)
-            self.Sigma_tracked.append(S)
-            agg_grad = self.weighted_average(stacked_grad=G_approx)
-            return agg_grad
-
+            G_updated = self.conventional_pca_aggregation(G)
         else:
-            # Else: we train a linear auto-encoder
-            print("Mark Hamilton PCA...")
-            G = torch.from_numpy(G).to(device)
-            if self.pca is None:
-                self.pca = RobustPCAEstimator(self.num_clients, input_dim=G.shape[1], hidden_dim=self.rank, device=device,
-                                              auto_encoder_loss=self.auto_encoder_loss)
-                self.pca.fit(G, client_ids, steps=self.auto_encoder_init_steps)
+            # Train a linear auto-encoder
+            if self.subspace_axis == 1:
+                (G_approx, scales) = self.mk_pca_dimensionality_reduction(G, client_ids)
+            elif self.subspace_axis == 0:
+                (G_approx, scales) = self.mk_pca_client_filtering(G)
             else:
-                self.pca.fine_tune(G, client_ids, steps=self.auto_encoder_fine_tune_steps)
+                raise NotImplementedError("Invalid subspace axis {}".format(self.subspace_axis))
 
-            G_approx, scales = self.pca.transform(G, client_ids)
             self.alpha_tracked.append(scales)
-            cut = 1 - self.adaptive_rank_th
-            print("cutting off {}% of components".format(cut*100))
-            k = int(np.ceil(cut * scales.shape[0]))
-            cutoff = torch.min(torch.topk(scales, k=k)[0])
-            alphas = torch.ones_like(scales) * (scales < cutoff).to(torch.float32)
-            return torch.einsum("nf,n->f", G_approx, alphas).detach().cpu().numpy()
+
+            def _adaptive_rank_selection(scales, adaptive_rank_th):
+                """
+                Filter data samples with a larger log-RMSE.
+                notes:
+                This is implemented by A. Acharya and left for maintaining backword compatibility
+                """
+                assert adaptive_rank_th <= 1.0, "Invalid 'adaptive_rank_th': {} > 1".format(adaptive_rank_th)
+                cut = 1 - adaptive_rank_th
+                k = int(np.ceil(cut * scales.shape[0]))
+                cutoff = torch.min(torch.topk(scales, k=k)[0])
+                print("cutting off {}% of components: {} out of {}: with logstd threshold={}".format(cut*100, k, scales.shape[0], cutoff))
+                return torch.ones_like(scales) * (scales < cutoff).to(torch.float32)
+
+            if self.adaptive_rank_th >= 0.0:
+                alphas = _adaptive_rank_selection(scales, self.adaptive_rank_th)
+            else:  # No selection is performed
+                G_updated = torch.sum(G_approx, 0).detach().cpu().numpy()
+
+            if self.subspace_axis == 1:
+                G_updated = torch.einsum("nf,n->f", G_approx, alphas).detach().cpu().numpy()
+            else:  # row-wise multiplication and sum along the column (client axis=0)
+                G_updated = torch.einsum("nf,f->f", G_approx, alphas).detach().cpu().numpy()
+
+        self.num_updates += 1
+        return G_updated
+
+    def conventional_pca_aggregation(self, G: np.ndarray) -> np.ndarray:
+        """
+        Run subspace filtering with conventional SVD-based PCA
+        """
+        print("Conventional PCA...")
+        G_approx, S = fast_lr_decomposition(X=G,
+                                            rank=self.rank,
+                                            adaptive_rank_th=self.adaptive_rank_th,
+                                            drop_top_comp=self.drop_top_comp)
+        self.Sigma_tracked.append(S)
+        agg_grad = self.weighted_average(stacked_grad=G_approx)
+        return agg_grad
+
+    def mk_pca_dimensionality_reduction(self, G, client_ids):
+        """
+        Use Mark Hamiliton PCA to reduce the dimension of a gradient vector
+        and compute a reconstruction error score for each client
+
+        :return: Tuple of gradient matrix and reconstruction error vector for each client
+        """
+        print("Mark Hamilton PCA for dimensionality reduction...")
+        G = torch.from_numpy(G).to(device)
+        if self.pca is None:
+            self.pca = RobustPCAEstimator(self.num_clients, input_dim=G.shape[1], hidden_dim=self.rank, device=device,
+                                        auto_encoder_loss=self.auto_encoder_loss)
+            self.pca.fit(G, client_ids, steps=self.auto_encoder_init_steps)
+        elif (self.num_updates % self.auto_encoder_fit_freq) != 0:  # update an auto-encoder only (in original Anish's implementation, it is always False)
+            print("Fine-tuning")
+            self.pca.fine_tune(G, client_ids, steps=self.auto_encoder_fine_tune_steps)
+        else:  # also update a reconstruction error score
+            print("Fitting at the {}-th update".format(self.num_updates))
+            self.pca.fit(G, client_ids, steps=self.auto_encoder_init_steps)
+
+        G_approx, scales = self.pca.transform(G, client_ids)
+        return (G_approx, scales)
+
+    def mk_pca_client_filtering(self, G):
+        """
+        Use Mark Hamiliton PCA to filter noisy clients
+        and compute a reconstruction error score for each gradient vector component
+
+        :return: Tuple of gradient matrix an reconstruction error vector for each gradient vector component
+        """
+        print("Mark Hamilton PCA for client filtering...")
+        dataid = np.arange(G.shape[1])
+        GT = torch.from_numpy(G.T).to(device)
+        if self.pca is None:
+            self.pca = RobustPCAEstimator(G.shape[1], input_dim=G.shape[0], hidden_dim=self.rank, device=device,
+                                        auto_encoder_loss=self.auto_encoder_loss)
+            self.pca.fit(GT, dataid, steps=self.auto_encoder_init_steps)
+        elif (self.num_updates % self.auto_encoder_fit_freq) != 0:  # update an auto-encoder only
+            print("Fine-tuning")
+            self.pca.fine_tune(GT, dataid, steps=self.auto_encoder_fine_tune_steps)
+        else:  # also update a reconstruction error score
+            print("Fitting at the {}-th update".format(self.num_updates))
+            self.pca.fit(GT, dataid, steps=self.auto_encoder_init_steps)
+
+        GT_approx, scales = self.pca.transform(GT, dataid)
+        return (torch.transpose(GT_approx, 0, 1), scales)
 
 
 class Krum(GAR):

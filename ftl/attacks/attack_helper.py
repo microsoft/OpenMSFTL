@@ -17,7 +17,7 @@ def get_attack(attack_config: Dict):
     elif attack_config["attack_model"] == 'random_sign_flip':
         return RandomSignFlipAttack(attack_config=attack_config)
     else:
-        return None
+        raise NotImplementedError("Invalid attack model: {}".format(attack_config["attack_model"]))
 
 
 def launch_attack(attack_mode, mal_nodes):

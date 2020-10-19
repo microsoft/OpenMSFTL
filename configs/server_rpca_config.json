@@ -1,0 +1,39 @@
+{
+  "verbose_freq": 10,
+  "val_freq": 2,
+  "summary_path": "logs/baseline",
+  "server_opt_config" :
+  {
+    "optimizer_scheme": "Adam",
+    "lr0": 0.002,
+    "weight_decay": 0.005,
+    "momentum": 0,
+    "nesterov": true,
+    "amsgrad": false,
+    "dampening": 0,
+    "clip_val": null
+  },
+
+  "server_lrs_config":
+  {
+    "lr_restart": 100,
+    "lr_schedule": "MultiStepLR",
+    "milestones": [15, 25, 50, 100],
+    "step_size": 10,
+    "gamma": 0.5
+  },
+
+  "aggregation_config" :
+  {
+    "aggregation_scheme": "fed_spectral_avg",
+    "rank": 5,
+    "pc_analysis": false,
+    "plot_grad": false,
+    "plot_grad_algo": "pca",
+    "adaptive_rank_th": 0.9,
+    "auto_encoder_loss": "scaled_mse",
+    "analytic": false,
+    "num_encoder_init_epochs": 2000,
+    "num_encoder_ft_epochs": 500
+  }
+}

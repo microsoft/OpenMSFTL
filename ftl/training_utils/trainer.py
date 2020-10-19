@@ -32,7 +32,7 @@ class Trainer:
         if self.scheduler:
             self.scheduler.step()
             # print('client LR = {}'.format(self.scheduler.get_lr()))
-        self.sum_loss += loss.detach().numpy()
+        self.sum_loss += loss.detach().cpu().numpy()
 
     def reset_gradient_power(self):
         """

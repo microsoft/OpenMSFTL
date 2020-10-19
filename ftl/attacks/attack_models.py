@@ -102,16 +102,18 @@ class RandomGaussian(ByzAttack):
     def attack(self, byz_clients: List[Client]):
         if len(byz_clients) == 0:
             return
-        clients_grad = []
-        for client in byz_clients:
-            clients_grad.append(client.grad)
-        grad_mean = np.mean(clients_grad, axis=0)
+        if self.noise_scale == 0.0:
+            noise_loc = np.zeros(len(byz_clients[0].grad))
+        elif self.noise_scale != 0.0:
+            clients_grad = [client.grad for client in byz_clients]
+            noise_loc = np.mean(clients_grad, axis=0)
+
         # apply gaussian noise (scaled appropriately)
         if self.fixed:
             np.random.seed(999)
-        noise = np.random.normal(loc=self.noise_scale*grad_mean if self.to_scale else self.noise_scale,
+        noise = np.random.normal(loc=self.noise_scale*noise_loc if self.to_scale else self.noise_scale,
                                  scale=self.attack_std,
-                                 size=grad_mean.shape).astype(dtype=grad_mean.dtype)
+                                 size=noise_loc.shape).astype(dtype=noise_loc.dtype)
         for client in byz_clients:
             client.grad = noise
 

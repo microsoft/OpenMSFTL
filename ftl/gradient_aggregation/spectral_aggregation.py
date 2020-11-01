@@ -83,6 +83,14 @@ class RobustPCAEstimator:
     def transform(self, x, indices):
         return self.pca(x), self.pca.get_scales(indices)
 
+    def encode(self, x, indices=None):
+        scales = self.pca.get_scales(indices) if indices is not None else None
+        return self.pca.enc(x), scales
+
+    def decode(self, x, indices=None):
+        scales = self.pca.get_scales(indices) if indices is not None else None
+        return self.pca.dec(x), scales
+
 
 def fast_lr_decomposition(X: np.ndarray,
                           rank: int = None,

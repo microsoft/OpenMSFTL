@@ -63,6 +63,7 @@ class SpectralFedAvg(GAR):
                                                        self.aggregation_config["num_client_nodes"])
         self.rank = self.aggregation_config["rank"]
         self.adaptive_rank_th = self.aggregation_config.get("adaptive_rank_th", -1)
+        assert self.adaptive_rank_th <= 1.0, "Invalid 'adaptive_rank_th': {} > 1".format(self.adaptive_rank_th)
         # how do we create a subspace, filtering malicious clients or remove noisy gradient components?
         # 0 if it is client filtering and 1 if dimensionality reduction
         self.subspace_axis = self.aggregation_config.get("subspace_axis", 1)
@@ -76,6 +77,10 @@ class SpectralFedAvg(GAR):
             self.auto_encoder_fit_freq = self.aggregation_config.get("auto_encoder_fit_freq", 64)  # how frequently a fitting process (full training) is peformanced
 
         self.pca = None
+        self.cov_mats = None  # Covariance matrix for each base: torch.zeros(self.rank, self.num_clients, self.num_clients)
+        self.forgetting_factor = self.aggregation_config.get("forgetting_factor", 0.9)
+        self.diagonal_loading = self.aggregation_config.get("diagonal_loading", 0.01)
+        self.num_noisy_clients = self.aggregation_config.get("num_noisy_clients", self.num_clients // 10)
 
     def aggregate(self, G: np.ndarray,
                   client_ids: np.ndarray) -> np.ndarray:
@@ -85,7 +90,9 @@ class SpectralFedAvg(GAR):
             G_updated = self.conventional_pca_aggregation(G)
         else:
             # Train a linear auto-encoder
-            if self.subspace_axis == 1:
+            if self.subspace_axis == 2:
+                (G_approx, scales) = self.mk_pca_space_filtering(G, client_ids)
+            elif self.subspace_axis == 1:
                 (G_approx, scales) = self.mk_pca_dimensionality_reduction(G, client_ids)
             elif self.subspace_axis == 0:
                 (G_approx, scales) = self.mk_pca_client_filtering(G)
@@ -94,13 +101,12 @@ class SpectralFedAvg(GAR):
 
             self.alpha_tracked.append(scales)
 
-            def _adaptive_rank_selection(scales, adaptive_rank_th):
+            def _lre_rank_selection(scales, adaptive_rank_th):
                 """
                 Filter data samples with a larger log-RMSE.
                 notes:
                 This is implemented by A. Acharya and left for maintaining backword compatibility
                 """
-                assert adaptive_rank_th <= 1.0, "Invalid 'adaptive_rank_th': {} > 1".format(adaptive_rank_th)
                 cut = 1 - adaptive_rank_th
                 k = int(np.ceil(cut * scales.shape[0]))
                 cutoff = torch.min(torch.topk(scales, k=k)[0])
@@ -108,17 +114,18 @@ class SpectralFedAvg(GAR):
                 return torch.ones_like(scales) * (scales < cutoff).to(torch.float32)
 
             if self.adaptive_rank_th >= 0.0:
-                alphas = _adaptive_rank_selection(scales, self.adaptive_rank_th)
+                alphas = _lre_rank_selection(scales, self.adaptive_rank_th)
+                if self.subspace_axis == 1:
+                    G_updated = torch.einsum("nf,n->f", G_approx, alphas)
+                elif self.subspace_axis == 2:
+                    G_approx = torch.einsum("nf,n->nf", G_approx, alphas)
+                else:  # row-wise multiplication and sum along the column (client axis=0)
+                    G_updated = torch.einsum("nf,f->f", G_approx, alphas)
             else:  # No selection is performed
-                G_updated = torch.sum(G_approx, 0).detach().cpu().numpy()
-
-            if self.subspace_axis == 1:
-                G_updated = torch.einsum("nf,n->f", G_approx, alphas).detach().cpu().numpy()
-            else:  # row-wise multiplication and sum along the column (client axis=0)
-                G_updated = torch.einsum("nf,f->f", G_approx, alphas).detach().cpu().numpy()
+                G_updated = torch.sum(G_approx, 0)
 
         self.num_updates += 1
-        return G_updated
+        return G_updated.detach().cpu().numpy()
 
     def conventional_pca_aggregation(self, G: np.ndarray) -> np.ndarray:
         """
@@ -132,6 +139,54 @@ class SpectralFedAvg(GAR):
         self.Sigma_tracked.append(S)
         agg_grad = self.weighted_average(stacked_grad=G_approx)
         return agg_grad
+
+    def mk_pca_space_filtering(self, G, client_ids):
+        """
+        Perform subspace filtering on the Mark Hamiliton PCA domain,
+        where components associated with smaller eigenvalues are filtered
+
+        :return: Tuple of gradient matrix and reconstruction error vector for each client
+        """
+        print("Subspace filtering on the Mark Hamilton PCA domain...")
+        G = torch.from_numpy(G).to(device)
+        if self.pca is None:
+            self.pca = RobustPCAEstimator(self.num_clients, input_dim=G.shape[1], hidden_dim=self.rank, device=device,
+                                        auto_encoder_loss=self.auto_encoder_loss)
+            self.pca.fit(G, client_ids, steps=self.auto_encoder_init_steps)
+        elif (self.num_updates % self.auto_encoder_fit_freq) != 0:  # update an auto-encoder only (in original Anish's implementation, it is always False)
+            print("Fine-tuning")
+            self.pca.fine_tune(G, client_ids, steps=self.auto_encoder_fine_tune_steps)
+        else:  # also update a reconstruction error score
+            print("Fitting at the {}-th update".format(self.num_updates))
+            self.pca.fit(G, client_ids, steps=self.auto_encoder_init_steps)
+
+        def _subspace_filtering(G, k):
+            """
+            Compute an eigenvector on a covariance matrix
+            :param G:
+            :param k: number of noisy clients (== no. eigenvector to ignore)
+            """
+            cov_mats = torch.einsum('ik, jk->kij', G, G)  # (#components, #cleints, #clients)
+            if self.cov_mats is None: # compute an initial covariance matrix for each component
+                self.cov_mats = cov_mats
+            else:
+                self.cov_mats = self.forgetting_factor * self.cov_mats + (1 - self.forgetting_factor) * cov_mats
+
+            print("Cutting {} eigenvectors out of {}".format(k, G.shape[0]))
+            es, Vs = torch.symeig(self.cov_mats + self.diagonal_loading * torch.eye(G.shape[0]), eigenvectors=True)
+            # Perform subspace filtering with eigenvectors
+            for i, v in enumerate(Vs):  # loop for components
+                G[:,i] = torch.matmul(torch.matmul(v[:,k:], torch.transpose(v[:,k:], 0, 1)), G[:,i])
+                #print("{}th component: ev th={}".format(i, es[i][k]))
+
+            return G
+
+        G_subspace, _ = self.pca.encode(G, None)
+        if self.num_noisy_clients > 0:
+            G_subspace = _subspace_filtering(G_subspace, self.num_noisy_clients)
+
+        G_approx, scales = self.pca.decode(G_subspace, client_ids)
+        return (G_approx, scales)
 
     def mk_pca_dimensionality_reduction(self, G, client_ids):
         """

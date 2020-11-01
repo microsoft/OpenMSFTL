@@ -1,7 +1,8 @@
 from torch import nn
+from ftl.models.model_base import ImageClassifierBase
 
 
-class AlexNet(nn.Module):
+class AlexNet(ImageClassifierBase):
     def __init__(self, num_channels=3, num_classes=10):
         super().__init__()
         self.features = nn.Sequential(

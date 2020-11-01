@@ -4,24 +4,43 @@
 from typing import Dict, List
 from ftl.agents import Client, Server
 from .vision_datasets import FedMNIST, FedCIFAR10, FedFashionMNIST
-from .federated_data_manager import DataManager
+from .federated_data_manager import JsonlTextDataManager, JsonlImageDataManager
 
-
-def process_data(data_config: Dict,
+def distribute_data(data_config: Dict,
                  clients: List[Client],
-                 server: Server) -> DataManager:
-    data_set = data_config["data_set"]
+                 server: Server):
+    """
+    Distribute data to server and clients
+    """
+    data_set = data_config["client"]["data_set"]
     if data_set == 'cifar10':
-        return FedCIFAR10(data_config=data_config,
-                          clients=clients,
-                          server=server)
-    elif data_set == 'mnist':
-        return FedMNIST(data_config=data_config,
+        dm = FedCIFAR10(data_config=data_config["client"],
                         clients=clients,
                         server=server)
+    elif data_set == 'mnist':
+        dm = FedMNIST(data_config=data_config["client"],
+                      clients=clients,
+                      server=server)
     elif data_set == 'fashion_mnist':
-        return FedFashionMNIST(data_config=data_config,
-                               clients=clients,
-                               server=server)
+        dm = FedFashionMNIST(data_config=data_config["client"],
+                             clients=clients,
+                             server=server)
+    elif data_set == 'leaf_sent140':
+        # data_config["server"]["test"]["test_jsonl"] = "/blob/sdrg/user/didimit/Data/Projects/Leaf/data/sent140/data/test/all_data_0_0_keep_5_test_9.json"
+        # data_config["server"]["val"]["val_jsonl"] = "/blob/sdrg/user/didimit/Data/Projects/Leaf/data/sent140/data/val/all_data_0_0_keep_5_val_9.json"
+        # data_config["client"]["train"]["list_of_train_jsonls"] = "/blob/sdrg/user/didimit/Data/Projects/Leaf/data/sent140/data/train/all_data_0_0_keep_5_train_9.json"
+        # data_config["client"]["train"]["vocab_dict"] = "/blob/sdrg/user/didimit/Data/Projects/Leaf/models/sent140/embs.json"
+        dm = JsonlTextDataManager(data_config=data_config,
+                              clients=clients,
+                              server=server,
+                              vec_size=300)
+    elif data_set == 'leaf_femnist':
+        dm = JsonlImageDataManager(data_config=data_config,
+                              clients=clients,
+                              server=server,
+                              img_size=[28, 28])
     else:
         raise NotImplemented
+
+    dm.distribute_data()
+    return dm.server, dm.clients

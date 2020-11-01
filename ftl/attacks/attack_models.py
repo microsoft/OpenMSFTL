@@ -103,7 +103,7 @@ class RandomGaussian(ByzAttack):
         if len(byz_clients) == 0:
             return
         if self.noise_scale == 0.0:
-            noise_loc = np.zeros(len(byz_clients[0].grad))
+            noise_loc = np.zeros(len(byz_clients[0].grad), dtype=byz_clients[0].grad.dtype)
         elif self.noise_scale != 0.0:
             clients_grad = [client.grad for client in byz_clients]
             noise_loc = np.mean(clients_grad, axis=0)

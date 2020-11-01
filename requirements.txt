@@ -4,3 +4,4 @@ tqdm
 numpyencoder
 sklearn
 matplotlib
+easydict

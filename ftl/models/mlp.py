@@ -1,9 +1,9 @@
 from torch import nn
 import torch
-torch.manual_seed(1)
+from ftl.models.model_base import ImageClassifierBase
 
 
-class MLP(nn.Module):
+class MLP(ImageClassifierBase):
     def __init__(self,
                  hidden_size_list,
                  num_classes=10,

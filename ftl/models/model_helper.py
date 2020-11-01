@@ -2,6 +2,7 @@ from .mlp import MLP
 from .resnet import resnet32
 from .alexnet import AlexNet
 from .lenet import LeNet
+from .language_model import LstmLM
 import torch
 import functools
 import numpy as np
@@ -35,10 +36,9 @@ def dist_grads_to_model(grads, parameters):
         offset += new_size
 
 
-def get_model(learner_config: Dict, data_config: Dict):
+def get_model(learner_config: Dict, data_set: str):
     """ wrapper to return appropriate model class """
     net = learner_config["net"]
-    data_set = data_config["data_set"]
 
     if net == 'mlp':
         model = MLP(hidden_size_list = learner_config.get("hidden_size_list", [784, 300, 150]),
@@ -46,19 +46,25 @@ def get_model(learner_config: Dict, data_config: Dict):
                     drop_p=learner_config.get("drop_p", 0.2))
     elif net == 'alexnet':
         if data_set not in ['cifar10']:
-            raise Exception('{} is not yet supported for {}'.format(net, data_set))
+            raise Exception('{} is not yet supported for {}\nUse alexnet for cifar10'.format(net, data_set))
         model = AlexNet(num_classes=learner_config.get("num_labels", 10),
                         num_channels=learner_config.get("num_channels", 3))
     elif net == 'lenet':
         if data_set not in ['mnist', 'fashion_mnist']:
-            raise Exception('{} is not yet supported for {}'.format(net, data_set))
+            raise Exception('{} is not yet supported for {}\nUse lenet for mnist or fashion_mnist'.format(net, data_set))
         model = LeNet(num_classes=learner_config.get("num_labels", 10),
                       num_channels=learner_config.get("num_channels", 1),
                       dim_hidden1=learner_config.get("dim_hidden1", 500))
     elif net == 'resnet32':
         if data_set not in ['cifar10']:
-            raise Exception('{} is not yet supported for {}'.format(net, data_set))
+            raise Exception('{} is not yet supported for {}\nUse resnet32 for cifar10'.format(net, data_set))
         model = resnet32()
+    elif net == 'lstmlm':
+        if data_set not in ['sent140']:
+            raise Exception('{} is not yet supported for {}\nUse lstmlm for sent140'.format(net, data_set))
+        model = LstmLM(input_dim=learner_config["input_dim"],
+                       output_dim=learner_config["output_dim"],
+                       lstm_config=learner_config["lstm_config"])
     else:
         raise NotImplementedError
 
@@ -66,8 +72,3 @@ def get_model(learner_config: Dict, data_config: Dict):
     print('----------------------------')
     print(model)
     return model
-
-
-
-
-

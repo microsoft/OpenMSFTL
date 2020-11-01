@@ -1,7 +1,8 @@
 from torch import nn
+from ftl.models.model_base import ftlModelBase
 
 
-class AlexNet(nn.Module):
+class AlexNet(ftlModelBase):
     def __init__(self, num_channels=3, num_classes=10):
         super().__init__()
         self.features = nn.Sequential(

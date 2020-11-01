@@ -17,6 +17,9 @@ class Client:
                  mal: bool = False,
                  client_opt_config=None,
                  client_lrs_config=None):
+        """
+        These clients parameters should not be accessed by anybody
+        """
         self.client_id = client_id
         self.mal = mal  # is it a malicious node ?
         self.attack_model = attack_model  # pass the attack model
@@ -24,10 +27,10 @@ class Client:
         self.trainer = Trainer()
         self.client_opt_config = client_opt_config
         self.client_lrs_config = client_lrs_config
-        """
-        These clients parameters should not be accessed by anybody
-        """
         self.local_train_data = None
+        """
+        These clients parameters will be sent back to a server
+        """
         self.grad = None
         self.current_weights = None
         self.learner = None

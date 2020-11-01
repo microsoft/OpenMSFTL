@@ -6,7 +6,7 @@ from ftl.agents import Client, Server
 from ftl.models import get_model
 from ftl.compression import Compression
 from ftl.attacks import get_attack
-from ftl.data_manager import process_data
+from ftl.data_manager import distribute_data
 import copy
 import random
 import torch
@@ -18,13 +18,15 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def run_exp(server_config, client_config):
-    data_config = client_config["data_config"]
+    client_data_config = client_config["data_config"]
+    data_set = client_data_config["data_set"]
     learner_config = client_config["learner_config"]
     client_opt_config = client_config["client_opt_config"]
     client_lrs_config = client_config["client_lrs_config"]
     attack_config = client_config.get("attack_config", {})
     client_compression_config = client_config.get("client_compression_config", {})
 
+    server_data_config = server_config.get("data_config", None)
     server_opt_config = server_config["server_opt_config"]
     server_lrs_config = server_config["server_lrs_config"]
     aggregation_config = server_config["aggregation_config"]
@@ -38,7 +40,7 @@ def run_exp(server_config, client_config):
     # -----------------------------------------
     print('initializing Learner')
     model_net = get_model(learner_config=learner_config,
-                          data_config=data_config).to(device=device)
+                          data_set=data_set).to(device=device)
 
     print('Setting Up the Network')
     # *** Set up Client Nodes ****
@@ -70,13 +72,13 @@ def run_exp(server_config, client_config):
                     val_loader=None,
                     test_loader=None)
 
-    # ** Data Handling **
+    # ** Data Assignment for Simulation **
     # -------------------
     print('Processing and distributing Data across the network')
-    data_manager = process_data(data_config=data_config,
-                                clients=clients,
-                                server=server)
-    data_manager.distribute_data()
+    data_config = {"server":server_data_config, "client":client_data_config}
+    server, clients = distribute_data(data_config=data_config,
+                                      clients=clients,
+                                      server=server)
 
     # *** Training **
     # ---------------
@@ -84,7 +86,7 @@ def run_exp(server_config, client_config):
     print('#            Launching Federated Training           #')
     print('# ------------------------------------------------- #')
     grad_kl_div = []
-    for epoch in range(1, learner_config["comm_rounds"] + 1):
+    for epoch in range(1, learner_config.get("comm_rounds", 50) + 1):
         print(" ")
         print(' ------------------------------------------ ')
         print('         Communication Round {}             '.format(epoch))

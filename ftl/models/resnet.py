@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
-
+from ftl.models.model_base import ftlModelBase
 
 __all__ = ['ResNet', 'resnet20', 'resnet32', 'resnet44', 'resnet56', 'resnet110', 'resnet1202']
 
@@ -55,7 +55,7 @@ class BasicBlock(nn.Module):
         return out
 
 
-class ResNet(nn.Module):
+class ResNet(ftlModelBase):
     def __init__(self, block, num_blocks, num_classes=10):
         super(ResNet, self).__init__()
         self.in_planes = 16

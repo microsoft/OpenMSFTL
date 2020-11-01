@@ -17,6 +17,9 @@ class Client:
                  mal: bool = False,
                  client_opt_config=None,
                  client_lrs_config=None):
+        """
+        These clients parameters should not be accessed by anybody
+        """
         self.client_id = client_id
         self.mal = mal  # is it a malicious node ?
         self.attack_model = attack_model  # pass the attack model
@@ -24,10 +27,11 @@ class Client:
         self.trainer = Trainer()
         self.client_opt_config = client_opt_config
         self.client_lrs_config = client_lrs_config
+        self.train_data_cls = None
+        self.train_data_kwargs = {}
         """
-        These clients parameters should not be accessed by anybody
+        These clients parameters will be sent back to a server
         """
-        self.local_train_data = None
         self.grad = None
         self.current_weights = None
         self.learner = None
@@ -45,6 +49,8 @@ class Client:
 
     def client_step(self):
         """ Run Client Train (opt step) for num_batches iterations """
+        # Instantiate a data loader
+        self.trainer.train_iter = self.train_data_cls(**self.train_data_kwargs)
         num_batches = self.client_opt_config.get("num_batches", 1)
         self.trainer.reset_gradient_power()
         for batch_ix in range(0, num_batches):
@@ -52,9 +58,10 @@ class Client:
         updated_model_weights = flatten_params(learner=self.learner)
         self.grad = self.current_weights - updated_model_weights
         self.current_weights = updated_model_weights
+        self.trainer.empty()
 
     def empty(self):
-        del self.learner, self.grad, self.current_weights
+        del self.learner, self.grad, self.current_weights,
         gc.collect()
 
     def get_stats(self):

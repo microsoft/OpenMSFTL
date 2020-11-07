@@ -29,14 +29,14 @@
     "nesterov": true,
     "amsgrad": true,
     "dampening": 0,
-    "num_batches": 25,
+    "num_batches": 1,
     "clip_val": null
   },
 
   "client_lrs_config":
   {
     "lr_restart": 200,
-    "lr_schedule": "MultiStepLR",
+    "lr_schedule": null,
     "milestones": [100, 300, 500, 1000, 2000],
     "step_size": 100,
     "gamma": 0.5

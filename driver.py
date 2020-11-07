@@ -6,8 +6,8 @@ import argparse
 import os
 import numpy as np
 import json
-from numpyencoder import NumpyEncoder
 import pickle
+
 
 def _parse_args():
     parser = argparse.ArgumentParser(description='driver.py')
@@ -15,9 +15,11 @@ def _parse_args():
     # Client Opt Params
     parser.add_argument('--server_config', type=str, default='./configs/server_config.json')
     parser.add_argument('--client_config', type=str, default='./configs/client_config.json')
+
     # Results Related Params
     parser.add_argument('--o', type=str, default='result_default', help='Pass results location')
     parser.add_argument('--n_repeat', type=int, default=1, help='Specify number of repeat runs')
+    parser.add_argument('--dir')
 
     args = parser.parse_args()
     return args
@@ -36,8 +38,9 @@ def run_main():
     print('Server:\n{}'.format(json.dumps(server_config, indent=4)), flush=True)
     print('Client:\n{}'.format(json.dumps(client_config, indent=4)), flush=True)
 
-    directory = "result_dumps/" + client_config["data_config"]["data_set"] + "/" + \
-                client_config["learner_config"]["net"] + "/"
+    # directory = "result_dumps/" + client_config["data_config"]["data_set"] + "/" + \
+    #             client_config["learner_config"]["net"] + "/"
+    directory = args.dir
     if not os.path.exists(directory):
         os.makedirs(directory)
 

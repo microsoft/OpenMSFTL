@@ -81,10 +81,10 @@ class Server:
             client.client_step()
             if client.mal:
                 mal_nodes.append(client)
-            # collect client's stats {"loss": normalized loss, "mean": mean of grad, "var": var of grad}
+            # collect client's stats {"nloss": normalized loss, "mean": mean of grad, "var": var of grad}
             client_stats = client.get_stats()
-            curr_client_losses.append(client_stats["loss"])
-            for sx, feat_type in enumerate(client_stats.keys()): # "loss", "mean", "var"
+            curr_client_losses.append(-client_stats["nloss"])
+            for sx, feat_type in enumerate(client_stats.keys()): # "nloss", "mean", "var"
                 input_feature[ix + sx * num_participating_client] = client_stats[feat_type]
 
         train_loss = sum(curr_client_losses) / len(sampled_clients)

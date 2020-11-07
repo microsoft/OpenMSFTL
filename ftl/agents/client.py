@@ -76,6 +76,6 @@ class Client:
 
         sum_loss = self.trainer.sum_loss
         vN = self.trainer.sum_grad2 - (self.trainer.sum_grad / self.trainer.counter) * self.trainer.sum_grad
-        return OrderedDict([("loss", -sum_loss),
+        return OrderedDict([("nloss", -sum_loss),
                             ("mean", self.trainer.sum_grad / self.trainer.counter),
                             ("var", vN / self.trainer.counter)])
